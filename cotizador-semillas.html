@@ -980,11 +980,13 @@ const Quote = {
     try {
       await this.build();
       const ov=$('quote-overlay');
+      const qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
+      qc.style.width='440px';
       const cliente=$('cliente').value||'Cliente';
-      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:440});
+      await captureAndShare(qc, `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:440});
     } catch(e) { if(e.name!=='AbortError') alert('Error al compartir. Probá con vista previa.'); }
-    finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
+    finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
   async show() {
     if(!lastLC.length) return alert('Agregá al menos un híbrido antes de compartir.');

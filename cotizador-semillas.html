@@ -315,29 +315,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       </div>
     </div>
 
-    <!-- DESCUENTOS -->
-    <div class="hcard no-print fu fu1" style="padding:12px 15px;margin-bottom:8px;">
-      <p class="slabel">Descuentos y bonificaciones</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
-          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
-          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valZG',-0.5)">−</button><input type="number" id="valZG" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZG',0.5)">+</button></div></div>
-        </div>
-        <div class="dto-group"><p class="dto-title">Dto. Henderseeds</p>
-          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valPM',-0.5)">−</button><input type="number" id="valPM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPM',0.5)">+</button></div></div>
-          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valPG',-0.5)">−</button><input type="number" id="valPG" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPG',0.5)">+</button></div></div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <label style="font-size:.63rem;font-weight:600;color:var(--c-gray);white-space:nowrap;">Volumen:</label>
-        <select id="selVol" onchange="Calc.toggleVolManual()" class="inp" style="flex:1;min-width:130px;padding:6px 22px 6px 8px;font-size:.76rem;"><option value="auto">Auto (tabla Nidera)</option><option value="manual">Manual %</option></select>
-        <input type="number" id="valVolManual" style="display:none;width:70px;padding:6px 8px;font-size:.76rem;" value="0" onblur="Calc.run()" placeholder="%" class="inp">
-      </div>
-    </div>
-
     <!-- HÍBRIDOS -->
-    <div class="hcard fu fu2" style="padding:12px 15px;margin-bottom:8px;overflow:visible;position:relative;z-index:10;">
+    <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;overflow:visible;position:relative;z-index:10;">
       <p class="slabel" style="margin:0 0 8px;">Híbridos seleccionados</p>
       <div class="rows-header no-print">
         <span>Híbrido</span>
@@ -358,6 +337,27 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
         <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
         <span></span>
+      </div>
+    </div>
+
+    <!-- DESCUENTOS -->
+    <div class="hcard no-print fu fu2" style="padding:12px 15px;margin-bottom:8px;">
+      <p class="slabel">Descuentos y bonificaciones</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
+          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valZG',-0.5)">−</button><input type="number" id="valZG" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZG',0.5)">+</button></div></div>
+        </div>
+        <div class="dto-group"><p class="dto-title">Dto. Henderseeds</p>
+          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valPM',-0.5)">−</button><input type="number" id="valPM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPM',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valPG',-0.5)">−</button><input type="number" id="valPG" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPG',0.5)">+</button></div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <label style="font-size:.63rem;font-weight:600;color:var(--c-gray);white-space:nowrap;">Volumen:</label>
+        <select id="selVol" onchange="Calc.toggleVolManual()" class="inp" style="flex:1;min-width:130px;padding:6px 22px 6px 8px;font-size:.76rem;"><option value="auto">Auto (tabla Nidera)</option><option value="manual">Manual %</option></select>
+        <input type="number" id="valVolManual" style="display:none;width:70px;padding:6px 8px;font-size:.76rem;" value="0" onblur="Calc.run()" placeholder="%" class="inp">
       </div>
     </div>
 

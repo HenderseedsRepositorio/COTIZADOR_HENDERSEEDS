@@ -1690,38 +1690,21 @@ const App = {
       const logoW = 26, logoH = logoW / 2.51;
       try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 6, logoW, logoH); } catch(e) {}
     }
-    // Título + info a la izquierda
+    // Cliente a la izquierda, fecha debajo
+    const cliente = $('cliente').value || '';
     doc.setTextColor(...navy);
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text(esReceta ? 'RECETA' : 'COTIZACIÓN', margin, 12);
+    doc.text(cliente || '—', margin, 12);
     doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...gris);
-    const headerInfo = dateStr() + '  ·  ' + (vendor || '');
-    if (!esReceta) {
-      const fin = financiacion.find(f => f.plazo === plazoActual);
-      doc.text(headerInfo + '  ·  ' + (fin ? fin.label : 'Contado'), margin, 17);
-    } else {
-      doc.text(headerInfo, margin, 17);
-    }
+    doc.text(dateStr(), margin, 17);
     // Línea separadora
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     doc.line(margin, 20, W - margin, 20);
     y = 23;
-
-    // ── Info cliente (compacta, sin fondo) ──
-    const cliente = $('cliente').value || '';
-    if (cliente) {
-      doc.setTextColor(...navy);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Cliente:', margin, y);
-      doc.setFont('helvetica', 'normal');
-      doc.text(cliente, margin + 18, y);
-      y += 5;
-    }
 
     // ── Loop through each aplicacion ──
     let grandTotalHa = 0, grandTotalIvaHa = 0;
@@ -1881,12 +1864,7 @@ const App = {
     doc.setFontSize(7);
     doc.setTextColor(...gris);
     doc.setFont('helvetica', 'italic');
-    if (esReceta) {
-      doc.text('Henderseeds SRL — ' + dateStr(), margin, y + 6);
-    } else {
-      doc.text('Precios expresados en USD. Sujetos a cambio sin previo aviso. IVA según categoría.', margin, y + 4);
-      doc.text('Henderseeds SRL — ' + dateStr(), margin, y + 8);
-    }
+    doc.text('Henderseeds SRL — ' + dateStr(), margin, y + 6);
 
     return doc;
   },

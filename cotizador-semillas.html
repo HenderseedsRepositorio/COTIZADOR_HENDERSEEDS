@@ -496,12 +496,12 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
             <th style="padding:8px 10px;text-align:left;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);border-radius:6px 0 0 0;">Híbrido</th>
             <th style="padding:8px 6px;text-align:center;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);">Banda</th>
             <th style="padding:8px 6px;text-align:center;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);">Cant.</th>
-            <th style="padding:8px 8px;text-align:right;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);">Lista</th>
-            <th style="padding:8px 10px;text-align:right;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-green);border-radius:0 6px 0 0;">Contado</th>
+            <th style="padding:8px 8px;text-align:right;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-green);">Contado</th>
+            <th style="padding:8px 10px;text-align:right;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);border-radius:0 6px 0 0;">Mayo 2027</th>
           </tr></thead>
           <tbody id="q-tbody"></tbody>
         </table>
-        <p style="font-size:.56rem;color:var(--c-light);text-align:center;margin:0 0 2px;">Precios netos en USD con descuentos aplicados · Contado: -8% adicional</p>
+        <p style="font-size:.56rem;color:var(--c-light);text-align:center;margin:0 0 2px;">Precios netos en USD con descuentos aplicados · Contado: -8% sobre Mayo 2027</p>
         <p style="font-size:.52rem;color:#cbd5e1;text-align:center;margin:0;">Sujeto a confirmación de stock y precios vigentes — Henderseeds S.R.L.</p>
       </div>
       <div style="display:none;"><span id="q-neto"></span><span id="q-contado"></span><span id="q-iva"></span><span id="q-final"></span></div>
@@ -967,7 +967,7 @@ const Quote = {
 
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
-      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-lista">\$${fmt(l.unitNeto)}</td><td class="q-contado">\$${fmt(l.unitNeto*0.92)}</td></tr>`;
+      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\$${fmt(l.unitNeto*0.92)}</td><td class="q-lista">\$${fmt(l.unitNeto)}</td></tr>`;
     }).join('');
   },
   async show() {

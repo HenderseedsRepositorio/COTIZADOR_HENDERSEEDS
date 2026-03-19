@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cotizador Agroinsumos — Henderseeds v3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e293b;
+  --navy-light: #334155;
+  --accent: #D97706;
+  --accent-dark: #B45309;
+  --accent-bg: #FEF3C7;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --red: #ef4444;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-sec: #64748b;
+  --text-mut: #94a3b8;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --title: 'Archivo Black', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 70px;
+}
+input, select, button { font-family: inherit; font-size: inherit; }
+
+/* ── Header ── */
+.header {
+  background: var(--navy);
+  color: white;
+  padding: 10px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.brand { display: flex; align-items: center; gap: 2px; flex-direction: column; }
+.brand-logo { height: 50px; width: auto; object-fit: contain; }
+.brand small { font-size: 10px; opacity: .5; }
+.vend-sel {
+  background: var(--navy-light);
+  color: white;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.vend-sel option { background: var(--navy); }
+.tabs {
+  display: flex;
+  gap: 3px;
+  background: rgba(255,255,255,.08);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.5);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.tab-btn.active { background: var(--accent); color: white; }
+
+/* ── Layout principal ── */
+.main { max-width: 1280px; margin: 0 auto; padding: 12px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Layout: una sola columna, referencia abajo */
+.layout-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: var(--title);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-sec);
+  margin-bottom: 10px;
+}
+
+/* ── Inputs ── */
+.inp {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: var(--text);
+  outline: none;
+}
+.inp:focus { border-color: var(--accent); }
+.inp-sm { padding: 6px 8px; font-size: 13px; }
+.inp-xs { padding: 4px 6px; font-size: 12px; width: 70px; text-align: right; font-family: var(--mono); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.form-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 3px;
+}
+
+/* ── Filas de cotización ── */
+.rows-scroll {
+  overflow-x: auto;
+  margin: 0 -12px;
+  padding: 0 12px;
+}
+.rows-header {
+  display: grid;
+  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.row-item {
+  display: grid;
+  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  gap: 6px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 10px;
+  margin-bottom: 5px;
+  box-shadow: var(--shadow);
+  animation: slideIn .2s ease;
+  min-height: 48px;
+}
+.row-inp {
+  width: 100%;
+  padding: 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--text);
+  background: white;
+  outline: none;
+}
+.row-inp:focus { border-color: var(--accent); background: var(--accent-bg); }
+/* Fila nueva (buscador inline) */
+.row-new {
+  display: grid;
+  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  gap: 6px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 5px;
+}
+.row-new-search {
+  position: relative;
+}
+.row-new-search input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+  background: white;
+}
+.row-new-search input:focus { border-color: var(--accent); }
+.row-new-search input::placeholder { color: var(--text-mut); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.row-prod { display: flex; flex-direction: column; min-width: 0; }
+.row-prod-name {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-prod-meta { font-size: 10px; color: var(--text-mut); }
+.row-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+}
+.row-val.costo { color: var(--accent); font-weight: 700; font-size: 13px; }
+.row-rm {
+  background: none;
+  border: none;
+  color: var(--text-mut);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  text-align: center;
+}
+.row-rm:hover { color: var(--red); }
+
+/* ── Dropdown ── */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  display: none;
+}
+.dropdown.show { display: block; }
+.dd-cat {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--accent);
+  padding: 8px 12px 4px;
+  background: var(--bg);
+}
+.dd-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  border-bottom: 1px solid var(--bg);
+}
+.dd-item:hover, .dd-item.highlighted { background: var(--accent-bg); }
+.dd-item-price {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.cliente-dd .dd-item { font-size: 13px; padding: 6px 12px; }
+.cliente-dd .dd-add { color: var(--accent); font-weight: 700; font-size: 12px; }
+
+/* ── Plazo ── */
+.plazo-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.plazo-chip {
+  flex: 1;
+  padding: 5px 4px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: white;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  line-height: 1.2;
+}
+.plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+.plazo-chip small { display: block; font-weight: 400; font-size: 9px; opacity: .7; }
+
+/* ── Totales ── */
+.totales {
+  background: var(--navy);
+  color: white;
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.tot-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+.tot-row.big {
+  border-top: 1px solid rgba(255,255,255,.15);
+  margin-top: 4px;
+  padding-top: 8px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.tot-row .mono { font-family: var(--mono); }
+
+/* ── Botones ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { background: var(--accent-dark); }
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: #15803d; }
+.btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+
+/* ── Panel referencia (abajo) ── */
+.ref-panel { }
+.ref-panel .card { margin-bottom: 0; }
+.ref-table-wrap {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+}
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.ref-table th {
+  position: sticky;
+  top: 0;
+  background: var(--navy);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  padding: 8px 6px;
+  text-align: left;
+  white-space: nowrap;
+  z-index: 2;
+}
+.ref-table th.num { text-align: right; }
+.ref-table td {
+  padding: 6px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.ref-table td.num {
+  text-align: right;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.ref-table tr:hover { background: var(--accent-bg); }
+.ref-table tr.cat-row td {
+  background: var(--bg);
+  font-family: var(--title);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 6px;
+  border-bottom: 2px solid var(--accent);
+}
+.ref-table .prod-name { font-weight: 600; white-space: nowrap; }
+.ref-table .droga { font-size: 10px; color: var(--text-sec); max-width: 180px; }
+.ref-table .prov { font-size: 11px; color: var(--text-sec); }
+.ref-table .resid { font-size: 11px; text-align: center; }
+.ref-table .precio-col { color: var(--accent); font-weight: 700; }
+.ref-table .costo-ha-col { color: var(--green); font-weight: 600; }
+
+/* Filtro referencia */
+.ref-filter {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ref-filter-inp {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+.ref-filter-inp:focus { border-color: var(--accent); }
+
+/* Panel referencia toggle */
+.ref-toggle {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: var(--navy-light);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.ref-panel { display: none; }
+.ref-panel.open { display: block; }
+
+/* ── WA bar ── */
+.wa-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1280px;
+  background: white;
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 90;
+  box-sizing: border-box;
+}
+.wa-bar .btn { flex: 1; }
+
+/* ── WA preview ── */
+.wa-preview {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-end;
+}
+.wa-preview.show { display: flex; }
+.wa-sheet {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px 16px;
+  animation: sheetUp .25s ease;
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.wa-msg {
+  background: #DCF8C6;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  font-family: var(--mono);
+  white-space: pre-wrap;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  word-break: break-word;
+}
+.wa-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wa-actions .btn-green { grid-column: 1 / -1; }
+
+/* ── Lista de precios ── */
+.lista-cat {
+  font-family: var(--title);
+  font-size: 13px;
+  color: var(--accent);
+  padding: 8px 0 4px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 4px;
+  margin-top: 14px;
+}
+.lista-cat:first-child { margin-top: 0; }
+.lista-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.lista-name { font-size: 13px; font-weight: 500; }
+.lista-unit { font-size: 11px; color: var(--text-mut); }
+.lista-price { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); white-space: nowrap; }
+
+/* ── Historial ── */
+.hist-empty { text-align: center; padding: 40px 20px; color: var(--text-mut); }
+
+/* ── Status ── */
+.status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-mut); padding: 6px 0; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+.status-dot.on { background: var(--green); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="brand">
+        <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="brand-logo">
+      </div>
+      <select id="vendedor" class="vend-sel">
+        <option value="">Vendedor...</option>
+        <option value="Alvaro">Alvaro</option>
+        <option value="Gonzalo">Gonzalo</option>
+        <option value="Juan Augusto">Juan Augusto</option>
+      </select>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="cotizar">Cotizar</button>
+      <button class="tab-btn" data-tab="lista">Lista</button>
+      <button class="tab-btn" data-tab="historial">Historial</button>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ═══ TAB COTIZAR ═══ -->
+  <section id="tab-cotizar" class="tab-content active">
+    <div class="layout-2col">
+
+      <!-- ── COLUMNA IZQUIERDA: Cotización ── -->
+      <div class="col-cotiz">
+        <div class="card" style="padding:8px 10px;">
+          <div class="form-row-3">
+            <div style="position:relative;">
+              <div class="form-lbl">Cliente</div>
+              <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"
+                oninput="App.filterClientes()" onfocus="App.filterClientes(true)">
+              <div class="dropdown cliente-dd" id="cliente-dd"></div>
+            </div>
+            <div>
+              <div class="form-lbl">Establecimiento</div>
+              <input id="establecimiento" type="text" class="inp inp-sm" placeholder="Campo / Lote">
+            </div>
+            <div>
+              <div class="form-lbl">Hectáreas</div>
+              <input id="hectareas" type="number" class="inp inp-sm" placeholder="Has" min="1" value=""
+                oninput="App.renderRows()">
+            </div>
+          </div>
+        </div>
+
+        <div class="plazo-bar">
+          <button class="plazo-chip active" data-modo="contado" onclick="App.setModo(this)">Contado</button>
+          <button class="plazo-chip" data-modo="financiacion" onclick="App.setModo(this)">Financiación</button>
+          <div id="fin-config" style="display:none; flex:2; display:none; align-items:center; gap:8px;">
+            <input type="month" id="fin-fecha" class="inp inp-sm" style="font-size:12px; padding:4px 6px;"
+              onchange="App.calcFinanciacion()">
+            <div style="font-size:11px; color:var(--text-sec); white-space:nowrap;">
+              Tasa: <input type="number" id="fin-tasa" value="0.75" step="0.01" min="0" style="width:50px; font-size:11px; padding:2px 4px; border:1px solid var(--border); border-radius:4px; text-align:right;" onchange="App.calcFinanciacion()">%/mes
+            </div>
+            <div id="fin-info" style="font-family:var(--mono); font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap;"></div>
+          </div>
+        </div>
+
+        <div class="rows-scroll">
+          <div class="rows-header">
+            <span>Producto</span>
+            <span style="text-align:right; color:var(--text-mut);">Sug.</span>
+            <span style="text-align:right">Precio</span>
+            <span style="text-align:right">Dosis</span>
+            <span style="text-align:right">Vol.</span>
+            <span style="text-align:right">$/ha</span>
+            <span style="text-align:right">Monto</span>
+            <span></span>
+          </div>
+
+          <div id="rows"></div>
+        </div>
+
+        <!-- Fila nueva inline -->
+        <div class="row-new" id="row-new">
+          <div class="row-new-search">
+            <input type="text" id="search" placeholder="+ Agregar producto..." autocomplete="off"
+              onfocus="App.showDropdown()" oninput="App.filterDropdown()">
+            <div class="dropdown" id="dropdown"></div>
+          </div>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span></span>
+        </div>
+
+        <!-- Totales -->
+        <div id="totales" class="totales" style="display:none;">
+          <div class="tot-row">
+            <span>Monto total (s/IVA)</span>
+            <span class="mono" id="t-neto">—</span>
+          </div>
+          <div class="tot-row big">
+            <span>Monto total (c/IVA)</span>
+            <span class="mono" id="t-total">—</span>
+          </div>
+        </div>
+
+        <div class="status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Offline — datos locales</span>
+        </div>
+      </div>
+
+
+    </div>
+  </section>
+
+  <!-- ═══ TAB LISTA ═══ -->
+  <section id="tab-lista" class="tab-content">
+    <div class="plazo-bar">
+      <button class="plazo-chip active" data-plazo="contado" onclick="App.setListaPlazo(this)">Contado</button>
+      <button class="plazo-chip" data-plazo="mayo2026" onclick="App.setListaPlazo(this)">Mayo 26</button>
+      <button class="plazo-chip" data-plazo="dic2026" onclick="App.setListaPlazo(this)">Dic 26</button>
+    </div>
+    <div id="lista-body"></div>
+  </section>
+
+  <!-- ═══ TAB HISTORIAL ═══ -->
+  <section id="tab-historial" class="tab-content">
+    <div id="hist-body">
+      <div class="hist-empty">
+        <p style="font-size:32px; margin-bottom:8px;">&#128203;</p>
+        <p>Sin cotizaciones registradas</p>
+        <p style="font-size:12px; margin-top:4px;">Aparecerán aquí al compartir por WhatsApp</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- WA bar -->
+<div class="wa-bar" id="wa-bar" style="display:none;">
+  <button class="btn btn-green" onclick="App.compartirPDF('cotizacion')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Compartir Cotización</button>
+  <button class="btn btn-outline" onclick="App.compartirPDF('receta')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Compartir Receta</button>
+</div>
+
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
+
+/* ══════════════════════════════════════════
+   CATÁLOGO FALLBACK — copia de "Catalogo Agronomia" en Sheets
+   Columnas: producto, presentacion, formulacion, proveedor,
+   iva_pct, costo_usd, margen_pct, precio_usd, dosis_sug, stock
+   Cuando conecte a Sheets se sobreescribe con datos frescos.
+   ══════════════════════════════════════════ */
+const CATALOGO_FALLBACK = {
+  "Herbicidas": [
+    { producto: "SULFOSATO TOUCHDOWN X 20 LTS", presentacion: 20, unidad: "L", formulacion: "glifosato 62%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 4.25, margen_pct: 8, precio_usd: 4.59, dosis_sug: null, stock: 4940 },
+    { producto: "NUVOX X 20 LT", presentacion: 20, unidad: "L", formulacion: "glifosato 62%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 4.25, margen_pct: 8, precio_usd: 4.60, dosis_sug: null, stock: 0 },
+    { producto: "ACURON UNO X 5L", presentacion: 5, unidad: "L", formulacion: "biciclopirona 20%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 38.13, margen_pct: 8, precio_usd: 41.20, dosis_sug: null, stock: 0 },
+    { producto: "GESAPRIM 90 WDG X 10KG", presentacion: 10, unidad: "kg", formulacion: "atrazina 90%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.40, margen_pct: 8, precio_usd: 6.91, dosis_sug: null, stock: 840 },
+    { producto: "DUAL GOLD X 6,5 lt", presentacion: 6.5, unidad: "L", formulacion: "S-metalocloro 96%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.10, margen_pct: 13, precio_usd: 6.89, dosis_sug: null, stock: 6.5 },
+    { producto: "2,4D VOLERIS X 20 LT", presentacion: 20, unidad: "L", formulacion: "2,4D 89%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 5.09, margen_pct: 10, precio_usd: 5.60, dosis_sug: null, stock: 260 },
+    { producto: "EDDUS X 20 LT", presentacion: 20, unidad: "L", formulacion: "fomesafen 11,95% + S-Metalocloro 51,8%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 8.91, margen_pct: 10, precio_usd: 9.80, dosis_sug: null, stock: 1380 },
+    { producto: "AXIAL PLUS X 5 LT", presentacion: 5, unidad: "L", formulacion: "pinoxaden 5% + cloquintocet 1,25%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 44.54, margen_pct: 9, precio_usd: 48.55, dosis_sug: null, stock: 100 },
+    { producto: "FLEXSTAR X 20 LT", presentacion: 20, unidad: "L", formulacion: "glifosato 32,5% + fomesafen 7,1% + pydiflumetofen 20%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.88, margen_pct: 8, precio_usd: 7.43, dosis_sug: null, stock: 180 },
+    { producto: "HEAT X 0,35 KG", presentacion: 0.35, unidad: "kg", formulacion: "Saflufenacil 70%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 297.67, margen_pct: 9.5, precio_usd: 325.95, dosis_sug: null, stock: 28 },
+    { producto: "PIVOT X 5 LT", presentacion: 5, unidad: "L", formulacion: "Imazetapir 10,6%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 7.50, margen_pct: 9, precio_usd: 8.18, dosis_sug: null, stock: 285 },
+    { producto: "CLETODIM ZYNION PLUS X 20 LT", presentacion: 20, unidad: "L", formulacion: "Cletodim 24%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 8.50, margen_pct: 8, precio_usd: 9.20, dosis_sug: null, stock: 0 },
+    { producto: "CONVEY BASF X 1 LT", presentacion: 1, unidad: "L", formulacion: "", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 282.40, margen_pct: 8, precio_usd: 304.99, dosis_sug: null, stock: 0 },
+    { producto: "SULFENTRAZONE CAPAZ 50 X 5 LT", presentacion: 5, unidad: "L", formulacion: "Sulfentrazone 50%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 18.00, margen_pct: 10, precio_usd: 19.80, dosis_sug: null, stock: 0 },
+    { producto: "SULFENTRAZONE CAPAZ 50 X 10 LT", presentacion: 10, unidad: "L", formulacion: "Sulfentrazone 50%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 18.00, margen_pct: 10, precio_usd: 19.80, dosis_sug: null, stock: 650 }
+  ],
+  "Insecticidas": [
+    { producto: "AMPLIGO X 1LT", presentacion: 1, unidad: "L", formulacion: "clorantraniliprole 10% + Lambdacialotrina 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 76.26, margen_pct: 13, precio_usd: 86.17, dosis_sug: null, stock: 159 },
+    { producto: "CAREXO X 1 LT", presentacion: 1, unidad: "L", formulacion: "clorantraniliprole 10% + Lambdacialotrina 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 76.26, margen_pct: 13, precio_usd: 86.17, dosis_sug: null, stock: 1 },
+    { producto: "ZETAMETRINA MUSTANG X 5 LT", presentacion: 5, unidad: "L", formulacion: "Zetametrina 20%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 19.44, margen_pct: 8, precio_usd: 21.00, dosis_sug: null, stock: 20 }
+  ],
+  "Fungicidas": [
+    { producto: "ELATUS ACE X 5 LT", presentacion: 5, unidad: "L", formulacion: "propiconazole 25% + benzovindiflupyr 4%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 41.21, margen_pct: 9, precio_usd: 44.90, dosis_sug: null, stock: 0 },
+    { producto: "MIRAVIS DUO X 5 LT", presentacion: 5, unidad: "L", formulacion: "difenoconazole 12,5% + pydiflumetofen 7,5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 40.59, margen_pct: 8, precio_usd: 43.84, dosis_sug: null, stock: 155 },
+    { producto: "MIRAVIS TRIPLE PACK X 6,3 LT", presentacion: 6.3, unidad: "L", formulacion: "propiconazole + benzovindiflupyr", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 0, margen_pct: 8, precio_usd: 0, dosis_sug: null, stock: 0 },
+    { producto: "ARTEA X 5 LT", presentacion: 5, unidad: "L", formulacion: "Propiconazole 25% + Cyproconazole 8%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 9.20, margen_pct: 8, precio_usd: 9.94, dosis_sug: null, stock: 85 },
+    { producto: "OPERA X 5 LT", presentacion: 5, unidad: "L", formulacion: "Pyraclostrobin 13,3% + Epoxiconazole 5,0%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 21.00, margen_pct: 9, precio_usd: 22.89, dosis_sug: null, stock: 0 }
+  ],
+  "Curasemillas": [
+    { producto: "CURASEM VIBRANCE GOLD X 5 LT", presentacion: 5, unidad: "L", formulacion: "difenoconazole 2.5% + fludioxonil 2.5% + sedaxane 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 38.16, margen_pct: 8, precio_usd: 41.21, dosis_sug: null, stock: 105 }
+  ],
+  "Coadyuvantes": [
+    { producto: "DASH MSO BASF X 5 LT", presentacion: 5, unidad: "L", formulacion: "", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 13.00, margen_pct: 15, precio_usd: 15.00, dosis_sug: null, stock: 0 }
+  ]
+};
+
+const FINANCIACION_FALLBACK = [
+  { plazo: "contado", label: "Contado", recargo_pct: 0 },
+  { plazo: "mayo2026", label: "Mayo 2026", recargo_pct: 2 },
+  { plazo: "dic2026", label: "Dic 2026", recargo_pct: 6 }
+];
+
+/* ── Logo para PDF (se carga como base64 al inicio) ── */
+let logoDataUrl = null;
+(function loadLogo() {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    logoDataUrl = c.toDataURL('image/png');
+  };
+  img.src = '00-LOGO HENDERSEEDS TRANSPARENTE.png';
+})();
+
+/* ── Estado ── */
+let catalogo = CATALOGO_FALLBACK;
+let financiacion = FINANCIACION_FALLBACK;
+let rows = [];
+let rowId = 0;
+let plazoActual = 'contado';
+let prodSeleccionado = null;
+let highlightIdx = -1;
+let ddItems = [];
+let clientes = [];
+
+/* ── Calc ── */
+const Calc = {
+  recargo(plazo) {
+    const f = financiacion.find(f => f.plazo === plazo);
+    return f ? f.recargo_pct : 0;
+  },
+  precioConRecargo(precio, plazo) {
+    return precio * (1 + Calc.recargo(plazo) / 100);
+  },
+  costoHa(precio, dosis, plazo) {
+    return Calc.precioConRecargo(precio, plazo) * dosis;
+  }
+};
+
+/* ══════════════════════════════════════════
+   API_URL — Pegá acá la URL de tu Apps Script deploy
+   Dejala vacía para usar datos fallback locales
+   ══════════════════════════════════════════ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_kcpTVtGKSlDH9WHmVlRGNo-jt-QbLqlg5BNY5RGAhHV8kw/exec';
+
+/* ── Market (conexión a Sheets) ── */
+const Market = {
+  online: false,
+
+  async init() {
+    if (!API_URL) {
+      Market.setStatus(false, 'Offline — datos locales');
+      return;
+    }
+    Market.setStatus(null, 'Conectando...');
+    try {
+      // Cargar catálogo y financiación en paralelo
+      const [catRes, finRes, cliRes] = await Promise.all([
+        Market.fetch('getCatalogoAgro'),
+        Market.fetch('getFinanciacionAgro'),
+        Market.fetch('getClientes')
+      ]);
+
+      console.log('Respuesta catálogo:', JSON.stringify(catRes).substring(0, 500));
+      console.log('Respuesta financiación:', JSON.stringify(finRes).substring(0, 500));
+
+      if (catRes.ok && catRes.catalogo) {
+        catalogo = catRes.catalogo;
+        var totalProds = Object.values(catalogo).reduce(function(s, arr) { return s + arr.length; }, 0);
+        console.log('Catálogo cargado:', Object.keys(catalogo).length, 'categorías,', totalProds, 'productos');
+        Market.setStatus(true, 'Sheets — ' + totalProds + ' productos');
+      } else {
+        console.error('Catálogo no cargó:', catRes.error || 'sin campo catalogo');
+        Market.setStatus(false, 'Error catálogo — datos locales');
+      }
+
+      if (finRes.ok && finRes.financiacion) {
+        financiacion = finRes.financiacion;
+      }
+      if (cliRes.ok && cliRes.clientes) {
+        clientes = cliRes.clientes;
+        console.log('Clientes cargados:', clientes.length);
+      }
+      App.renderLista(plazoActual);
+    } catch (err) {
+      console.error('Market.init error:', err);
+      Market.setStatus(false, 'Error — usando datos locales');
+    }
+  },
+
+  async fetch(action) {
+    const res = await fetch(API_URL + '?action=' + action);
+    return res.json();
+  },
+
+  async post(data) {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async registrarCotizacion() {
+    if (!API_URL) return null;
+    try {
+      const fin = financiacion.find(f => f.plazo === plazoActual);
+      const data = {
+        action: 'registrarAgro',
+        vendedor: $('vendedor').value,
+        cliente: $('cliente').value,
+        localidad: '',
+        hectareas: parseFloat($('hectareas').value) || 0,
+        plazo: fin ? fin.label : 'Contado',
+        recargo_pct: fin ? fin.recargo_pct : 0,
+        lineas: rows.map(r => ({
+          categoria: r.cat,
+          producto: r.producto,
+          unidad: r.unidad,
+          precio: r.precio,
+          dosis: r.dosis,
+          iva_pct: r.iva_pct
+        }))
+      };
+      return await Market.post(data);
+    } catch (err) {
+      console.error('Registrar error:', err);
+      return null;
+    }
+  },
+
+  setStatus(online, text) {
+    Market.online = online;
+    const dot = $('status-dot');
+    dot.classList.remove('on');
+    if (online === true) dot.classList.add('on');
+    if (online === null) dot.style.background = 'var(--accent)'; // connecting
+    else dot.style.background = '';
+    $('status-text').textContent = text;
+  }
+};
+
+/* ── Historial ── */
+const Historial = {
+  items: [],
+  async cargar() {
+    if (!API_URL) return;
+    try {
+      const res = await Market.fetch('getHistorialAgro');
+      if (res.ok && res.historial) {
+        Historial.items = res.historial;
+        Historial.render();
+      }
+    } catch(e) { console.error('Error cargando historial:', e); }
+  },
+  render() {
+    const body = $('hist-body');
+    if (!Historial.items.length) {
+      body.innerHTML = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
+      return;
+    }
+    body.innerHTML = Historial.items.map(h => {
+      const tipoTag = h.tipo === 'Receta'
+        ? `<span style="font-size:10px; background:var(--bg); color:var(--text-sec); padding:1px 6px; border-radius:4px;">Receta</span>`
+        : `<span style="font-size:10px; background:var(--accent-bg); color:var(--accent); padding:1px 6px; border-radius:4px;">Cotización</span>`;
+      const thead = `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:4px 0; border-bottom:1px solid var(--border); font-size:9px; font-weight:700; color:var(--text-mut); text-transform:uppercase;">
+        <span>Producto</span><span style="text-align:right">Dosis</span><span style="text-align:right">Vol.</span><span style="text-align:right">Precio</span><span style="text-align:right">$/ha</span><span style="text-align:right">Monto</span>
+      </div>`;
+      const trows = (h.lineas || []).map(l =>
+        `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:3px 0; border-bottom:1px solid var(--bg); font-size:11px;">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.producto}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.dosis}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.vol || '—'}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.precio || '—'}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.costoHa}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${l.monto || '—'}</span>
+        </div>`
+      ).join('');
+      return `<div class="card" style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${h.numero || '—'}</span>
+            ${tipoTag}
+          </div>
+          <span style="font-size:11px; color:var(--text-mut);">${h.fecha} · ${h.plazo || ''}</span>
+        </div>
+        <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${h.cliente || 'Sin nombre'}</div>
+        ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${h.establecimiento || ''}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? h.hectareas + ' has' : ''}</div>` : ''}
+        <div style="margin-top:4px; overflow-x:auto;">
+          ${thead}${trows}
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid var(--border);">
+          <span style="font-weight:700; font-size:12px;">Total/ha</span>
+          <span style="font-family:var(--mono); font-weight:700; font-size:12px; color:var(--accent);">USD ${h.total}</span>
+        </div>
+        ${h.hectareas ? `<div style="display:flex; justify-content:space-between;">
+          <span style="font-size:11px; color:var(--text-sec);">Total ${h.hectareas} has</span>
+          <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
+        </div>` : ''}
+        <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
+          <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:5px 8px;" onclick="Historial.exportar(${Historial.items.indexOf(h)})">Reenviar PDF</button>
+        </div>
+      </div>`;
+    }).join('');
+  },
+  async recargar() {
+    await Historial.cargar();
+  },
+  async exportar(idx) {
+    const h = Historial.items[idx];
+    if (!h) return;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, margin = 15, contentW = W - margin * 2;
+    let y = 15;
+    const navy = [30, 41, 59], accent = [217, 119, 6], gris = [100, 116, 139];
+
+    // Header
+    const headerH = 20;
+    doc.setFillColor(...navy);
+    doc.rect(0, 0, W, headerH, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('COTIZACIÓN #' + (h.numero || ''), margin, 10);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(h.fecha + ' · ' + (h.vendedor || '') + '  ·  ' + (h.plazo || ''), margin, 16);
+    if (logoDataUrl) {
+      const logoW = 28, logoH = logoW / 2.51;
+      try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 3, logoW, logoH); } catch(e) {}
+    }
+    y = headerH + 4;
+
+    // Info
+    const infoItems = [];
+    if (h.cliente) infoItems.push(['Cliente:', h.cliente]);
+    if (h.establecimiento) infoItems.push(['Establecimiento:', h.establecimiento]);
+    if (h.hectareas) infoItems.push(['Superficie:', h.hectareas + ' has']);
+    if (infoItems.length) {
+      const boxH = 6 + infoItems.length * 6;
+      doc.setFillColor(254, 243, 199);
+      doc.roundedRect(margin, y, contentW, boxH, 2, 2, 'F');
+      doc.setFontSize(9);
+      doc.setTextColor(...navy);
+      infoItems.forEach((item, i) => {
+        const iy = y + 5 + i * 6;
+        doc.setFont('helvetica', 'bold');
+        doc.text(item[0], margin + 4, iy);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item[1], margin + 35, iy);
+      });
+      y += boxH + 4;
+    }
+
+    // Tabla
+    const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PRODUCTO', colC[0] + 3, y + 5.5);
+    doc.text('DOSIS/HA', colC[1] + 2, y + 5.5);
+    doc.text('VOLUMEN', colC[2] + 2, y + 5.5);
+    doc.text('PRECIO', colC[3] + 2, y + 5.5);
+    doc.text('$/HA', colC[4] + 2, y + 5.5);
+    doc.text('MONTO', colC[5] + 2, y + 5.5);
+    y += 8;
+
+    (h.lineas || []).forEach((l, i) => {
+      if (y > 265) { doc.addPage(); y = 15; }
+      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+      doc.setTextColor(...navy);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      const nombre = l.producto.length > 32 ? l.producto.substring(0, 30) + '...' : l.producto;
+      doc.text(nombre, colC[0] + 3, y + 4.5);
+      doc.setFontSize(7.5);
+      doc.text(l.dosis + ' ' + (l.unidad || 'L'), colC[1] + 2, y + 4.5);
+      doc.setTextColor(...gris);
+      doc.text(l.vol || '—', colC[2] + 2, y + 4.5);
+      doc.setTextColor(...navy);
+      doc.text('$' + l.precio, colC[3] + 2, y + 4.5);
+      doc.text('$' + l.costoHa, colC[4] + 2, y + 4.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(l.monto !== '—' ? '$' + l.monto : '—', colC[5] + 2, y + 4.5);
+      y += 7;
+    });
+
+    // Totales
+    y += 3;
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, h.hectareas ? 22 : 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Total/ha', margin + 4, y + 8);
+    doc.text('USD ' + h.total, W - margin - 4, y + 8, { align: 'right' });
+    if (h.hectareas) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...accent);
+      doc.text('TOTAL ' + h.hectareas + ' has', margin + 4, y + 18);
+      doc.text('USD ' + h.totalHas, W - margin - 4, y + 18, { align: 'right' });
+    }
+    y += (h.hectareas ? 28 : 16);
+
+    // Footer
+    doc.setFontSize(7);
+    doc.setTextColor(...gris);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Precios expresados en USD. Sujetos a cambio sin previo aviso.', margin, y + 4);
+    doc.text('Henderseeds SRL — ' + h.fecha, margin, y + 8);
+
+    // Compartir o descargar
+    const cliente = h.cliente || 'cotizacion';
+    const fileName = 'Henderseeds_Cotizacion_' + (h.numero || '') + '_' + cliente.replace(/\s+/g, '_') + '.pdf';
+    try {
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Cotización #' + h.numero });
+      } else {
+        doc.save(fileName);
+      }
+    } catch(err) {
+      if (err.name !== 'AbortError') doc.save(fileName);
+    }
+  }
+};
+
+/* ══════════════════════════════════════
+   APP
+   ══════════════════════════════════════ */
+const App = {
+  init() {
+    const sel = $('vendedor');
+    const saved = localStorage.getItem('vendedor');
+    if (saved) sel.value = saved;
+    sel.addEventListener('change', () => localStorage.setItem('vendedor', sel.value));
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        $('tab-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'historial') Historial.cargar();
+      });
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.row-new-search') && !e.target.closest('#dropdown')) App.hideDropdown();
+      if (!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
+    });
+
+    $('search').addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveHighlight(-1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlightIdx >= 0) App.selectFromDropdown(highlightIdx);
+        else if ($('search').value.trim()) App.addManual($('search').value.trim());
+      }
+      else if (e.key === 'Escape') App.hideDropdown();
+    });
+
+
+    Market.init();
+    App.renderLista('contado');
+  },
+
+  /* ── Render plazos dinámicos (si vienen de Sheets) ── */
+  renderPlazos() {
+    const bars = document.querySelectorAll('.plazo-bar');
+    bars.forEach(bar => {
+      bar.innerHTML = financiacion.map((f, i) => {
+        const active = f.plazo === plazoActual ? ' active' : '';
+        const small = f.recargo_pct > 0 ? `<small>+${f.recargo_pct}%</small>` : '<small>0%</small>';
+        const handler = bar.closest('#tab-cotizar') ? `App.setPlazo(this)` : `App.setListaPlazo(this)`;
+        return `<button class="plazo-chip${active}" data-plazo="${f.plazo}" onclick="${handler}">${f.label} ${small}</button>`;
+      }).join('');
+    });
+  },
+
+  /* ── Ref panel toggle (mobile) ── */
+  toggleRef() {
+    const p = $('ref-panel');
+    const isOpen = p.classList.toggle('open');
+    $('ref-toggle').textContent = isOpen ? 'Ocultar tabla de referencia' : 'Ver tabla de precios de referencia';
+  },
+
+  /* ── Render tabla de referencia ── */
+  renderRef() {
+    const q = ($('ref-filter')?.value || '').toLowerCase().trim();
+    let html = '';
+
+    Object.entries(catalogo).forEach(([cat, prods]) => {
+      const filtered = prods.filter(p =>
+        !q ||
+        p.producto.toLowerCase().includes(q) ||
+        cat.toLowerCase().includes(q) ||
+        (p.formulacion && p.formulacion.toLowerCase().includes(q)) ||
+        (p.proveedor && p.proveedor.toLowerCase().includes(q))
+      );
+      if (!filtered.length) return;
+      html += `<tr class="cat-row"><td colspan="7">${cat}</td></tr>`;
+      filtered.forEach(p => {
+        const stockClass = p.stock > 0 ? 'color:var(--green)' : 'color:var(--text-mut)';
+        html += `<tr>
+          <td class="prod-name">${p.producto}</td>
+          <td class="droga">${p.formulacion || '—'}</td>
+          <td class="prov">${(p.proveedor || '').replace(/ S\.A\.?/g, '')}</td>
+          <td class="num precio-col">$${fmt(p.precio_usd)}</td>
+          <td class="num">${p.presentacion || '—'}</td>
+          <td class="num">${p.margen_pct || 0}%</td>
+          <td class="num" style="${stockClass}">${p.stock || 0}</td>
+        </tr>`;
+      });
+    });
+
+    $('ref-tbody').innerHTML = html;
+  },
+
+  /* ── Plazo ── */
+  setModo(el) {
+    document.querySelectorAll('#tab-cotizar .plazo-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const modo = el.dataset.modo;
+    plazoActual = modo;
+    const finConfig = $('fin-config');
+    if (modo === 'financiacion') {
+      finConfig.style.display = 'flex';
+      if (!$('fin-fecha').value) {
+        // Default: 3 meses adelante
+        const d = new Date();
+        d.setMonth(d.getMonth() + 3);
+        $('fin-fecha').value = d.toISOString().slice(0, 7);
+      }
+      App.calcFinanciacion();
+    } else {
+      finConfig.style.display = 'none';
+    }
+    App.renderRows();
+  },
+  calcFinanciacion() {
+    const fechaStr = $('fin-fecha').value;
+    if (!fechaStr) return;
+    const tasa = parseFloat($('fin-tasa').value) || 0.75;
+    const fecha = new Date(fechaStr + '-01');
+    const hoy = new Date();
+    const meses = Math.max(0, (fecha.getFullYear() - hoy.getFullYear()) * 12 + (fecha.getMonth() - hoy.getMonth()));
+    const recargo = tasa * meses;
+    $('fin-info').textContent = meses + ' meses · +' + recargo.toFixed(1) + '%';
+    App.renderRows();
+  },
+  getRecargo() {
+    if (plazoActual !== 'financiacion') return 0;
+    const fechaStr = $('fin-fecha').value;
+    if (!fechaStr) return 0;
+    const tasa = (parseFloat($('fin-tasa').value) || 0.75) / 100;
+    const fecha = new Date(fechaStr + '-01');
+    const hoy = new Date();
+    const meses = Math.max(0, (fecha.getFullYear() - hoy.getFullYear()) * 12 + (fecha.getMonth() - hoy.getMonth()));
+    return tasa * meses;
+  },
+
+  /* ── Dropdown ── */
+  showDropdown() {
+    App.filterDropdown();
+    $('dropdown').classList.add('show');
+  },
+  hideDropdown() {
+    $('dropdown').classList.remove('show');
+    highlightIdx = -1;
+  },
+  filterDropdown() {
+    const q = $('search').value.toLowerCase().trim();
+    let html = '';
+    ddItems = [];
+    Object.entries(catalogo).forEach(([cat, prods]) => {
+      const filtered = prods.filter(p =>
+        p.producto.toLowerCase().includes(q) ||
+        cat.toLowerCase().includes(q) ||
+        (p.formulacion && p.formulacion.toLowerCase().includes(q)) ||
+        (p.proveedor && p.proveedor.toLowerCase().includes(q))
+      );
+      if (!filtered.length) return;
+      html += `<div class="dd-cat">${cat}</div>`;
+      filtered.forEach(p => {
+        const idx = ddItems.length;
+        ddItems.push({ ...p, cat });
+        const stockTxt = p.stock > 0 ? `<span style="color:var(--green);">stk:${p.stock}</span>` : '<span style="color:var(--text-mut);">s/stk</span>';
+        html += `<div class="dd-item" onclick="App.selectFromDropdown(${idx})">
+          <div>
+            <span style="font-weight:600;">${p.producto}</span>
+            <span style="font-size:10px; color:var(--text-mut);"> · ${(p.proveedor||'').replace(/ S\.A\.?/g,'')}</span>
+          </div>
+          <div style="text-align:right;">
+            <div class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad}</div>
+            <div style="font-size:10px;">${stockTxt}</div>
+          </div>
+        </div>`;
+      });
+    });
+    // Opción para agregar producto manual
+    const nombreManual = $('search').value.trim();
+    if (nombreManual) {
+      html += `<div class="dd-item dd-add" onclick="App.addManual('${nombreManual.replace(/'/g, "\\'")}')">
+        <span style="color:var(--accent); font-weight:700;">+ Agregar "${nombreManual}" manualmente</span>
+      </div>`;
+    }
+    if (!html) html = '<div style="padding:12px; color:var(--text-mut); font-size:13px;">Escribí para buscar o agregar</div>';
+    $('dropdown').innerHTML = html;
+    highlightIdx = -1;
+  },
+  moveHighlight(dir) {
+    if (!ddItems.length) return;
+    highlightIdx = Math.max(0, Math.min(ddItems.length - 1, highlightIdx + dir));
+    $('dropdown').querySelectorAll('.dd-item').forEach((el, i) => el.classList.toggle('highlighted', i === highlightIdx));
+    const el = $('dropdown').querySelector('.dd-item.highlighted');
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  },
+
+  selectFromDropdown(idx) {
+    const p = ddItems[idx];
+    if (!p) return;
+    App.hideDropdown();
+    $('search').value = '';
+
+    rowId++;
+    rows.push({
+      id: rowId,
+      producto: p.producto,
+      cat: p.cat,
+      precio: p.precio_usd,
+      unidad: p.unidad || 'L',
+      dosis: p.dosis_sug || 0,
+      iva_pct: p.iva_pct,
+      proveedor: p.proveedor || '',
+      costo_usd: p.costo_usd || 0,
+      margen_pct: p.margen_pct || 0,
+      precio_margen: p.precio_usd || 0,
+      formulacion: p.formulacion || '',
+      presentacion: p.presentacion || 0
+    });
+    App.renderRows();
+    // Focus en dosis de la fila recién agregada
+    setTimeout(() => {
+      const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
+      if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[1]) { inps[1].focus(); inps[1].select(); } }
+    }, 50);
+  },
+
+  addManual(nombre) {
+    App.hideDropdown();
+    $('search').value = '';
+
+    rowId++;
+    rows.push({
+      id: rowId,
+      producto: nombre,
+      cat: 'Otros',
+      precio: 0,
+      unidad: 'L',
+      dosis: 1,
+      iva_pct: 21,
+      proveedor: '',
+      costo_usd: 0,
+      margen_pct: 0,
+      precio_margen: 0,
+      formulacion: '',
+      presentacion: 0
+    });
+    App.renderRows();
+    // Focus en precio de la fila recién agregada
+    setTimeout(() => {
+      const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
+      if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[0]) { inps[0].focus(); inps[0].select(); } }
+    }, 50);
+  },
+
+  renderRows() {
+    const container = $('rows');
+    const has = parseFloat($('hectareas').value) || 0;
+
+    if (!rows.length) {
+      container.innerHTML = '';
+      $('totales').style.display = 'none';
+      $('wa-bar').style.display = 'none';
+      return;
+    }
+
+    let netoHa = 0, ivaHa = 0;
+
+    const recargo = App.getRecargo();
+    container.innerHTML = rows.map(r => {
+      const precioFinal = r.precio * (1 + recargo);
+      const costoHa = precioFinal * r.dosis;
+      netoHa += costoHa;
+      ivaHa += costoHa * (r.iva_pct / 100);
+      const volumen = has > 0 ? r.dosis * has : null;
+      const monto = has > 0 ? costoHa * has : null;
+      return `<div class="row-item" data-rowid="${r.id}">
+        <div class="row-prod">
+          <span class="row-prod-name">${r.producto}</span>
+          <span class="row-prod-meta">${(r.proveedor||'').replace(/ S\\.A\\.?/g,'')} · ${r.unidad}</span>
+        </div>
+        <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
+        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+          onchange="App.updateField(${r.id},'precio',this.value)"
+          oninput="App.updateField(${r.id},'precio',this.value)">
+        <input type="number" class="row-inp" value="${r.dosis}" step="0.01" min="0"
+          onchange="App.updateField(${r.id},'dosis',this.value)"
+          oninput="App.updateField(${r.id},'dosis',this.value)">
+        <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
+        <span class="row-val costo">${fmt(costoHa)}</span>
+        <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+        <button class="row-rm" onclick="App.removeRow(${r.id})">&times;</button>
+      </div>`;
+    }).join('');
+
+    const mult = has > 0 ? has : 1;
+    $('totales').style.display = 'block';
+    $('t-neto').textContent = 'USD ' + fmt(netoHa * mult);
+    $('t-total').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
+
+    $('wa-bar').style.display = 'flex';
+  },
+
+  updateField(id, field, val) {
+    const r = rows.find(r => r.id === id);
+    if (!r) return;
+    r[field] = parseFloat(val) || 0;
+    const has = parseFloat($('hectareas').value) || 0;
+    const recargo = App.getRecargo();
+    let netoHa = 0, ivaHa = 0;
+    rows.forEach(r => {
+      const precioF = r.precio * (1 + recargo);
+      const costoHa = precioF * r.dosis;
+      netoHa += costoHa;
+      ivaHa += costoHa * (r.iva_pct / 100);
+    });
+    const rowEl = document.querySelector(`[data-rowid="${id}"]`);
+    if (rowEl) {
+      const precioF = r.precio * (1 + recargo);
+      const costoHa = precioF * r.dosis;
+      const volumen = has > 0 ? r.dosis * has : null;
+      const monto = has > 0 ? costoHa * has : null;
+      const vals = rowEl.querySelectorAll('.row-val');
+      vals[0].textContent = volumen ? fmt(volumen) : '—';
+      vals[1].textContent = fmt(costoHa);
+      vals[2].textContent = monto ? fmt(monto) : '—';
+    }
+    const mult = has > 0 ? has : 1;
+    $('totales').style.display = 'block';
+    $('t-neto').textContent = 'USD ' + fmt(netoHa * mult);
+    $('t-total').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
+  },
+
+  removeRow(id) {
+    rows = rows.filter(r => r.id !== id);
+    App.renderRows();
+  },
+
+  async _registrarYGuardar(modo) {
+    const has = parseFloat($('hectareas').value) || 0;
+    const fin = financiacion.find(f => f.plazo === plazoActual);
+    let totalHa = 0;
+    const lineas = rows.map(r => {
+      const precioP = Calc.precioConRecargo(r.precio, plazoActual);
+      const costoHa = precioP * r.dosis;
+      const vol = has > 0 ? r.dosis * has : null;
+      const monto = has > 0 ? precioP * r.dosis * has : null;
+      totalHa += costoHa;
+      return { producto: r.producto, dosis: r.dosis, unidad: r.unidad, precio: fmt(precioP), costoHa: fmt(costoHa), vol: vol ? fmt(vol) : '—', monto: monto ? fmt(monto) : '—' };
+    });
+    // Registrar en Sheets
+    let numero = '—';
+    try {
+      const result = await Market.registrarCotizacion();
+      if (result && result.ok) numero = result.numero;
+    } catch(e) { console.error(e); }
+    // Recargar historial desde Sheets
+    Historial.recargar();
+  },
+
+  /* ── PDF profesional ── */
+  generarPDF(modo) {
+    const esReceta = modo === 'receta';
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, margin = 15;
+    const contentW = W - margin * 2;
+    let y = 15;
+
+    const navy = [30, 41, 59];
+    const accent = [217, 119, 6];
+    const gris = [100, 116, 139];
+
+    // ── Header (compacto) ──
+    const headerH = esReceta ? 18 : 20;
+    doc.setFillColor(...navy);
+    doc.rect(0, 0, W, headerH, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text(esReceta ? 'RECETA' : 'COTIZACIÓN', margin, 10);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const headerInfo = dateStr() + ' · ' + ($('vendedor').value || '');
+    if (!esReceta) {
+      const fin = financiacion.find(f => f.plazo === plazoActual);
+      doc.text(headerInfo + '  ·  ' + (fin ? fin.label : 'Contado'), margin, 16);
+    } else {
+      doc.text(headerInfo, margin, 15);
+    }
+
+    if (logoDataUrl) {
+      const logoW = 28, logoH = logoW / 2.51;
+      try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 3, logoW, logoH); } catch(e) {}
+    }
+
+    y = headerH + 4;
+
+    // ── Info cliente + establecimiento ──
+    const cliente = $('cliente').value || '';
+    const has = parseFloat($('hectareas').value) || 0;
+    const estab = $('establecimiento').value || '';
+    const infoItems = [];
+    if (cliente) infoItems.push(['Cliente:', cliente]);
+    if (estab) infoItems.push(['Establecimiento:', estab]);
+    if (has > 0) infoItems.push(['Superficie:', has + ' has']);
+
+    if (infoItems.length) {
+      const boxH = 6 + infoItems.length * 6;
+      doc.setFillColor(254, 243, 199);
+      doc.roundedRect(margin, y, contentW, boxH, 2, 2, 'F');
+      doc.setFontSize(9);
+      doc.setTextColor(...navy);
+      infoItems.forEach((item, i) => {
+        const iy = y + 5 + i * 6;
+        doc.setFont('helvetica', 'bold');
+        doc.text(item[0], margin + 4, iy);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item[1], margin + 35, iy);
+      });
+      y += boxH + 4;
+    }
+
+    // ── Tabla ──
+    const grupos = {};
+    rows.forEach(r => { if (!grupos[r.cat]) grupos[r.cat] = []; grupos[r.cat].push(r); });
+
+    if (esReceta) {
+      // RECETA: Producto | Dosis | Volumen | Formulación
+      const colR = [margin, margin + 75, margin + 110, margin + 145];
+      doc.setFillColor(...navy);
+      doc.rect(margin, y, contentW, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PRODUCTO', colR[0] + 3, y + 5.5);
+      doc.text('DOSIS/HA', colR[1] + 2, y + 5.5);
+      doc.text('VOLUMEN', colR[2] + 2, y + 5.5);
+      doc.text('FORMULACIÓN', colR[3] + 2, y + 5.5);
+      y += 8;
+
+      rows.forEach((r, i) => {
+        if (y > 265) { doc.addPage(); y = 15; }
+        const vol = has > 0 ? r.dosis * has : null;
+        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+
+        doc.setTextColor(...navy);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        const nombre = r.producto.length > 38 ? r.producto.substring(0, 36) + '...' : r.producto;
+        doc.text(nombre, colR[0] + 3, y + 4.5);
+        doc.setFontSize(8);
+        doc.text(r.dosis + ' ' + r.unidad + '/ha', colR[1] + 2, y + 4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colR[2] + 2, y + 4.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...gris);
+        doc.text(r.formulacion || '—', colR[3] + 2, y + 4.5);
+        y += 7;
+      });
+    } else {
+      // COTIZACIÓN: Producto | Dosis/ha | Volumen | Precio | $/ha | Monto
+      const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
+      doc.setFillColor(...navy);
+      doc.rect(margin, y, contentW, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PRODUCTO', colC[0] + 3, y + 5.5);
+      doc.text('DOSIS/HA', colC[1] + 2, y + 5.5);
+      doc.text('VOLUMEN', colC[2] + 2, y + 5.5);
+      doc.text('PRECIO', colC[3] + 2, y + 5.5);
+      doc.text('$/HA', colC[4] + 2, y + 5.5);
+      doc.text('MONTO', colC[5] + 2, y + 5.5);
+      y += 8;
+
+      let totalHa = 0, totalIvaHa = 0;
+
+      rows.forEach((r, i) => {
+        if (y > 265) { doc.addPage(); y = 15; }
+        const precioP = Calc.precioConRecargo(r.precio, plazoActual);
+        const costoHa = precioP * r.dosis;
+        const vol = has > 0 ? r.dosis * has : null;
+        const monto = has > 0 ? precioP * r.dosis * has : null;
+        totalHa += costoHa;
+        totalIvaHa += costoHa * (r.iva_pct / 100);
+
+        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+
+          doc.setTextColor(...navy);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          const nombre = r.producto.length > 32 ? r.producto.substring(0, 30) + '...' : r.producto;
+          doc.text(nombre, colC[0] + 3, y + 4.5);
+          doc.setFontSize(7.5);
+          doc.text(r.dosis + ' ' + r.unidad, colC[1] + 2, y + 4.5);
+          doc.setTextColor(...gris);
+          doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colC[2] + 2, y + 4.5);
+          doc.setTextColor(...navy);
+          doc.text('$' + fmt(precioP), colC[3] + 2, y + 4.5);
+          doc.text('$' + fmt(costoHa), colC[4] + 2, y + 4.5);
+          doc.setFont('helvetica', 'bold');
+        doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 4.5);
+        y += 7;
+      });
+
+      // Totales
+      y += 3;
+      doc.setFillColor(...navy);
+      doc.rect(margin, y, contentW, has > 0 ? 22 : 16, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Costo/ha (sin IVA)', margin + 4, y + 6);
+      doc.text('USD ' + fmt(totalHa), W - margin - 4, y + 6, { align: 'right' });
+      doc.text('IVA/ha', margin + 4, y + 12);
+      doc.text('USD ' + fmt(totalIvaHa), W - margin - 4, y + 12, { align: 'right' });
+      if (has > 0) {
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...accent);
+        doc.text('TOTAL ' + has + ' has (c/IVA)', margin + 4, y + 19);
+        doc.text('USD ' + fmt((totalHa + totalIvaHa) * has), W - margin - 4, y + 19, { align: 'right' });
+      }
+      y += (has > 0 ? 28 : 20);
+    }
+
+    // ── Footer ──
+    doc.setFontSize(7);
+    doc.setTextColor(...gris);
+    doc.setFont('helvetica', 'italic');
+    if (esReceta) {
+      doc.text('Henderseeds SRL — ' + dateStr(), margin, y + 6);
+    } else {
+      doc.text('Precios expresados en USD. Sujetos a cambio sin previo aviso. IVA según categoría.', margin, y + 4);
+      doc.text('Henderseeds SRL — ' + dateStr(), margin, y + 8);
+    }
+
+    return doc;
+  },
+
+  async compartirPDF(modo) {
+    if (!rows.length) return;
+    const esReceta = modo === 'receta';
+    const btnSelector = esReceta ? '#wa-bar .btn-outline' : '#wa-bar .btn-green';
+    const btn = document.querySelector(btnSelector);
+    const origText = btn.textContent;
+    btn.textContent = 'Generando...';
+    btn.disabled = true;
+
+    try {
+      const doc = App.generarPDF(modo);
+      const cliente = $('cliente').value || (esReceta ? 'receta' : 'cotizacion');
+      const prefix = esReceta ? 'Receta' : 'Cotizacion';
+      const fileName = 'Henderseeds_' + prefix + '_' + cliente.replace(/\s+/g, '_') + '_' + dateStr().replace(/\//g, '-') + '.pdf';
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: (esReceta ? 'Receta' : 'Cotización') + ' Henderseeds',
+          text: (esReceta ? 'Receta' : 'Cotización') + ' ' + cliente
+        });
+      } else {
+        doc.save(fileName);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error compartiendo PDF:', err);
+        try {
+          const doc = App.generarPDF(modo);
+          doc.save('Henderseeds_' + (esReceta ? 'Receta' : 'Cotizacion') + '.pdf');
+        } catch(e) { console.error(e); }
+      }
+    }
+
+    // Registrar en Sheets e historial
+    App._registrarYGuardar(modo);
+
+    btn.textContent = origText;
+    btn.disabled = false;
+  },
+
+  /* ── Clientes ── */
+  filterClientes(showAll) {
+    const q = $('cliente').value.trim().toLowerCase();
+    const dd = $('cliente-dd');
+    if (!clientes.length) { dd.classList.remove('show'); return; }
+    const matches = q
+      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0, 10)
+      : (showAll ? clientes.slice(0, 15) : []);
+    if (!matches.length && !q) { dd.classList.remove('show'); return; }
+    let html = matches.map(c =>
+      `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">
+        <span>${c.nombre}</span>
+        <span style="font-size:11px;color:var(--text-mut);">${c.cuit || ''}</span>
+      </div>`
+    ).join('');
+    if (q && (!matches.length || !matches.some(c => c.nombre.toLowerCase() === q))) {
+      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+    }
+    dd.innerHTML = html;
+    dd.classList.add('show');
+  },
+  selectCliente(nombre) {
+    $('cliente').value = nombre;
+    $('cliente-dd').classList.remove('show');
+  },
+  hideClienteDD() {
+    $('cliente-dd').classList.remove('show');
+  },
+  async addCliente() {
+    const nombre = $('cliente').value.trim();
+    if (!nombre) return;
+    $('cliente-dd').classList.remove('show');
+    clientes.push({ nombre, localidad: '' });
+    if (API_URL) {
+      try {
+        await Market.post({ action: 'addCliente', nombre });
+        console.log('Cliente agregado a Sheets:', nombre);
+      } catch (err) { console.error('Error agregando cliente:', err); }
+    }
+  },
+
+  /* ── Lista ── */
+  setListaPlazo(el) {
+    document.querySelectorAll('#tab-lista .plazo-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    App.renderLista(el.dataset.plazo);
+  },
+  renderLista(plazo) {
+    // Agrupar todos los productos por proveedor
+    const porProveedor = {};
+    Object.entries(catalogo).forEach(([cat, prods]) => {
+      prods.forEach(p => {
+        const prov = p.proveedor || 'Sin proveedor';
+        if (!porProveedor[prov]) porProveedor[prov] = [];
+        porProveedor[prov].push({ ...p, categoria: cat });
+      });
+    });
+    // Ordenar proveedores alfabéticamente
+    const proveedores = Object.keys(porProveedor).sort();
+    let html = '';
+    proveedores.forEach(prov => {
+      html += `<div class="lista-cat">${prov}</div>`;
+      porProveedor[prov].forEach(p => {
+        const precio = Calc.precioConRecargo(p.precio_usd, plazo);
+        html += `<div class="lista-row">
+          <div><div class="lista-name">${p.producto}</div><div class="lista-unit">${p.categoria} · ${p.unidad}</div></div>
+          <span class="lista-price">$${fmt(precio)}/${p.unidad}</span>
+        </div>`;
+      });
+    });
+    $('lista-body').innerHTML = html;
+  }
+};
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+</body>
+</html>

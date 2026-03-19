@@ -1,0 +1,27 @@
+# ── Subcarpetas de desarrollo ──
+1-Cotizador Semillas (Nidera)/PRUEBA/
+1-Cotizador Semillas (Nidera)/Versiones viejas index/
+1-Cotizador Semillas (Nidera)/juego-memoria/
+2-Cotizador Agronomia (Henderseeds)/cotizador-agro-starter/
+2-Cotizador Agronomia (Henderseeds)/cotizador-agro-starter.zip
+2-Cotizador Agronomia (Henderseeds)/sheets/
+2-Cotizador Agronomia (Henderseeds)/resumen/
+
+# ── Claude / editor config ──
+.claude/
+*/.claude/
+CLAUDE.md
+
+# ── Archivos temporales / instrucciones sueltas ──
+*.csv
+*.xlsx
+*.zip
+*.txt
+*.png
+!00-LOGO HENDERSEEDS TRANSPARENTE.png
+!2-Cotizador Agronomia (Henderseeds)/00-LOGO HENDERSEEDS TRANSPARENTE.png
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini

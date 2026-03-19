@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Henderseeds — Cotizadores</title>
+<meta name="description" content="Herramientas de cotización Henderseeds: Semillas Nidera y Agroinsumos">
+<meta name="theme-color" content="#0f1f35">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════ RESET & VARIABLES ══════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0f1f35;
+  --navy-mid: #162d4a;
+  --navy-light: #1e3a5f;
+  --blue: #2d6fc4;
+  --sky: #4a90d9;
+  --green: #89ba16;
+  --green-dark: #6d9512;
+  --orange: #D97706;
+  --bg: #f0f4fb;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f1f35;
+  --text-sec: #64748b;
+  --text-mut: #94a3b8;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --title: 'Archivo Black', sans-serif;
+}
+html { height: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ══════ HERO HEADER ══════ */
+.hero {
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-mid) 40%, var(--navy-light) 100%);
+  color: #fff;
+  text-align: center;
+  padding: 40px 20px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 80%, rgba(137,186,22,.08) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 350px at 80% 20%, rgba(45,111,196,.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+.logo-img {
+  height: 56px;
+  width: auto;
+  margin-bottom: 16px;
+  filter: brightness(0) invert(1);
+  opacity: .95;
+}
+.hero h1 {
+  font-family: var(--title);
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.hero p {
+  font-size: clamp(.78rem, 2.5vw, .92rem);
+  color: rgba(255,255,255,.55);
+  font-weight: 500;
+  max-width: 380px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ══════ VENDOR BAR ══════ */
+.vendor-bar {
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.vendor-bar label {
+  font-size: .68rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.45);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.vendor-select {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  padding: 7px 28px 7px 12px;
+  font-family: var(--font);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color .15s;
+}
+.vendor-select:focus { outline: none; border-color: var(--green); }
+.vendor-select option { background: var(--navy); color: #fff; }
+
+/* ══════ MAIN CONTENT ══════ */
+.main {
+  flex: 1;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+.section-label {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--text-sec);
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+/* ══════ COTIZADOR CARDS ══════ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 520px) {
+  .cards-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.cot-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  box-shadow: 0 2px 12px rgba(15,31,53,.06);
+  cursor: pointer;
+  position: relative;
+}
+.cot-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(15,31,53,.12);
+}
+.cot-card:active { transform: translateY(0); }
+
+/* Card accent stripe */
+.cot-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.cot-card.card-nidera::before { background: linear-gradient(90deg, var(--green-dark), var(--green)); }
+.cot-card.card-nidera:hover { border-color: var(--green); }
+.cot-card.card-agro::before { background: linear-gradient(90deg, var(--orange), #F59E0B); }
+.cot-card.card-agro:hover { border-color: var(--orange); }
+
+.card-body { padding: 24px 20px 20px; flex: 1; }
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+.card-nidera .card-icon { background: #f0fce0; }
+.card-agro .card-icon { background: #FEF3C7; }
+
+.card-title {
+  font-family: var(--title);
+  font-size: .95rem;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.card-sub {
+  font-size: .74rem;
+  color: var(--text-sec);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  font-size: .58rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.card-nidera .tag { background: #f0fce0; color: #4d7c0f; }
+.card-agro .tag { background: #FEF3C7; color: #92400e; }
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: #fafbfd;
+}
+.card-footer span {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.card-nidera .card-footer span { color: var(--green-dark); }
+.card-agro .card-footer span { color: var(--orange); }
+.card-footer .arrow {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  transition: transform .15s;
+}
+.card-nidera .card-footer .arrow { background: #f0fce0; color: var(--green-dark); }
+.card-agro .card-footer .arrow { background: #FEF3C7; color: var(--orange); }
+.cot-card:hover .arrow { transform: translateX(3px); }
+
+/* ══════ FOOTER ══════ */
+.footer {
+  text-align: center;
+  padding: 20px 16px 24px;
+  border-top: 1px solid var(--border);
+}
+.footer p {
+  font-size: .64rem;
+  color: var(--text-mut);
+  line-height: 1.6;
+}
+.footer strong {
+  color: var(--text-sec);
+  font-weight: 600;
+}
+
+/* ══════ ANIMATIONS ══════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp .35s ease both; }
+.fade-up-1 { animation-delay: .08s; }
+.fade-up-2 { animation-delay: .16s; }
+
+/* ══════ PWA INSTALL BANNER (optional future use) ══════ */
+.install-hint {
+  display: none;
+  background: var(--navy);
+  color: #fff;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.install-hint:hover { background: var(--navy-mid); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HERO ══════════ -->
+<header class="hero">
+  <div class="hero-content">
+    <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="logo-img" id="heroLogo">
+    <h1>COTIZADORES</h1>
+    <p>Herramientas de cotización para el equipo comercial Henderseeds</p>
+  </div>
+  <div class="vendor-bar">
+    <label for="vendorSelect">Vendedor:</label>
+    <select id="vendorSelect" class="vendor-select">
+      <option value="">Seleccionar...</option>
+      <option value="Alvaro">Alvaro</option>
+      <option value="Gonzalo">Gonzalo</option>
+      <option value="Juan Augusto">Juan Augusto</option>
+    </select>
+  </div>
+</header>
+
+<!-- ══════════ CARDS ══════════ -->
+<main class="main">
+  <div class="section-label fade-up">Elegir cotizador</div>
+  <div class="cards-grid">
+
+    <!-- NIDERA -->
+    <a href="cotizador-semillas.html" class="cot-card card-nidera fade-up fade-up-1" id="cardNidera">
+      <div class="card-body">
+        <div class="card-icon">🌽</div>
+        <div class="card-title">Semillas Nidera</div>
+        <div class="card-sub">Cotización de híbridos de maíz y girasol con bandas de precios, descuentos y condiciones financieras.</div>
+        <div class="card-tags">
+          <span class="tag">Maíz</span>
+          <span class="tag">Girasol</span>
+          <span class="tag">3 bandas</span>
+          <span class="tag">Datos técnicos</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span>Abrir cotizador</span>
+        <div class="arrow">&rarr;</div>
+      </div>
+    </a>
+
+    <!-- AGRONOMIA -->
+    <a href="cotizador-agronomia.html" class="cot-card card-agro fade-up fade-up-2" id="cardAgro">
+      <div class="card-body">
+        <div class="card-icon">🧪</div>
+        <div class="card-title">Agroinsumos</div>
+        <div class="card-sub">Cotización de herbicidas, insecticidas, fungicidas, pasturas, silo bolsas y más con costo por hectárea.</div>
+        <div class="card-tags">
+          <span class="tag">Herbicidas</span>
+          <span class="tag">Fungicidas</span>
+          <span class="tag">Pasturas</span>
+          <span class="tag">+6 categorías</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span>Abrir cotizador</span>
+        <div class="arrow">&rarr;</div>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <p><strong>Henderseeds SRL</strong> — Herramientas internas</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  const VENDOR_KEY = 'henderseeds_vendor';
+  const sel = document.getElementById('vendorSelect');
+
+  // ── Restore saved vendor ──
+  const saved = localStorage.getItem(VENDOR_KEY);
+  if (saved) sel.value = saved;
+
+  // ── Save vendor on change ──
+  sel.addEventListener('change', function() {
+    if (this.value) {
+      localStorage.setItem(VENDOR_KEY, this.value);
+    } else {
+      localStorage.removeItem(VENDOR_KEY);
+    }
+  });
+
+  // ── Pass vendor to cotizador via URL param ──
+  document.querySelectorAll('.cot-card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      const vendor = sel.value;
+      if (!vendor) {
+        e.preventDefault();
+        sel.focus();
+        sel.style.borderColor = '#ef4444';
+        sel.style.boxShadow = '0 0 0 3px rgba(239,68,68,.25)';
+        setTimeout(function() {
+          sel.style.borderColor = '';
+          sel.style.boxShadow = '';
+        }, 1500);
+        return;
+      }
+      // Store vendor so cotizadores can read it
+      localStorage.setItem(VENDOR_KEY, vendor);
+    });
+  });
+
+  // ── Fallback logo: use inline base64 if PNG not found ──
+  var logoEl = document.getElementById('heroLogo');
+  logoEl.onerror = function() {
+    // Try subfolder path
+    this.src = '2-Cotizador Agronomia (Henderseeds)/00-LOGO HENDERSEEDS TRANSPARENTE.png';
+    this.onerror = function() {
+      // Hide if no logo found
+      this.style.display = 'none';
+    };
+  };
+})();
+</script>
+</body>
+</html>

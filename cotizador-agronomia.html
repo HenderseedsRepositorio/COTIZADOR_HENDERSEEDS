@@ -11,21 +11,24 @@
 :root {
   --navy: #1e293b;
   --navy-light: #334155;
+  --navy-sky: #3b5998;
   --accent: #D97706;
   --accent-dark: #B45309;
   --accent-bg: #FEF3C7;
+  --accent-light: #FBBF24;
   --green: #16a34a;
   --green-bg: #dcfce7;
   --red: #ef4444;
-  --bg: #f8fafc;
+  --bg: #f0f4fb;
   --card: #ffffff;
   --border: #e2e8f0;
+  --accent-border: #fde68a;
   --text: #1e293b;
   --text-sec: #64748b;
   --text-mut: #94a3b8;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 2px 14px rgba(30,41,59,.08), 0 1px 3px rgba(30,41,59,.04);
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --title: 'Archivo Black', sans-serif;
@@ -46,57 +49,107 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .header {
   background: var(--navy);
   color: white;
-  padding: 10px 16px;
+  padding: 8px 16px 0;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 .header-inner {
-  max-width: 1280px;
+  max-width: 920px;
   margin: 0 auto;
 }
 .header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .brand { display: flex; align-items: center; gap: 2px; flex-direction: column; }
-.brand-logo { height: 50px; width: auto; object-fit: contain; }
+.brand-logo { height: 38px; width: auto; object-fit: contain; }
 .brand small { font-size: 10px; opacity: .5; }
-.vend-sel {
-  background: var(--navy-light);
-  color: white;
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 500;
+
+/* ── Status bar ── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0 6px;
+  font-size: .62rem;
+  color: var(--text-mut);
 }
-.vend-sel option { background: var(--navy); }
+.status-bar .vname { font-weight: 700; color: var(--accent); cursor: pointer; }
+.status-bar .vname:hover { text-decoration: underline; }
+
+/* ── Tabs (underline style) ── */
 .tabs {
   display: flex;
-  gap: 3px;
-  background: rgba(255,255,255,.08);
-  border-radius: var(--radius-sm);
-  padding: 3px;
+  border-bottom: 2px solid rgba(255,255,255,.1);
 }
 .tab-btn {
   flex: 1;
   background: none;
   border: none;
-  color: rgba(255,255,255,.5);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 7px 4px;
-  border-radius: 6px;
+  border-bottom: 3px solid transparent;
+  color: var(--text-mut);
+  font-size: .76rem;
+  font-weight: 500;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: var(--font);
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.tab-btn.active { border-bottom-color: var(--accent); color: #fff; font-weight: 700; }
+
+/* ── Vendor overlay ── */
+#vendor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--navy-sky) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#vendor-overlay.hidden { display: none; }
+.vendor-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  max-width: 340px;
+  width: 90%;
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  text-align: center;
+}
+.vendor-card h2 { margin: 0 0 6px; font-size: 1.1rem; color: var(--navy); }
+.vendor-card p { margin: 0 0 20px; font-size: .78rem; color: var(--text-sec); }
+.vendor-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  font-family: var(--font);
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--navy);
   cursor: pointer;
   transition: all .15s;
 }
-.tab-btn.active { background: var(--accent); color: white; }
+.vendor-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+.vendor-btn:last-child { margin-bottom: 0; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fu { animation: fadeUp .26s ease both; }
+.fu1 { animation-delay: .05s; } .fu2 { animation-delay: .1s; } .fu3 { animation-delay: .16s; }
 
 /* ── Layout principal ── */
-.main { max-width: 1280px; margin: 0 auto; padding: 12px; }
+.main { max-width: 920px; margin: 0 auto; padding: 8px 8px 52px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
@@ -111,7 +164,6 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .card {
   background: var(--card);
   border-radius: var(--radius);
-  border: 1px solid var(--border);
   padding: 14px;
   margin-bottom: 10px;
   box-shadow: var(--shadow);
@@ -129,25 +181,26 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .inp {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   background: white;
   color: var(--text);
   outline: none;
+  transition: border-color .15s, box-shadow .15s;
 }
-.inp:focus { border-color: var(--accent); }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
 .inp-sm { padding: 6px 8px; font-size: 13px; }
 .inp-xs { padding: 4px 6px; font-size: 12px; width: 70px; text-align: right; font-family: var(--mono); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .form-lbl {
-  font-size: 11px;
+  font-size: .62rem;
   font-weight: 700;
-  color: var(--text-sec);
+  color: var(--accent-dark);
   text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: 3px;
+  letter-spacing: .1em;
+  margin-bottom: 5px;
 }
 
 /* ── Filas de cotización ── */
@@ -173,10 +226,9 @@ input, select, button { font-family: inherit; font-size: inherit; }
   gap: 6px;
   align-items: center;
   background: var(--card);
-  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 10px 10px;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   box-shadow: var(--shadow);
   animation: slideIn .2s ease;
   min-height: 48px;
@@ -303,64 +355,67 @@ input, select, button { font-family: inherit; font-size: inherit; }
 /* ── Plazo ── */
 .plazo-bar {
   display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 .plazo-chip {
   flex: 1;
-  padding: 5px 4px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  font-size: .7rem;
   font-weight: 700;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: white;
   cursor: pointer;
   text-align: center;
   transition: all .15s;
   line-height: 1.2;
+  font-family: var(--font);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
-.plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
-.plazo-chip small { display: block; font-weight: 400; font-size: 9px; opacity: .7; }
+.plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(217,119,6,.2); }
+.plazo-chip small { display: block; font-weight: 400; font-size: .52rem; opacity: .7; margin-top: 1px; }
 
 /* ── Totales ── */
 .totales {
-  background: var(--navy);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--navy-sky) 100%);
   color: white;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 14px 18px;
   margin-bottom: 10px;
 }
-.tot-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+.tot-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .78rem; }
+.tot-row span:first-child { opacity: .7; font-size: .72rem; }
 .tot-row.big {
   border-top: 1px solid rgba(255,255,255,.15);
-  margin-top: 4px;
-  padding-top: 8px;
-  font-size: 17px;
+  margin-top: 6px;
+  padding-top: 10px;
+  font-size: 1.1rem;
   font-weight: 700;
 }
-.tot-row .mono { font-family: var(--mono); }
+.tot-row.big span:first-child { opacity: 1; }
+.tot-row .mono { font-family: var(--mono); color: var(--accent-light); }
 
 /* ── Botones ── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: 7px;
+  padding: 13px 18px;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
+  border-radius: 99px;
+  font-size: .82rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all .15s;
+  font-family: var(--font);
+  transition: opacity .15s;
 }
-.btn-accent { background: var(--accent); color: white; }
-.btn-accent:hover { background: var(--accent-dark); }
-.btn-green { background: var(--green); color: white; }
-.btn-green:hover { background: #15803d; }
-.btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
-.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-.btn-sm { padding: 7px 12px; font-size: 13px; }
+.btn:hover { opacity: .87; }
+.btn-accent { background: var(--accent); color: white; box-shadow: 0 3px 12px rgba(217,119,6,.26); }
+.btn-green { background: #25d366; color: white; box-shadow: 0 3px 12px rgba(37,211,102,.26); }
+.btn-outline { background: var(--navy-light); color: #fff; box-shadow: 0 3px 12px rgba(30,41,59,.22); }
+.btn-sm { font-size: .68rem; padding: 6px 14px; }
 
 /* ── Panel referencia (abajo) ── */
 .ref-panel { }
@@ -537,31 +592,40 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .hist-empty { text-align: center; padding: 40px 20px; color: var(--text-mut); }
 
 /* ── Status ── */
-.status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-mut); padding: 6px 0; }
+.status { display: flex; align-items: center; gap: 5px; font-size: .62rem; color: var(--text-mut); padding: 6px 4px; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
 .status-dot.on { background: var(--green); }
 </style>
 </head>
 <body>
 
+<!-- ══════════ VENDOR OVERLAY ══════════ -->
+<div id="vendor-overlay">
+  <div class="vendor-card">
+    <img id="vendorLogo" src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="HenderSeeds" style="height:50px;margin-bottom:16px;">
+    <h2>Cotizador Agroinsumos</h2>
+    <p>Seleccioná tu nombre para empezar</p>
+    <button class="vendor-btn" onclick="App.selectVendor('Alvaro')">Alvaro</button>
+    <button class="vendor-btn" onclick="App.selectVendor('Gonzalo')">Gonzalo</button>
+    <button class="vendor-btn" onclick="App.selectVendor('Juan Augusto')">Juan Augusto</button>
+  </div>
+</div>
+
 <header class="header">
   <div class="header-inner">
     <div class="header-top">
-      <a href="index.html" style="color:rgba(255,255,255,.5);text-decoration:none;font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px;padding:4px 0;">&larr; Menú</a>
-      <div class="brand">
-        <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="brand-logo">
-      </div>
-      <select id="vendedor" class="vend-sel">
-        <option value="">Vendedor...</option>
-        <option value="Alvaro">Alvaro</option>
-        <option value="Gonzalo">Gonzalo</option>
-        <option value="Juan Augusto">Juan Augusto</option>
-      </select>
+      <a href="index.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.58rem;font-weight:600;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
+      <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="brand-logo" style="filter:brightness(0) invert(1);opacity:.9;">
+      <span style="font-size:.62rem;color:var(--text-mut);" id="displayDate"></span>
+    </div>
+    <div class="status-bar">
+      <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
+      <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
     </div>
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="cotizar">Cotizar</button>
-      <button class="tab-btn" data-tab="lista">Lista</button>
-      <button class="tab-btn" data-tab="historial">Historial</button>
+      <button class="tab-btn active" data-tab="cotizar">🧪 Cotizar</button>
+      <button class="tab-btn" data-tab="lista">📋 Lista</button>
+      <button class="tab-btn" data-tab="historial">📊 Historial</button>
     </nav>
   </div>
 </header>
@@ -574,7 +638,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
       <!-- ── COLUMNA IZQUIERDA: Cotización ── -->
       <div class="col-cotiz">
-        <div class="card" style="padding:8px 10px;">
+        <div class="card fu fu1" style="padding:12px 15px;">
           <div class="form-row-3">
             <div style="position:relative;">
               <div class="form-lbl">Cliente</div>
@@ -650,10 +714,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
           </div>
         </div>
 
-        <div class="status">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">Offline — datos locales</span>
-        </div>
+        <!-- status moved to header -->
       </div>
 
 
@@ -855,7 +916,7 @@ const Market = {
       const fin = financiacion.find(f => f.plazo === plazoActual);
       const data = {
         action: 'registrarAgro',
-        vendedor: $('vendedor').value,
+        vendedor: vendor,
         cliente: $('cliente').value,
         localidad: '',
         hectareas: parseFloat($('hectareas').value) || 0,
@@ -1082,15 +1143,20 @@ const Historial = {
 /* ══════════════════════════════════════
    APP
    ══════════════════════════════════════ */
+let vendor = '';
 const App = {
+  selectVendor(name) {
+    vendor = name;
+    localStorage.setItem('vendedor', name);
+    localStorage.setItem('henderseeds_vendor', name);
+    $('currentVendor').textContent = name;
+    $('vendor-overlay').classList.add('hidden');
+  },
+  changeVendor() { $('vendor-overlay').classList.remove('hidden'); },
   init() {
-    const sel = $('vendedor');
     const saved = localStorage.getItem('henderseeds_vendor') || localStorage.getItem('vendedor');
-    if (saved) sel.value = saved;
-    sel.addEventListener('change', () => {
-      localStorage.setItem('vendedor', sel.value);
-      localStorage.setItem('henderseeds_vendor', sel.value);
-    });
+    if (saved) App.selectVendor(saved);
+    $('displayDate').textContent = dateStr();
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1462,7 +1528,7 @@ const App = {
     doc.text(esReceta ? 'RECETA' : 'COTIZACIÓN', margin, 10);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    const headerInfo = dateStr() + ' · ' + ($('vendedor').value || '');
+    const headerInfo = dateStr() + ' · ' + (vendor || '');
     if (!esReceta) {
       const fin = financiacion.find(f => f.plazo === plazoActual);
       doc.text(headerInfo + '  ·  ' + (fin ? fin.label : 'Contado'), margin, 16);

@@ -796,7 +796,7 @@ let logoDataUrl = null;
     c.getContext('2d').drawImage(img, 0, 0);
     logoDataUrl = c.toDataURL('image/png');
   };
-  img.src = '00-LOGO HENDERSEEDS TRANSPARENTE.png';
+  img.src = 'logo-henderseeds.png';
 })();
 
 /* ── Estado ── */
@@ -1852,24 +1852,6 @@ const App = {
           if (!retiroMap[key]) retiroMap[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0 };
           if (vol) retiroMap[key].totalVol += vol;
         });
-
-        // Per-app subtotals (compacto)
-        y += 1;
-        if (y > 260) { doc.addPage(); y = 12; }
-        doc.setFillColor(60, 60, 60);
-        const subH = has > 0 ? 14 : 10;
-        doc.rect(margin, y, contentW, subH, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Costo/ha s/IVA: USD ' + fmt(appTotalHa), margin + 3, y + 4.5);
-        doc.text('IVA/ha: USD ' + fmt(appTotalIvaHa), margin + 70, y + 4.5);
-        if (has > 0) {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.text('TOTAL ' + has + ' has (c/IVA):  USD ' + fmt((appTotalHa + appTotalIvaHa) * has), margin + 3, y + 11);
-        }
-        y += subH + 3;
 
         grandTotalHa += appTotalHa * (has > 0 ? has : 1);
         grandTotalIvaHa += appTotalIvaHa * (has > 0 ? has : 1);

@@ -721,43 +721,8 @@ const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
    iva_pct, costo_usd, margen_pct, precio_usd, dosis_sug, stock
    Cuando conecte a Sheets se sobreescribe con datos frescos.
    ══════════════════════════════════════════ */
-const CATALOGO_FALLBACK = {
-  "Herbicidas": [
-    { producto: "SULFOSATO TOUCHDOWN X 20 LTS", presentacion: 20, unidad: "L", formulacion: "glifosato 62%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 4.25, margen_pct: 8, precio_usd: 4.59, dosis_sug: null, stock: 4940 },
-    { producto: "NUVOX X 20 LT", presentacion: 20, unidad: "L", formulacion: "glifosato 62%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 4.25, margen_pct: 8, precio_usd: 4.60, dosis_sug: null, stock: 0 },
-    { producto: "ACURON UNO X 5L", presentacion: 5, unidad: "L", formulacion: "biciclopirona 20%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 38.13, margen_pct: 8, precio_usd: 41.20, dosis_sug: null, stock: 0 },
-    { producto: "GESAPRIM 90 WDG X 10KG", presentacion: 10, unidad: "kg", formulacion: "atrazina 90%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.40, margen_pct: 8, precio_usd: 6.91, dosis_sug: null, stock: 840 },
-    { producto: "DUAL GOLD X 6,5 lt", presentacion: 6.5, unidad: "L", formulacion: "S-metalocloro 96%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.10, margen_pct: 13, precio_usd: 6.89, dosis_sug: null, stock: 6.5 },
-    { producto: "2,4D VOLERIS X 20 LT", presentacion: 20, unidad: "L", formulacion: "2,4D 89%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 5.09, margen_pct: 10, precio_usd: 5.60, dosis_sug: null, stock: 260 },
-    { producto: "EDDUS X 20 LT", presentacion: 20, unidad: "L", formulacion: "fomesafen 11,95% + S-Metalocloro 51,8%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 8.91, margen_pct: 10, precio_usd: 9.80, dosis_sug: null, stock: 1380 },
-    { producto: "AXIAL PLUS X 5 LT", presentacion: 5, unidad: "L", formulacion: "pinoxaden 5% + cloquintocet 1,25%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 44.54, margen_pct: 9, precio_usd: 48.55, dosis_sug: null, stock: 100 },
-    { producto: "FLEXSTAR X 20 LT", presentacion: 20, unidad: "L", formulacion: "glifosato 32,5% + fomesafen 7,1% + pydiflumetofen 20%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 6.88, margen_pct: 8, precio_usd: 7.43, dosis_sug: null, stock: 180 },
-    { producto: "HEAT X 0,35 KG", presentacion: 0.35, unidad: "kg", formulacion: "Saflufenacil 70%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 297.67, margen_pct: 9.5, precio_usd: 325.95, dosis_sug: null, stock: 28 },
-    { producto: "PIVOT X 5 LT", presentacion: 5, unidad: "L", formulacion: "Imazetapir 10,6%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 7.50, margen_pct: 9, precio_usd: 8.18, dosis_sug: null, stock: 285 },
-    { producto: "CLETODIM ZYNION PLUS X 20 LT", presentacion: 20, unidad: "L", formulacion: "Cletodim 24%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 8.50, margen_pct: 8, precio_usd: 9.20, dosis_sug: null, stock: 0 },
-    { producto: "CONVEY BASF X 1 LT", presentacion: 1, unidad: "L", formulacion: "", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 282.40, margen_pct: 8, precio_usd: 304.99, dosis_sug: null, stock: 0 },
-    { producto: "SULFENTRAZONE CAPAZ 50 X 5 LT", presentacion: 5, unidad: "L", formulacion: "Sulfentrazone 50%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 18.00, margen_pct: 10, precio_usd: 19.80, dosis_sug: null, stock: 0 },
-    { producto: "SULFENTRAZONE CAPAZ 50 X 10 LT", presentacion: 10, unidad: "L", formulacion: "Sulfentrazone 50%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 18.00, margen_pct: 10, precio_usd: 19.80, dosis_sug: null, stock: 650 }
-  ],
-  "Insecticidas": [
-    { producto: "AMPLIGO X 1LT", presentacion: 1, unidad: "L", formulacion: "clorantraniliprole 10% + Lambdacialotrina 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 76.26, margen_pct: 13, precio_usd: 86.17, dosis_sug: null, stock: 159 },
-    { producto: "CAREXO X 1 LT", presentacion: 1, unidad: "L", formulacion: "clorantraniliprole 10% + Lambdacialotrina 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 76.26, margen_pct: 13, precio_usd: 86.17, dosis_sug: null, stock: 1 },
-    { producto: "ZETAMETRINA MUSTANG X 5 LT", presentacion: 5, unidad: "L", formulacion: "Zetametrina 20%", proveedor: "FMC Quimica S.A", iva_pct: 21, costo_usd: 19.44, margen_pct: 8, precio_usd: 21.00, dosis_sug: null, stock: 20 }
-  ],
-  "Fungicidas": [
-    { producto: "ELATUS ACE X 5 LT", presentacion: 5, unidad: "L", formulacion: "propiconazole 25% + benzovindiflupyr 4%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 41.21, margen_pct: 9, precio_usd: 44.90, dosis_sug: null, stock: 0 },
-    { producto: "MIRAVIS DUO X 5 LT", presentacion: 5, unidad: "L", formulacion: "difenoconazole 12,5% + pydiflumetofen 7,5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 40.59, margen_pct: 8, precio_usd: 43.84, dosis_sug: null, stock: 155 },
-    { producto: "MIRAVIS TRIPLE PACK X 6,3 LT", presentacion: 6.3, unidad: "L", formulacion: "propiconazole + benzovindiflupyr", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 0, margen_pct: 8, precio_usd: 0, dosis_sug: null, stock: 0 },
-    { producto: "ARTEA X 5 LT", presentacion: 5, unidad: "L", formulacion: "Propiconazole 25% + Cyproconazole 8%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 9.20, margen_pct: 8, precio_usd: 9.94, dosis_sug: null, stock: 85 },
-    { producto: "OPERA X 5 LT", presentacion: 5, unidad: "L", formulacion: "Pyraclostrobin 13,3% + Epoxiconazole 5,0%", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 21.00, margen_pct: 9, precio_usd: 22.89, dosis_sug: null, stock: 0 }
-  ],
-  "Curasemillas": [
-    { producto: "CURASEM VIBRANCE GOLD X 5 LT", presentacion: 5, unidad: "L", formulacion: "difenoconazole 2.5% + fludioxonil 2.5% + sedaxane 5%", proveedor: "SYNGENTA S.A.", iva_pct: 21, costo_usd: 38.16, margen_pct: 8, precio_usd: 41.21, dosis_sug: null, stock: 105 }
-  ],
-  "Coadyuvantes": [
-    { producto: "DASH MSO BASF X 5 LT", presentacion: 5, unidad: "L", formulacion: "", proveedor: "BASF Argentina S.A.", iva_pct: 21, costo_usd: 13.00, margen_pct: 15, precio_usd: 15.00, dosis_sug: null, stock: 0 }
-  ]
-};
+/* Catálogo vacío — SIEMPRE se carga desde Sheets. Sin fallback de precios. */
+const CATALOGO_FALLBACK = {};
 
 const FINANCIACION_FALLBACK = [
   { plazo: "contado", label: "Contado", recargo_pct: 0 },
@@ -1282,9 +1247,36 @@ const App = {
   updateAppField(aid, field, val) {
     const app = aplicaciones.find(a => a.id === aid);
     if (!app) return;
-    if (field === 'hectareas') app[field] = parseFloat(val) || 0;
-    else app[field] = val;
-    App.renderAplicaciones();
+    if (field === 'hectareas') {
+      app.hectareas = parseFloat(val) || 0;
+      // Update row values inline without full re-render (keeps focus)
+      const has = app.hectareas;
+      const recargo = App.getRecargo();
+      const appBlock = document.querySelector(`.app-block[data-appid="${aid}"]`);
+      if (appBlock) {
+        app.rows.forEach(r => {
+          const rowEl = appBlock.querySelector(`[data-rowid="${r.id}"]`);
+          if (!rowEl) return;
+          const precioF = r.precio * (1 + recargo);
+          const costoHa = precioF * r.dosis;
+          const volumen = has > 0 ? r.dosis * has : null;
+          const monto = has > 0 ? costoHa * has : null;
+          const vals = rowEl.querySelectorAll('.row-val');
+          if (vals[1]) vals[1].textContent = volumen ? fmt(volumen) : '—';
+          if (vals[2]) vals[2].textContent = fmt(costoHa);
+          if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
+        });
+      }
+      App.renderConsolidado();
+    } else {
+      app[field] = val;
+      // Update title inline
+      const appBlock = document.querySelector(`.app-block[data-appid="${aid}"]`);
+      if (appBlock) {
+        const title = appBlock.querySelector('.app-title');
+        if (title) title.textContent = val || ('Aplicación ' + (aplicaciones.indexOf(app) + 1));
+      }
+    }
   },
 
   /* ── Dropdown (multi-app) ── */
@@ -1469,7 +1461,7 @@ const App = {
 
       const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
 
-      return `<div class="app-block${app.collapsed ? ' collapsed' : ''}">
+      return `<div class="app-block${app.collapsed ? ' collapsed' : ''}" data-appid="${app.id}">
         <div class="app-header">
           <div style="display:flex;align-items:center;">
             <span class="app-title">${appLabel}</span>

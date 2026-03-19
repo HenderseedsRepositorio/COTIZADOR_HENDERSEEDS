@@ -481,8 +481,9 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <div style="padding:22px 22px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid var(--c-border);">
           <img id="quoteLogo" alt="HenderSeeds" style="height:34px;">
-          <div style="text-align:right;">
+          <div style="display:flex;align-items:center;gap:10px;">
             <p style="margin:0;font-size:.56rem;color:var(--c-light);" id="q-fecha"></p>
+            <img id="quoteLogoNidera" alt="Nidera" style="height:28px;opacity:.8;">
           </div>
         </div>
         <div style="margin-bottom:14px;">
@@ -979,7 +980,7 @@ const Quote = {
       const ov=$('quote-overlay');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       const cliente=$('cliente').value||'Cliente';
-      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:420});
+      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:520});
     } catch(e) { if(e.name!=='AbortError') alert('Error al compartir. Probá con vista previa.'); }
     finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
@@ -998,13 +999,13 @@ const Quote = {
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     try {
-      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:420});
+      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:520});
     } catch(e) { if(e.name!=='AbortError') alert('No se pudo generar la imagen. Probá con Descargar.'); }
     finally { btn.innerHTML=orig; btn.disabled=false; }
   },
   async downloadPNG() {
     if(!lastLC.length) return;
-    try { await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.png`, {width:420}); }
+    try { await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.png`, {width:520}); }
     catch(e) { alert('Error al generar imagen'); }
   },
   async downloadPDF() {
@@ -1012,7 +1013,7 @@ const Quote = {
     const btn=$('btnDlPdf'), orig=btn.innerHTML;
     btn.innerHTML='⏳ Generando...'; btn.disabled=true;
     try {
-      await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.pdf`, {pdf:true, width:420});
+      await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.pdf`, {pdf:true, width:520});
     } catch(e) { alert('Error al generar PDF'); }
     finally { btn.innerHTML=orig; btn.disabled=false; }
   }

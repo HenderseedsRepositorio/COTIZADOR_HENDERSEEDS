@@ -1690,128 +1690,127 @@ const App = {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, margin = 15;
     const contentW = W - margin * 2;
-    let y = 15;
+    let y = 0;
 
     const navy = [30, 41, 59];
-    const accent = [217, 119, 6];
     const gris = [100, 116, 139];
+    const black = [0, 0, 0];
 
-    // ── Header (compacto) ──
-    const headerH = esReceta ? 18 : 20;
-    doc.setFillColor(...navy);
-    doc.rect(0, 0, W, headerH, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
+    // ── Header (blanco, compacto) ──
+    // Logo a la derecha
+    if (logoDataUrl) {
+      const logoW = 26, logoH = logoW / 2.51;
+      try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 6, logoW, logoH); } catch(e) {}
+    }
+    // Título + info a la izquierda
+    doc.setTextColor(...navy);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text(esReceta ? 'RECETA' : 'COTIZACIÓN', margin, 10);
-    doc.setFontSize(8);
+    doc.text(esReceta ? 'RECETA' : 'COTIZACIÓN', margin, 12);
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
-    const headerInfo = dateStr() + ' · ' + (vendor || '');
+    doc.setTextColor(...gris);
+    const headerInfo = dateStr() + '  ·  ' + (vendor || '');
     if (!esReceta) {
       const fin = financiacion.find(f => f.plazo === plazoActual);
-      doc.text(headerInfo + '  ·  ' + (fin ? fin.label : 'Contado'), margin, 16);
+      doc.text(headerInfo + '  ·  ' + (fin ? fin.label : 'Contado'), margin, 17);
     } else {
-      doc.text(headerInfo, margin, 15);
+      doc.text(headerInfo, margin, 17);
     }
+    // Línea separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(margin, 20, W - margin, 20);
+    y = 23;
 
-    if (logoDataUrl) {
-      const logoW = 28, logoH = logoW / 2.51;
-      try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 3, logoW, logoH); } catch(e) {}
-    }
-
-    y = headerH + 4;
-
-    // ── Info cliente ──
+    // ── Info cliente (compacta, sin fondo) ──
     const cliente = $('cliente').value || '';
-    const infoItems = [];
-    if (cliente) infoItems.push(['Cliente:', cliente]);
-
-    if (infoItems.length) {
-      const boxH = 6 + infoItems.length * 6;
-      doc.setFillColor(254, 243, 199);
-      doc.roundedRect(margin, y, contentW, boxH, 2, 2, 'F');
-      doc.setFontSize(9);
+    if (cliente) {
       doc.setTextColor(...navy);
-      infoItems.forEach((item, i) => {
-        const iy = y + 5 + i * 6;
-        doc.setFont('helvetica', 'bold');
-        doc.text(item[0], margin + 4, iy);
-        doc.setFont('helvetica', 'normal');
-        doc.text(item[1], margin + 35, iy);
-      });
-      y += boxH + 4;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Cliente:', margin, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(cliente, margin + 18, y);
+      y += 5;
     }
 
     // ── Loop through each aplicacion ──
     let grandTotalHa = 0, grandTotalIvaHa = 0;
+    // Collect retiro data for consolidated summary
+    const retiroMap = {};
 
     aplicaciones.forEach((app, appIdx) => {
       if (!app.rows.length) return;
       const has = app.hectareas || 0;
       const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
 
-      // Sub-header for this aplicacion
-      if (y > 255) { doc.addPage(); y = 15; }
-      doc.setFillColor(254, 243, 199);
-      doc.roundedRect(margin, y, contentW, 8, 1, 1, 'F');
-      doc.setTextColor(...accent);
-      doc.setFontSize(8);
+      // Sub-header compacto (línea fina, no bloque grande)
+      if (y > 260) { doc.addPage(); y = 12; }
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.2);
+      doc.line(margin, y, W - margin, y);
+      y += 3;
+      doc.setTextColor(...navy);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
-      const subLabel = appLabel + (has > 0 ? ' — ' + has + ' has' : '');
-      doc.text(subLabel, margin + 4, y + 5.5);
-      y += 10;
+      doc.text(appLabel.toUpperCase() + (has > 0 ? '  —  ' + has + ' has' : ''), margin, y + 1);
+      y += 4;
 
       if (esReceta) {
-        const colR = [margin, margin + 75, margin + 110, margin + 145];
-        doc.setFillColor(...navy);
-        doc.rect(margin, y, contentW, 8, 'F');
+        const colR = [margin, margin + 78, margin + 108, margin + 142];
+        // Header de tabla (gris oscuro, compacto)
+        doc.setFillColor(60, 60, 60);
+        doc.rect(margin, y, contentW, 6, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(8);
+        doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('PRODUCTO', colR[0] + 3, y + 5.5);
-        doc.text('DOSIS/HA', colR[1] + 2, y + 5.5);
-        doc.text('VOLUMEN', colR[2] + 2, y + 5.5);
-        doc.text('FORMULACIÓN', colR[3] + 2, y + 5.5);
-        y += 8;
+        doc.text('PRODUCTO', colR[0] + 2, y + 4);
+        doc.text('DOSIS/HA', colR[1] + 2, y + 4);
+        doc.text('VOLUMEN', colR[2] + 2, y + 4);
+        doc.text('FORMULACIÓN', colR[3] + 2, y + 4);
+        y += 6;
 
         app.rows.forEach((r, i) => {
-          if (y > 265) { doc.addPage(); y = 15; }
+          if (y > 272) { doc.addPage(); y = 12; }
           const vol = has > 0 ? r.dosis * has : null;
-          if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
-          doc.setTextColor(...navy);
+          if (i % 2 === 0) { doc.setFillColor(245, 245, 245); doc.rect(margin, y, contentW, 5.5, 'F'); }
+          doc.setTextColor(...black);
           doc.setFont('helvetica', 'normal');
-          doc.setFontSize(7.5);
-          const nombre = r.producto.length > 38 ? r.producto.substring(0, 36) + '...' : r.producto;
-          doc.text(nombre, colR[0] + 3, y + 4.5);
-          doc.setFontSize(8);
-          doc.text(r.dosis + ' ' + r.unidad + '/ha', colR[1] + 2, y + 4.5);
+          doc.setFontSize(7);
+          const nombre = r.producto.length > 40 ? r.producto.substring(0, 38) + '...' : r.producto;
+          doc.text(nombre, colR[0] + 2, y + 3.8);
+          doc.text(r.dosis + ' ' + (r.unidad||'L') + '/ha', colR[1] + 2, y + 3.8);
           doc.setFont('helvetica', 'bold');
-          doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colR[2] + 2, y + 4.5);
+          doc.text(vol ? fmt(vol) + ' ' + (r.unidad||'L') : '—', colR[2] + 2, y + 3.8);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(...gris);
-          doc.text(r.formulacion || '—', colR[3] + 2, y + 4.5);
-          y += 7;
+          doc.text(r.formulacion || '—', colR[3] + 2, y + 3.8);
+          y += 5.5;
+          // Accumulate retiro
+          const key = r.producto;
+          if (!retiroMap[key]) retiroMap[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0 };
+          if (vol) retiroMap[key].totalVol += vol;
         });
       } else {
-        const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
-        doc.setFillColor(...navy);
-        doc.rect(margin, y, contentW, 8, 'F');
+        const colC = [margin, margin + 62, margin + 86, margin + 110, margin + 134, margin + 158];
+        doc.setFillColor(60, 60, 60);
+        doc.rect(margin, y, contentW, 6, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7.5);
+        doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('PRODUCTO', colC[0] + 3, y + 5.5);
-        doc.text('DOSIS/HA', colC[1] + 2, y + 5.5);
-        doc.text('VOLUMEN', colC[2] + 2, y + 5.5);
-        doc.text('PRECIO', colC[3] + 2, y + 5.5);
-        doc.text('$/HA', colC[4] + 2, y + 5.5);
-        doc.text('MONTO', colC[5] + 2, y + 5.5);
-        y += 8;
+        doc.text('PRODUCTO', colC[0] + 2, y + 4);
+        doc.text('DOSIS/HA', colC[1] + 2, y + 4);
+        doc.text('VOLUMEN', colC[2] + 2, y + 4);
+        doc.text('PRECIO', colC[3] + 2, y + 4);
+        doc.text('$/HA', colC[4] + 2, y + 4);
+        doc.text('MONTO', colC[5] + 2, y + 4);
+        y += 6;
 
         let appTotalHa = 0, appTotalIvaHa = 0;
 
         app.rows.forEach((r, i) => {
-          if (y > 265) { doc.addPage(); y = 15; }
+          if (y > 272) { doc.addPage(); y = 12; }
           const precioP = Calc.precioConRecargo(r.precio, plazoActual);
           const costoHa = precioP * r.dosis;
           const vol = has > 0 ? r.dosis * has : null;
@@ -1819,63 +1818,92 @@ const App = {
           appTotalHa += costoHa;
           appTotalIvaHa += costoHa * (r.iva_pct / 100);
 
-          if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
-          doc.setTextColor(...navy);
+          if (i % 2 === 0) { doc.setFillColor(245, 245, 245); doc.rect(margin, y, contentW, 5.5, 'F'); }
+          doc.setTextColor(...black);
           doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6.5);
+          const nombre = r.producto.length > 34 ? r.producto.substring(0, 32) + '...' : r.producto;
+          doc.text(nombre, colC[0] + 2, y + 3.8);
           doc.setFontSize(7);
-          const nombre = r.producto.length > 32 ? r.producto.substring(0, 30) + '...' : r.producto;
-          doc.text(nombre, colC[0] + 3, y + 4.5);
-          doc.setFontSize(7.5);
-          doc.text(r.dosis + ' ' + r.unidad, colC[1] + 2, y + 4.5);
+          doc.text(r.dosis + ' ' + (r.unidad||'L'), colC[1] + 2, y + 3.8);
           doc.setTextColor(...gris);
-          doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colC[2] + 2, y + 4.5);
-          doc.setTextColor(...navy);
-          doc.text('$' + fmt(precioP), colC[3] + 2, y + 4.5);
-          doc.text('$' + fmt(costoHa), colC[4] + 2, y + 4.5);
+          doc.text(vol ? fmt(vol) + ' ' + (r.unidad||'L') : '—', colC[2] + 2, y + 3.8);
+          doc.setTextColor(...black);
+          doc.text('$' + fmt(precioP), colC[3] + 2, y + 3.8);
+          doc.text('$' + fmt(costoHa), colC[4] + 2, y + 3.8);
           doc.setFont('helvetica', 'bold');
-          doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 4.5);
-          y += 7;
+          doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 3.8);
+          y += 5.5;
+          // Accumulate retiro
+          const key = r.producto;
+          if (!retiroMap[key]) retiroMap[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0 };
+          if (vol) retiroMap[key].totalVol += vol;
         });
 
-        // Per-app subtotals
-        y += 2;
-        if (y > 255) { doc.addPage(); y = 15; }
-        doc.setFillColor(...navy);
-        doc.rect(margin, y, contentW, has > 0 ? 22 : 16, 'F');
+        // Per-app subtotals (compacto)
+        y += 1;
+        if (y > 260) { doc.addPage(); y = 12; }
+        doc.setFillColor(60, 60, 60);
+        const subH = has > 0 ? 14 : 10;
+        doc.rect(margin, y, contentW, subH, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(9);
+        doc.setFontSize(7);
         doc.setFont('helvetica', 'normal');
-        doc.text('Costo/ha (sin IVA)', margin + 4, y + 6);
-        doc.text('USD ' + fmt(appTotalHa), W - margin - 4, y + 6, { align: 'right' });
-        doc.text('IVA/ha', margin + 4, y + 12);
-        doc.text('USD ' + fmt(appTotalIvaHa), W - margin - 4, y + 12, { align: 'right' });
+        doc.text('Costo/ha s/IVA: USD ' + fmt(appTotalHa), margin + 3, y + 4.5);
+        doc.text('IVA/ha: USD ' + fmt(appTotalIvaHa), margin + 70, y + 4.5);
         if (has > 0) {
-          doc.setFontSize(11);
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
-          doc.setTextColor(...accent);
-          doc.text('TOTAL ' + has + ' has (c/IVA)', margin + 4, y + 19);
-          doc.text('USD ' + fmt((appTotalHa + appTotalIvaHa) * has), W - margin - 4, y + 19, { align: 'right' });
+          doc.text('TOTAL ' + has + ' has (c/IVA):  USD ' + fmt((appTotalHa + appTotalIvaHa) * has), margin + 3, y + 11);
         }
-        y += (has > 0 ? 28 : 20);
+        y += subH + 3;
 
         grandTotalHa += appTotalHa * (has > 0 ? has : 1);
         grandTotalIvaHa += appTotalIvaHa * (has > 0 ? has : 1);
       }
 
-      y += 4; // spacing between apps
+      y += 2; // spacing between apps
     });
 
-    // ── Consolidated summary (if 2+ apps with cotizacion mode) ──
-    if (!esReceta && aplicaciones.filter(a => a.rows.length > 0).length >= 2) {
-      if (y > 250) { doc.addPage(); y = 15; }
-      doc.setFillColor(...accent);
-      doc.rect(margin, y, contentW, 10, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(10);
+    // ── Resumen de retiro (SIEMPRE si hay productos con volumen) ──
+    const retiroProducts = Object.values(retiroMap).filter(p => p.totalVol > 0);
+    if (retiroProducts.length > 0) {
+      if (y > 250) { doc.addPage(); y = 12; }
+      y += 2;
+      doc.setDrawColor(120, 120, 120);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, W - margin, y);
+      y += 4;
+      doc.setTextColor(...navy);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
-      doc.text('TOTAL GENERAL (c/IVA)', margin + 4, y + 7);
-      doc.text('USD ' + fmt(grandTotalHa + grandTotalIvaHa), W - margin - 4, y + 7, { align: 'right' });
-      y += 14;
+      doc.text('RETIRO TOTAL', margin, y);
+      y += 3;
+      retiroProducts.forEach((p, i) => {
+        if (y > 278) { doc.addPage(); y = 12; }
+        if (i % 2 === 0) { doc.setFillColor(245, 245, 245); doc.rect(margin, y, contentW, 5, 'F'); }
+        doc.setTextColor(...black);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.text(p.producto, margin + 2, y + 3.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmt(p.totalVol) + ' ' + p.unidad, W - margin - 4, y + 3.5, { align: 'right' });
+        y += 5;
+      });
+      y += 2;
+    }
+
+    // ── Grand total (if 2+ apps, cotizacion mode) ──
+    if (!esReceta && aplicaciones.filter(a => a.rows.length > 0).length >= 2) {
+      if (y > 265) { doc.addPage(); y = 12; }
+      doc.setFillColor(30, 41, 59);
+      doc.rect(margin, y, contentW, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL GENERAL (c/IVA)', margin + 3, y + 5.5);
+      doc.text('USD ' + fmt(grandTotalHa + grandTotalIvaHa), W - margin - 4, y + 5.5, { align: 'right' });
+      y += 12;
     }
 
     // ── Footer ──

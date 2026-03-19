@@ -87,6 +87,13 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .dd-item:hover,.dd-item.highlighted{background:#eef3fb}
 .dd-item-price{font-family:var(--mono);font-size:.64rem;color:var(--c-blue);white-space:nowrap;font-weight:600}
 
+/* Cliente dropdown */
+.cliente-wrap{position:relative}
+.cliente-dd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--c-border);border-top:none;border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;z-index:60;box-shadow:0 8px 24px rgba(13,45,94,.12);display:none}
+.cliente-dd.show{display:block}
+.cliente-dd .dd-item{padding:6px 12px;font-size:.76rem}
+.cliente-dd .dd-add{color:var(--c-green);font-weight:700;font-size:.68rem}
+
 .mkt-table{width:100%;border-collapse:collapse}
 .mkt-table th{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:6px}
 .mkt-table th:first-child{text-align:left;padding-left:0}
@@ -310,7 +317,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Nombre..." class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
+        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
       </div>
     </div>
@@ -573,6 +580,7 @@ let lastLC = [];
 let vendor = '';
 let highlightIdx = -1;
 let ddItems = [];
+let clientes = [];
 
 /* ══════════════════════════════════════════════════════════════════
    UTILS
@@ -665,6 +673,12 @@ const App = {
         $('catalogStatus').textContent='☁️ Precios actualizados';
         if(lineas.length) Calc.renderLines();
       } else { $('catalogStatus').textContent='⚠️ Sheets vacía, catálogo local'; }
+      // Load clients in parallel
+      try {
+        const cr = await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getClientes',{redirect:'follow'});
+        const cd = await cr.json();
+        if(cd.ok && cd.clientes) { clientes = cd.clientes; console.log('Clientes:',clientes.length); }
+      } catch(e2) { console.warn('No se cargaron clientes'); }
     } catch(e) { $('catalogStatus').textContent='⚠️ Sin conexión, catálogo local'; }
   },
   initUI() {
@@ -694,9 +708,10 @@ const App = {
     $('displayDate').innerText = dateStr();
     $('displayDateVisible').innerText = dateStr();
     this.loadCatalog();
-    // Click-outside to close dropdown
+    // Click-outside to close dropdowns
     document.addEventListener('click', e => {
       if(!e.target.closest('.row-new-search') && !e.target.closest('#hybridDD')) Calc.hideDropdown();
+      if(!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
     });
     // Keyboard navigation for hybrid search
     $('hybridSearch').addEventListener('keydown', e => {
@@ -705,6 +720,41 @@ const App = {
       else if(e.key==='Enter'){ e.preventDefault(); if(highlightIdx>=0) Calc.selectFromDropdown(highlightIdx); }
       else if(e.key==='Escape') Calc.hideDropdown();
     });
+  },
+  filterClientes(showAll) {
+    const q = $('cliente').value.trim().toLowerCase();
+    const dd = $('cliente-dd');
+    if(!clientes.length){ dd.classList.remove('show'); return; }
+    const matches = q
+      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0,10)
+      : (showAll ? clientes.slice(0,15) : []);
+    if(!matches.length && !q){ dd.classList.remove('show'); return; }
+    let html = matches.map(c =>
+      `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g,"\\'")}')">`+
+      `<span>${c.nombre}</span><span style="font-size:.6rem;color:var(--c-light);">${c.cuit||''}</span></div>`
+    ).join('');
+    if(q && (!matches.length || !matches.some(c => c.nombre.toLowerCase()===q))) {
+      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+    }
+    dd.innerHTML = html;
+    dd.classList.add('show');
+  },
+  selectCliente(nombre) {
+    $('cliente').value = nombre;
+    const c = clientes.find(x => x.nombre === nombre);
+    if(c && c.cuit) $('cuit').value = c.cuit;
+    $('cliente-dd').classList.remove('show');
+  },
+  hideClienteDD() { $('cliente-dd').classList.remove('show'); },
+  async addCliente() {
+    const nombre = $('cliente').value.trim();
+    if(!nombre) return;
+    $('cliente-dd').classList.remove('show');
+    clientes.push({nombre, cuit:''});
+    if(CONFIG.APPS_SCRIPT_URL) {
+      try { await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'addCliente',nombre})}); }
+      catch(e) { console.warn('Error agregando cliente'); }
+    }
   }
 };
 

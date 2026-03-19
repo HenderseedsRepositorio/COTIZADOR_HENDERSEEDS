@@ -941,11 +941,13 @@ const Market = {
   setStatus(online, text) {
     Market.online = online;
     const dot = $('status-dot');
+    const txt = $('status-text');
+    if (!dot || !txt) return;
     dot.classList.remove('on');
     if (online === true) dot.classList.add('on');
-    if (online === null) dot.style.background = 'var(--accent)'; // connecting
+    if (online === null) dot.style.background = 'var(--accent)';
     else dot.style.background = '';
-    $('status-text').textContent = text;
+    txt.textContent = text;
   }
 };
 

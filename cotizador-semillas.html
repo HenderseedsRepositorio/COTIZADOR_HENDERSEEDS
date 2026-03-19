@@ -291,9 +291,10 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
   <!-- HEADER -->
   <div class="hcard fu" style="padding:8px 16px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;">
-    <p style="margin:0;font-size:.6rem;color:var(--c-light);" id="displayDateVisible"></p>
-    <img id="headerLogo" alt="HenderSeeds" style="height:38px;width:auto;object-fit:contain;">
+    <img src="Logo-nidera.svg" alt="Nidera" style="height:30px;width:auto;object-fit:contain;">
+    <img id="headerLogo" alt="HenderSeeds" style="height:30px;width:auto;object-fit:contain;">
     <p style="display:none;" id="displayDate"></p>
+    <p style="display:none;" id="displayDateVisible"></p>
   </div>
 
   <!-- STATUS BAR -->
@@ -314,7 +315,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
   <!-- ══════════ TAB: COTIZADOR ══════════ -->
   <div id="calc">
     <!-- CLIENTE -->
-    <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;">
+    <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;position:relative;z-index:20;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>

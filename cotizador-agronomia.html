@@ -212,7 +212,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 .rows-header {
   display: grid;
-  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  grid-template-columns: 1fr 52px 68px 62px 58px 62px 68px 24px;
   gap: 6px;
   padding: 6px 10px;
   font-size: 10px;
@@ -223,7 +223,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 .row-item {
   display: grid;
-  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  grid-template-columns: 1fr 52px 68px 62px 58px 62px 68px 24px;
   gap: 6px;
   align-items: center;
   background: var(--card);
@@ -251,7 +251,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 /* Fila nueva (buscador inline) */
 .row-new {
   display: grid;
-  grid-template-columns: 1fr 52px 68px 52px 58px 62px 68px 24px;
+  grid-template-columns: 1fr 52px 68px 62px 58px 62px 68px 24px;
   gap: 6px;
   align-items: center;
   background: var(--bg);
@@ -1464,7 +1464,7 @@ const App = {
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App.updateField(${app.id},${r.id},'precio',this.value)">
-          <input type="number" class="row-inp" value="${r.dosis}" step="0.01" min="0"
+          <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
             oninput="App.updateField(${app.id},${r.id},'dosis',this.value)">
           <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>

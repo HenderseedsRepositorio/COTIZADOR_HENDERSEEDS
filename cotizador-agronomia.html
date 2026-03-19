@@ -861,7 +861,7 @@ const Market = {
   },
 
   async fetch(action) {
-    const res = await fetch(API_URL + '?action=' + action);
+    const res = await fetch(API_URL + '?action=' + action + '&_t=' + Date.now(), { cache: 'no-store' });
     return res.json();
   },
 
@@ -1133,7 +1133,7 @@ const App = {
     $('vendor-overlay').classList.add('hidden');
   },
   changeVendor() { $('vendor-overlay').classList.remove('hidden'); },
-  init() {
+  async init() {
     const saved = localStorage.getItem('henderseeds_vendor') || localStorage.getItem('vendedor');
     if (saved) App.selectVendor(saved);
     if ($('displayDate')) $('displayDate').textContent = dateStr();
@@ -1164,8 +1164,9 @@ const App = {
     });
 
     App.addAplicacion();
-    Market.init();
-    App.renderLista('contado');
+    // CRITICAL: wait for catalog to load before allowing interaction
+    await Market.init();
+    App.renderLista(plazoActual);
   },
 
   /* ── Render plazos dinámicos (si vienen de Sheets) ── */

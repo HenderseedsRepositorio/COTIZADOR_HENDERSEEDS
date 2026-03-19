@@ -261,7 +261,13 @@ input, select, button { font-family: inherit; font-size: inherit; }
   margin-bottom: 5px;
 }
 .row-new-search {
-  position: relative;
+  position: static;
+}
+.row-new { position: relative; }
+.app-dropdown .dropdown {
+  left: 0;
+  right: 0;
+  top: 100%;
 }
 .row-new-search input {
   width: 100%;
@@ -508,6 +514,27 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .ref-panel { display: none; }
 .ref-panel.open { display: block; }
 
+/* ── App blocks (aplicaciones) ── */
+.app-block { background: var(--card); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.app-title { font-family: var(--title); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-dark); }
+.app-header-actions { display: flex; gap: 6px; align-items: center; }
+.app-toggle, .app-delete { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-mut); padding: 2px 4px; }
+.app-toggle:hover, .app-delete:hover { color: var(--navy); }
+.app-body { }
+.app-block.collapsed .app-body { display: none; }
+.app-summary { font-size: 11px; color: var(--text-sec); margin-left: 12px; }
+.app-totales { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--navy-sky) 100%); color: white; border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 8px; }
+.app-tot-row { display: flex; justify-content: space-between; font-size: .72rem; padding: 2px 0; }
+.app-tot-row span:first-child { opacity: .7; }
+.app-tot-row.big { border-top: 1px solid rgba(255,255,255,.15); margin-top: 4px; padding-top: 6px; font-weight: 700; font-size: .85rem; }
+.btn-add-app { width: 100%; padding: 12px; border: 2px dashed var(--accent); border-radius: var(--radius); background: var(--accent-bg); color: var(--accent-dark); font-weight: 700; font-size: .8rem; cursor: pointer; margin-bottom: 10px; transition: all .15s; }
+.btn-add-app:hover { background: var(--accent); color: white; }
+.resumen-card { background: var(--card); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); border: 2px solid var(--accent-border); }
+.resumen-title { font-family: var(--title); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-dark); margin-bottom: 10px; }
+.resumen-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .78rem; border-bottom: 1px solid var(--bg); }
+.resumen-row:last-child { border-bottom: none; }
+
 /* ── WA bar ── */
 .wa-bar {
   position: fixed;
@@ -639,22 +666,11 @@ input, select, button { font-family: inherit; font-size: inherit; }
       <!-- ── COLUMNA IZQUIERDA: Cotización ── -->
       <div class="col-cotiz">
         <div class="card fu fu1" style="padding:12px 15px;">
-          <div class="form-row-3">
-            <div style="position:relative;">
-              <div class="form-lbl">Cliente</div>
-              <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"
-                oninput="App.filterClientes()" onfocus="App.filterClientes(true)">
-              <div class="dropdown cliente-dd" id="cliente-dd"></div>
-            </div>
-            <div>
-              <div class="form-lbl">Establecimiento</div>
-              <input id="establecimiento" type="text" class="inp inp-sm" placeholder="Campo / Lote">
-            </div>
-            <div>
-              <div class="form-lbl">Hectáreas</div>
-              <input id="hectareas" type="number" class="inp inp-sm" placeholder="Has" min="1" value=""
-                oninput="App.renderRows()">
-            </div>
+          <div style="position:relative;">
+            <div class="form-lbl">Cliente</div>
+            <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"
+              oninput="App.filterClientes()" onfocus="App.filterClientes(true)">
+            <div class="dropdown cliente-dd" id="cliente-dd"></div>
           </div>
         </div>
 
@@ -671,48 +687,9 @@ input, select, button { font-family: inherit; font-size: inherit; }
           </div>
         </div>
 
-        <div class="rows-scroll">
-          <div class="rows-header">
-            <span>Producto</span>
-            <span style="text-align:right; color:var(--text-mut);">Sug.</span>
-            <span style="text-align:right">Precio</span>
-            <span style="text-align:right">Dosis</span>
-            <span style="text-align:right">Vol.</span>
-            <span style="text-align:right">$/ha</span>
-            <span style="text-align:right">Monto</span>
-            <span></span>
-          </div>
-
-          <div id="rows"></div>
-        </div>
-
-        <!-- Fila nueva inline -->
-        <div class="row-new" id="row-new">
-          <div class="row-new-search">
-            <input type="text" id="search" placeholder="+ Agregar producto..." autocomplete="off"
-              onfocus="App.showDropdown()" oninput="App.filterDropdown()">
-            <div class="dropdown" id="dropdown"></div>
-          </div>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span></span>
-        </div>
-
-        <!-- Totales -->
-        <div id="totales" class="totales" style="display:none;">
-          <div class="tot-row">
-            <span>Monto total (s/IVA)</span>
-            <span class="mono" id="t-neto">—</span>
-          </div>
-          <div class="tot-row big">
-            <span>Monto total (c/IVA)</span>
-            <span class="mono" id="t-total">—</span>
-          </div>
-        </div>
+        <div id="aplicaciones-container"></div>
+        <button class="btn-add-app" onclick="App.addAplicacion()">+ Agregar Aplicación</button>
+        <div id="resumen-consolidado" style="display:none;"></div>
 
         <!-- status moved to header -->
       </div>
@@ -824,8 +801,10 @@ let logoDataUrl = null;
 /* ── Estado ── */
 let catalogo = CATALOGO_FALLBACK;
 let financiacion = FINANCIACION_FALLBACK;
-let rows = [];
+let aplicaciones = [];
+let appId = 0;
 let rowId = 0;
+let activeDropdownApp = null;
 let plazoActual = 'contado';
 let prodSeleccionado = null;
 let highlightIdx = -1;
@@ -914,21 +893,36 @@ const Market = {
     if (!API_URL) return null;
     try {
       const fin = financiacion.find(f => f.plazo === plazoActual);
+      const firstApp = aplicaciones[0] || { hectareas: 0, establecimiento: '' };
+      const allRows = aplicaciones.flatMap(a => a.rows);
       const data = {
         action: 'registrarAgro',
         vendedor: vendor,
         cliente: $('cliente').value,
         localidad: '',
-        hectareas: parseFloat($('hectareas').value) || 0,
+        hectareas: firstApp.hectareas,
+        establecimiento: firstApp.establecimiento,
         plazo: fin ? fin.label : 'Contado',
         recargo_pct: fin ? fin.recargo_pct : 0,
-        lineas: rows.map(r => ({
+        lineas: allRows.map(r => ({
           categoria: r.cat,
           producto: r.producto,
           unidad: r.unidad,
           precio: r.precio,
           dosis: r.dosis,
           iva_pct: r.iva_pct
+        })),
+        aplicaciones: aplicaciones.map(a => ({
+          establecimiento: a.establecimiento,
+          hectareas: a.hectareas,
+          lineas: a.rows.map(r => ({
+            categoria: r.cat,
+            producto: r.producto,
+            unidad: r.unidad,
+            precio: r.precio,
+            dosis: r.dosis,
+            iva_pct: r.iva_pct
+          }))
         }))
       };
       return await Market.post(data);
@@ -1171,22 +1165,11 @@ const App = {
     });
 
     document.addEventListener('click', e => {
-      if (!e.target.closest('.row-new-search') && !e.target.closest('#dropdown')) App.hideDropdown();
+      if (!e.target.closest('.row-new-search') && !e.target.closest('.app-dropdown')) App.hideDropdown();
       if (!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
     });
 
-    $('search').addEventListener('keydown', e => {
-      if (e.key === 'ArrowDown') { e.preventDefault(); App.moveHighlight(1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveHighlight(-1); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (highlightIdx >= 0) App.selectFromDropdown(highlightIdx);
-        else if ($('search').value.trim()) App.addManual($('search').value.trim());
-      }
-      else if (e.key === 'Escape') App.hideDropdown();
-    });
-
-
+    App.addAplicacion();
     Market.init();
     App.renderLista('contado');
   },
@@ -1262,7 +1245,7 @@ const App = {
     } else {
       finConfig.style.display = 'none';
     }
-    App.renderRows();
+    App.renderAplicaciones();
   },
   calcFinanciacion() {
     const fechaStr = $('fin-fecha').value;
@@ -1273,7 +1256,7 @@ const App = {
     const meses = Math.max(0, (fecha.getFullYear() - hoy.getFullYear()) * 12 + (fecha.getMonth() - hoy.getMonth()));
     const recargo = tasa * meses;
     $('fin-info').textContent = meses + ' meses · +' + recargo.toFixed(1) + '%';
-    App.renderRows();
+    App.renderAplicaciones();
   },
   getRecargo() {
     if (plazoActual !== 'financiacion') return 0;
@@ -1286,17 +1269,53 @@ const App = {
     return tasa * meses;
   },
 
-  /* ── Dropdown ── */
-  showDropdown() {
-    App.filterDropdown();
-    $('dropdown').classList.add('show');
+  /* ── Aplicaciones CRUD ── */
+  addAplicacion() {
+    appId++;
+    aplicaciones.push({ id: appId, establecimiento: '', hectareas: 0, rows: [], collapsed: false });
+    App.renderAplicaciones();
+  },
+  removeAplicacion(aid) {
+    if (aplicaciones.length <= 1) return;
+    aplicaciones = aplicaciones.filter(a => a.id !== aid);
+    App.renderAplicaciones();
+  },
+  toggleCollapse(aid) {
+    const app = aplicaciones.find(a => a.id === aid);
+    if (app) { app.collapsed = !app.collapsed; App.renderAplicaciones(); }
+  },
+  updateAppField(aid, field, val) {
+    const app = aplicaciones.find(a => a.id === aid);
+    if (!app) return;
+    if (field === 'hectareas') app[field] = parseFloat(val) || 0;
+    else app[field] = val;
+    App.renderAplicaciones();
+  },
+
+  /* ── Dropdown (multi-app) ── */
+  showDropdown(aid) {
+    activeDropdownApp = aid;
+    App.filterDropdown(aid);
+    const dd = $('dropdown-' + aid);
+    if (dd) dd.classList.add('show');
   },
   hideDropdown() {
-    $('dropdown').classList.remove('show');
+    if (activeDropdownApp !== null) {
+      const dd = $('dropdown-' + activeDropdownApp);
+      if (dd) dd.classList.remove('show');
+    }
+    // Also hide any visible dropdown
+    document.querySelectorAll('.app-dropdown .dropdown.show').forEach(d => d.classList.remove('show'));
     highlightIdx = -1;
+    activeDropdownApp = null;
   },
-  filterDropdown() {
-    const q = $('search').value.toLowerCase().trim();
+  filterDropdown(aid) {
+    if (aid === undefined) aid = activeDropdownApp;
+    if (aid === null) return;
+    const searchEl = $('search-' + aid);
+    const ddEl = $('dropdown-' + aid);
+    if (!searchEl || !ddEl) return;
+    const q = searchEl.value.toLowerCase().trim();
     let html = '';
     ddItems = [];
     Object.entries(catalogo).forEach(([cat, prods]) => {
@@ -1312,7 +1331,7 @@ const App = {
         const idx = ddItems.length;
         ddItems.push({ ...p, cat });
         const stockTxt = p.stock > 0 ? `<span style="color:var(--green);">stk:${p.stock}</span>` : '<span style="color:var(--text-mut);">s/stk</span>';
-        html += `<div class="dd-item" onclick="App.selectFromDropdown(${idx})">
+        html += `<div class="dd-item" onclick="App.selectFromDropdown(${aid},${idx})">
           <div>
             <span style="font-weight:600;">${p.producto}</span>
             <span style="font-size:10px; color:var(--text-mut);"> · ${(p.proveedor||'').replace(/ S\.A\.?/g,'')}</span>
@@ -1324,33 +1343,38 @@ const App = {
         </div>`;
       });
     });
-    // Opción para agregar producto manual
-    const nombreManual = $('search').value.trim();
+    const nombreManual = searchEl.value.trim();
     if (nombreManual) {
-      html += `<div class="dd-item dd-add" onclick="App.addManual('${nombreManual.replace(/'/g, "\\'")}')">
+      html += `<div class="dd-item dd-add" onclick="App.addManual(${aid},'${nombreManual.replace(/'/g, "\\'")}')">
         <span style="color:var(--accent); font-weight:700;">+ Agregar "${nombreManual}" manualmente</span>
       </div>`;
     }
     if (!html) html = '<div style="padding:12px; color:var(--text-mut); font-size:13px;">Escribí para buscar o agregar</div>';
-    $('dropdown').innerHTML = html;
+    ddEl.innerHTML = html;
+    ddEl.classList.add('show');
     highlightIdx = -1;
   },
   moveHighlight(dir) {
-    if (!ddItems.length) return;
+    if (!ddItems.length || activeDropdownApp === null) return;
     highlightIdx = Math.max(0, Math.min(ddItems.length - 1, highlightIdx + dir));
-    $('dropdown').querySelectorAll('.dd-item').forEach((el, i) => el.classList.toggle('highlighted', i === highlightIdx));
-    const el = $('dropdown').querySelector('.dd-item.highlighted');
+    const dd = $('dropdown-' + activeDropdownApp);
+    if (!dd) return;
+    dd.querySelectorAll('.dd-item').forEach((el, i) => el.classList.toggle('highlighted', i === highlightIdx));
+    const el = dd.querySelector('.dd-item.highlighted');
     if (el) el.scrollIntoView({ block: 'nearest' });
   },
 
-  selectFromDropdown(idx) {
+  selectFromDropdown(aid, idx) {
     const p = ddItems[idx];
     if (!p) return;
+    const app = aplicaciones.find(a => a.id === aid);
+    if (!app) return;
     App.hideDropdown();
-    $('search').value = '';
+    const searchEl = $('search-' + aid);
+    if (searchEl) searchEl.value = '';
 
     rowId++;
-    rows.push({
+    app.rows.push({
       id: rowId,
       producto: p.producto,
       cat: p.cat,
@@ -1365,20 +1389,22 @@ const App = {
       formulacion: p.formulacion || '',
       presentacion: p.presentacion || 0
     });
-    App.renderRows();
-    // Focus en dosis de la fila recién agregada
+    App.renderAplicaciones();
     setTimeout(() => {
       const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
       if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[1]) { inps[1].focus(); inps[1].select(); } }
     }, 50);
   },
 
-  addManual(nombre) {
+  addManual(aid, nombre) {
+    const app = aplicaciones.find(a => a.id === aid);
+    if (!app) return;
     App.hideDropdown();
-    $('search').value = '';
+    const searchEl = $('search-' + aid);
+    if (searchEl) searchEl.value = '';
 
     rowId++;
-    rows.push({
+    app.rows.push({
       id: rowId,
       producto: nombre,
       cat: 'Otros',
@@ -1393,102 +1419,253 @@ const App = {
       formulacion: '',
       presentacion: 0
     });
-    App.renderRows();
-    // Focus en precio de la fila recién agregada
+    App.renderAplicaciones();
     setTimeout(() => {
       const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
       if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[0]) { inps[0].focus(); inps[0].select(); } }
     }, 50);
   },
 
-  renderRows() {
-    const container = $('rows');
-    const has = parseFloat($('hectareas').value) || 0;
-
-    if (!rows.length) {
-      container.innerHTML = '';
-      $('totales').style.display = 'none';
-      $('wa-bar').style.display = 'none';
-      return;
-    }
-
-    let netoHa = 0, ivaHa = 0;
-
+  /* ── Render all aplicaciones ── */
+  renderAplicaciones() {
+    const container = $('aplicaciones-container');
     const recargo = App.getRecargo();
-    container.innerHTML = rows.map(r => {
-      const precioFinal = r.precio * (1 + recargo);
-      const costoHa = precioFinal * r.dosis;
-      netoHa += costoHa;
-      ivaHa += costoHa * (r.iva_pct / 100);
-      const volumen = has > 0 ? r.dosis * has : null;
-      const monto = has > 0 ? costoHa * has : null;
-      return `<div class="row-item" data-rowid="${r.id}">
-        <div class="row-prod">
-          <span class="row-prod-name">${r.producto}</span>
-          <span class="row-prod-meta">${(r.proveedor||'').replace(/ S\\.A\\.?/g,'')} · ${r.unidad}</span>
+
+    container.innerHTML = aplicaciones.map((app, appIdx) => {
+      const has = app.hectareas || 0;
+      let netoHa = 0, ivaHa = 0;
+
+      const rowsHtml = app.rows.map(r => {
+        const precioFinal = r.precio * (1 + recargo);
+        const costoHa = precioFinal * r.dosis;
+        netoHa += costoHa;
+        ivaHa += costoHa * (r.iva_pct / 100);
+        const volumen = has > 0 ? r.dosis * has : null;
+        const monto = has > 0 ? costoHa * has : null;
+        return `<div class="row-item" data-rowid="${r.id}">
+          <div class="row-prod">
+            <span class="row-prod-name">${r.producto}</span>
+            <span class="row-prod-meta">${(r.proveedor||'').replace(/ S\\.A\\.?/g,'')} · ${r.unidad}</span>
+          </div>
+          <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
+          <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+            onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
+            oninput="App.updateField(${app.id},${r.id},'precio',this.value)">
+          <input type="number" class="row-inp" value="${r.dosis}" step="0.01" min="0"
+            onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
+            oninput="App.updateField(${app.id},${r.id},'dosis',this.value)">
+          <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
+          <span class="row-val costo">${fmt(costoHa)}</span>
+          <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+          <button class="row-rm" onclick="App.removeRow(${app.id},${r.id})">&times;</button>
+        </div>`;
+      }).join('');
+
+      const mult = has > 0 ? has : 1;
+      const summaryText = app.rows.length
+        ? `${app.rows.length} prod · USD ${fmt(netoHa)}/ha` + (has > 0 ? ` · USD ${fmt((netoHa + ivaHa) * has)} total` : '')
+        : 'Sin productos';
+
+      const deleteBtn = aplicaciones.length > 1
+        ? `<button class="app-delete" onclick="App.removeAplicacion(${app.id})" title="Eliminar">&times;</button>`
+        : '';
+
+      const totalesHtml = app.rows.length ? `
+        <div class="app-totales">
+          <div class="app-tot-row"><span>Costo/ha (s/IVA)</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt(netoHa)}</span></div>
+          <div class="app-tot-row"><span>IVA/ha</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt(ivaHa)}</span></div>
+          <div class="app-tot-row big"><span>Total (c/IVA)</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt((netoHa + ivaHa) * mult)}</span></div>
+        </div>` : '';
+
+      const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
+
+      return `<div class="app-block${app.collapsed ? ' collapsed' : ''}">
+        <div class="app-header">
+          <div style="display:flex;align-items:center;">
+            <span class="app-title">${appLabel}</span>
+            ${app.collapsed ? `<span class="app-summary">${summaryText}</span>` : ''}
+          </div>
+          <div class="app-header-actions">
+            <button class="app-toggle" onclick="App.toggleCollapse(${app.id})" title="${app.collapsed ? 'Expandir' : 'Colapsar'}">${app.collapsed ? '&#9654;' : '&#9660;'}</button>
+            ${deleteBtn}
+          </div>
         </div>
-        <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
-        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
-          onchange="App.updateField(${r.id},'precio',this.value)"
-          oninput="App.updateField(${r.id},'precio',this.value)">
-        <input type="number" class="row-inp" value="${r.dosis}" step="0.01" min="0"
-          onchange="App.updateField(${r.id},'dosis',this.value)"
-          oninput="App.updateField(${r.id},'dosis',this.value)">
-        <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
-        <span class="row-val costo">${fmt(costoHa)}</span>
-        <span class="row-val">${monto ? fmt(monto) : '—'}</span>
-        <button class="row-rm" onclick="App.removeRow(${r.id})">&times;</button>
+        <div class="app-body">
+          <div class="form-row" style="margin-bottom:10px;">
+            <div>
+              <div class="form-lbl">Establecimiento</div>
+              <input type="text" class="inp inp-sm" placeholder="Campo / Lote" value="${app.establecimiento}"
+                onchange="App.updateAppField(${app.id},'establecimiento',this.value)">
+            </div>
+            <div>
+              <div class="form-lbl">Hectáreas</div>
+              <input type="number" class="inp inp-sm" placeholder="Has" min="1" value="${app.hectareas || ''}"
+                oninput="App.updateAppField(${app.id},'hectareas',this.value)">
+            </div>
+          </div>
+
+          <div class="rows-scroll">
+            <div class="rows-header">
+              <span>Producto</span>
+              <span style="text-align:right; color:var(--text-mut);">Sug.</span>
+              <span style="text-align:right">Precio</span>
+              <span style="text-align:right">Dosis</span>
+              <span style="text-align:right">Vol.</span>
+              <span style="text-align:right">$/ha</span>
+              <span style="text-align:right">Monto</span>
+              <span></span>
+            </div>
+            <div id="rows-${app.id}">${rowsHtml}</div>
+          </div>
+
+          <div class="row-new">
+            <div class="row-new-search app-dropdown">
+              <input type="text" id="search-${app.id}" placeholder="+ Agregar producto..." autocomplete="off"
+                onfocus="App.showDropdown(${app.id})" oninput="App.filterDropdown(${app.id})">
+              <div class="dropdown" id="dropdown-${app.id}"></div>
+            </div>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span class="row-val" style="color:var(--text-mut);">—</span>
+            <span></span>
+          </div>
+
+          ${totalesHtml}
+        </div>
       </div>`;
     }).join('');
 
-    const mult = has > 0 ? has : 1;
-    $('totales').style.display = 'block';
-    $('t-neto').textContent = 'USD ' + fmt(netoHa * mult);
-    $('t-total').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
+    // Attach keyboard handlers to each search input
+    aplicaciones.forEach(app => {
+      const searchEl = $('search-' + app.id);
+      if (searchEl) {
+        searchEl.addEventListener('keydown', e => {
+          if (e.key === 'ArrowDown') { e.preventDefault(); App.moveHighlight(1); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveHighlight(-1); }
+          else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightIdx >= 0) App.selectFromDropdown(app.id, highlightIdx);
+            else if (searchEl.value.trim()) App.addManual(app.id, searchEl.value.trim());
+          }
+          else if (e.key === 'Escape') App.hideDropdown();
+        });
+      }
+    });
 
-    $('wa-bar').style.display = 'flex';
+    // Show/hide WA bar
+    const anyRows = aplicaciones.some(a => a.rows.length > 0);
+    $('wa-bar').style.display = anyRows ? 'flex' : 'none';
+
+    // Render consolidated summary
+    App.renderConsolidado();
   },
 
-  updateField(id, field, val) {
-    const r = rows.find(r => r.id === id);
+  updateField(aid, rid, field, val) {
+    const app = aplicaciones.find(a => a.id === aid);
+    if (!app) return;
+    const r = app.rows.find(r => r.id === rid);
     if (!r) return;
     r[field] = parseFloat(val) || 0;
-    const has = parseFloat($('hectareas').value) || 0;
+
+    const has = app.hectareas || 0;
     const recargo = App.getRecargo();
+
+    // Recalc app totals
     let netoHa = 0, ivaHa = 0;
-    rows.forEach(r => {
+    app.rows.forEach(r => {
       const precioF = r.precio * (1 + recargo);
       const costoHa = precioF * r.dosis;
       netoHa += costoHa;
       ivaHa += costoHa * (r.iva_pct / 100);
     });
-    const rowEl = document.querySelector(`[data-rowid="${id}"]`);
+
+    // Update row DOM
+    const rowEl = document.querySelector(`[data-rowid="${rid}"]`);
     if (rowEl) {
       const precioF = r.precio * (1 + recargo);
       const costoHa = precioF * r.dosis;
       const volumen = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? costoHa * has : null;
       const vals = rowEl.querySelectorAll('.row-val');
-      vals[0].textContent = volumen ? fmt(volumen) : '—';
-      vals[1].textContent = fmt(costoHa);
-      vals[2].textContent = monto ? fmt(monto) : '—';
+      // vals: [0]=sug(skip), [1]=vol, [2]=costo, [3]=monto — but sug is a span not .row-val inside row-prod
+      // Actually in the row: row-prod, sug-val, precio-inp, dosis-inp, vol-val, costo-val, monto-val, rm-btn
+      // .row-val elements after inputs: index 0=sug, 1=vol, 2=costo, 3=monto
+      if (vals[1]) vals[1].textContent = volumen ? fmt(volumen) : '—';
+      if (vals[2]) vals[2].textContent = fmt(costoHa);
+      if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
     }
-    const mult = has > 0 ? has : 1;
-    $('totales').style.display = 'block';
-    $('t-neto').textContent = 'USD ' + fmt(netoHa * mult);
-    $('t-total').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
+
+    // Update app totals DOM
+    const appBlock = rowEl ? rowEl.closest('.app-block') : null;
+    if (appBlock) {
+      const mult = has > 0 ? has : 1;
+      const totRows = appBlock.querySelectorAll('.app-tot-row');
+      if (totRows[0]) totRows[0].querySelector('span:last-child').textContent = 'USD ' + fmt(netoHa);
+      if (totRows[1]) totRows[1].querySelector('span:last-child').textContent = 'USD ' + fmt(ivaHa);
+      if (totRows[2]) totRows[2].querySelector('span:last-child').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
+    }
+
+    App.renderConsolidado();
   },
 
-  removeRow(id) {
-    rows = rows.filter(r => r.id !== id);
-    App.renderRows();
+  removeRow(aid, rid) {
+    const app = aplicaciones.find(a => a.id === aid);
+    if (!app) return;
+    app.rows = app.rows.filter(r => r.id !== rid);
+    App.renderAplicaciones();
+  },
+
+  /* ── Consolidated summary ── */
+  renderConsolidado() {
+    const el = $('resumen-consolidado');
+    const appsWithRows = aplicaciones.filter(a => a.rows.length > 0);
+    if (appsWithRows.length < 2) { el.style.display = 'none'; return; }
+
+    const recargo = App.getRecargo();
+    let grandNetoHa = 0, grandIvaHa = 0;
+
+    // Group products across apps
+    const productMap = {};
+    aplicaciones.forEach(app => {
+      const has = app.hectareas || 0;
+      app.rows.forEach(r => {
+        const precioF = r.precio * (1 + recargo);
+        const costoHa = precioF * r.dosis;
+        grandNetoHa += costoHa * (has > 0 ? has : 1);
+        grandIvaHa += costoHa * (r.iva_pct / 100) * (has > 0 ? has : 1);
+        const key = r.producto;
+        if (!productMap[key]) productMap[key] = { producto: r.producto, unidad: r.unidad, totalVol: 0 };
+        productMap[key].totalVol += r.dosis * (has > 0 ? has : 0);
+      });
+    });
+
+    let html = '<div class="resumen-card">';
+    html += '<div class="resumen-title">Resumen Consolidado</div>';
+    Object.values(productMap).forEach(p => {
+      html += `<div class="resumen-row">
+        <span>${p.producto}</span>
+        <span style="font-family:var(--mono);font-weight:600;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</span>
+      </div>`;
+    });
+    html += `<div class="resumen-row" style="border-top:2px solid var(--accent-border);margin-top:6px;padding-top:6px;font-weight:700;">
+      <span>TOTAL GENERAL (c/IVA)</span>
+      <span style="font-family:var(--mono);color:var(--accent);">USD ${fmt(grandNetoHa + grandIvaHa)}</span>
+    </div>`;
+    html += '</div>';
+    el.innerHTML = html;
+    el.style.display = 'block';
   },
 
   async _registrarYGuardar(modo) {
-    const has = parseFloat($('hectareas').value) || 0;
+    const firstApp = aplicaciones[0] || { hectareas: 0, establecimiento: '', rows: [] };
+    const has = firstApp.hectareas;
     const fin = financiacion.find(f => f.plazo === plazoActual);
+    const allRows = aplicaciones.flatMap(a => a.rows);
     let totalHa = 0;
-    const lineas = rows.map(r => {
+    const lineas = allRows.map(r => {
       const precioP = Calc.precioConRecargo(r.precio, plazoActual);
       const costoHa = precioP * r.dosis;
       const vol = has > 0 ? r.dosis * has : null;
@@ -1506,7 +1683,7 @@ const App = {
     Historial.recargar();
   },
 
-  /* ── PDF profesional ── */
+  /* ── PDF profesional (multi-aplicacion) ── */
   generarPDF(modo) {
     const esReceta = modo === 'receta';
     const { jsPDF } = window.jspdf;
@@ -1545,14 +1722,10 @@ const App = {
 
     y = headerH + 4;
 
-    // ── Info cliente + establecimiento ──
+    // ── Info cliente ──
     const cliente = $('cliente').value || '';
-    const has = parseFloat($('hectareas').value) || 0;
-    const estab = $('establecimiento').value || '';
     const infoItems = [];
     if (cliente) infoItems.push(['Cliente:', cliente]);
-    if (estab) infoItems.push(['Establecimiento:', estab]);
-    if (has > 0) infoItems.push(['Superficie:', has + ' has']);
 
     if (infoItems.length) {
       const boxH = 6 + infoItems.length * 6;
@@ -1570,72 +1743,83 @@ const App = {
       y += boxH + 4;
     }
 
-    // ── Tabla ──
-    const grupos = {};
-    rows.forEach(r => { if (!grupos[r.cat]) grupos[r.cat] = []; grupos[r.cat].push(r); });
+    // ── Loop through each aplicacion ──
+    let grandTotalHa = 0, grandTotalIvaHa = 0;
 
-    if (esReceta) {
-      // RECETA: Producto | Dosis | Volumen | Formulación
-      const colR = [margin, margin + 75, margin + 110, margin + 145];
-      doc.setFillColor(...navy);
-      doc.rect(margin, y, contentW, 8, 'F');
-      doc.setTextColor(255, 255, 255);
+    aplicaciones.forEach((app, appIdx) => {
+      if (!app.rows.length) return;
+      const has = app.hectareas || 0;
+      const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
+
+      // Sub-header for this aplicacion
+      if (y > 255) { doc.addPage(); y = 15; }
+      doc.setFillColor(254, 243, 199);
+      doc.roundedRect(margin, y, contentW, 8, 1, 1, 'F');
+      doc.setTextColor(...accent);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('PRODUCTO', colR[0] + 3, y + 5.5);
-      doc.text('DOSIS/HA', colR[1] + 2, y + 5.5);
-      doc.text('VOLUMEN', colR[2] + 2, y + 5.5);
-      doc.text('FORMULACIÓN', colR[3] + 2, y + 5.5);
-      y += 8;
+      const subLabel = appLabel + (has > 0 ? ' — ' + has + ' has' : '');
+      doc.text(subLabel, margin + 4, y + 5.5);
+      y += 10;
 
-      rows.forEach((r, i) => {
-        if (y > 265) { doc.addPage(); y = 15; }
-        const vol = has > 0 ? r.dosis * has : null;
-        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
-
-        doc.setTextColor(...navy);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        const nombre = r.producto.length > 38 ? r.producto.substring(0, 36) + '...' : r.producto;
-        doc.text(nombre, colR[0] + 3, y + 4.5);
+      if (esReceta) {
+        const colR = [margin, margin + 75, margin + 110, margin + 145];
+        doc.setFillColor(...navy);
+        doc.rect(margin, y, contentW, 8, 'F');
+        doc.setTextColor(255, 255, 255);
         doc.setFontSize(8);
-        doc.text(r.dosis + ' ' + r.unidad + '/ha', colR[1] + 2, y + 4.5);
         doc.setFont('helvetica', 'bold');
-        doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colR[2] + 2, y + 4.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...gris);
-        doc.text(r.formulacion || '—', colR[3] + 2, y + 4.5);
-        y += 7;
-      });
-    } else {
-      // COTIZACIÓN: Producto | Dosis/ha | Volumen | Precio | $/ha | Monto
-      const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
-      doc.setFillColor(...navy);
-      doc.rect(margin, y, contentW, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PRODUCTO', colC[0] + 3, y + 5.5);
-      doc.text('DOSIS/HA', colC[1] + 2, y + 5.5);
-      doc.text('VOLUMEN', colC[2] + 2, y + 5.5);
-      doc.text('PRECIO', colC[3] + 2, y + 5.5);
-      doc.text('$/HA', colC[4] + 2, y + 5.5);
-      doc.text('MONTO', colC[5] + 2, y + 5.5);
-      y += 8;
+        doc.text('PRODUCTO', colR[0] + 3, y + 5.5);
+        doc.text('DOSIS/HA', colR[1] + 2, y + 5.5);
+        doc.text('VOLUMEN', colR[2] + 2, y + 5.5);
+        doc.text('FORMULACIÓN', colR[3] + 2, y + 5.5);
+        y += 8;
 
-      let totalHa = 0, totalIvaHa = 0;
+        app.rows.forEach((r, i) => {
+          if (y > 265) { doc.addPage(); y = 15; }
+          const vol = has > 0 ? r.dosis * has : null;
+          if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+          doc.setTextColor(...navy);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+          const nombre = r.producto.length > 38 ? r.producto.substring(0, 36) + '...' : r.producto;
+          doc.text(nombre, colR[0] + 3, y + 4.5);
+          doc.setFontSize(8);
+          doc.text(r.dosis + ' ' + r.unidad + '/ha', colR[1] + 2, y + 4.5);
+          doc.setFont('helvetica', 'bold');
+          doc.text(vol ? fmt(vol) + ' ' + r.unidad : '—', colR[2] + 2, y + 4.5);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...gris);
+          doc.text(r.formulacion || '—', colR[3] + 2, y + 4.5);
+          y += 7;
+        });
+      } else {
+        const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
+        doc.setFillColor(...navy);
+        doc.rect(margin, y, contentW, 8, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PRODUCTO', colC[0] + 3, y + 5.5);
+        doc.text('DOSIS/HA', colC[1] + 2, y + 5.5);
+        doc.text('VOLUMEN', colC[2] + 2, y + 5.5);
+        doc.text('PRECIO', colC[3] + 2, y + 5.5);
+        doc.text('$/HA', colC[4] + 2, y + 5.5);
+        doc.text('MONTO', colC[5] + 2, y + 5.5);
+        y += 8;
 
-      rows.forEach((r, i) => {
-        if (y > 265) { doc.addPage(); y = 15; }
-        const precioP = Calc.precioConRecargo(r.precio, plazoActual);
-        const costoHa = precioP * r.dosis;
-        const vol = has > 0 ? r.dosis * has : null;
-        const monto = has > 0 ? precioP * r.dosis * has : null;
-        totalHa += costoHa;
-        totalIvaHa += costoHa * (r.iva_pct / 100);
+        let appTotalHa = 0, appTotalIvaHa = 0;
 
-        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+        app.rows.forEach((r, i) => {
+          if (y > 265) { doc.addPage(); y = 15; }
+          const precioP = Calc.precioConRecargo(r.precio, plazoActual);
+          const costoHa = precioP * r.dosis;
+          const vol = has > 0 ? r.dosis * has : null;
+          const monto = has > 0 ? precioP * r.dosis * has : null;
+          appTotalHa += costoHa;
+          appTotalIvaHa += costoHa * (r.iva_pct / 100);
 
+          if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
           doc.setTextColor(...navy);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(7);
@@ -1649,32 +1833,53 @@ const App = {
           doc.text('$' + fmt(precioP), colC[3] + 2, y + 4.5);
           doc.text('$' + fmt(costoHa), colC[4] + 2, y + 4.5);
           doc.setFont('helvetica', 'bold');
-        doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 4.5);
-        y += 7;
-      });
+          doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 4.5);
+          y += 7;
+        });
 
-      // Totales
-      y += 3;
-      doc.setFillColor(...navy);
-      doc.rect(margin, y, contentW, has > 0 ? 22 : 16, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Costo/ha (sin IVA)', margin + 4, y + 6);
-      doc.text('USD ' + fmt(totalHa), W - margin - 4, y + 6, { align: 'right' });
-      doc.text('IVA/ha', margin + 4, y + 12);
-      doc.text('USD ' + fmt(totalIvaHa), W - margin - 4, y + 12, { align: 'right' });
-      if (has > 0) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...accent);
-        doc.text('TOTAL ' + has + ' has (c/IVA)', margin + 4, y + 19);
-        doc.text('USD ' + fmt((totalHa + totalIvaHa) * has), W - margin - 4, y + 19, { align: 'right' });
+        // Per-app subtotals
+        y += 2;
+        if (y > 255) { doc.addPage(); y = 15; }
+        doc.setFillColor(...navy);
+        doc.rect(margin, y, contentW, has > 0 ? 22 : 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Costo/ha (sin IVA)', margin + 4, y + 6);
+        doc.text('USD ' + fmt(appTotalHa), W - margin - 4, y + 6, { align: 'right' });
+        doc.text('IVA/ha', margin + 4, y + 12);
+        doc.text('USD ' + fmt(appTotalIvaHa), W - margin - 4, y + 12, { align: 'right' });
+        if (has > 0) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...accent);
+          doc.text('TOTAL ' + has + ' has (c/IVA)', margin + 4, y + 19);
+          doc.text('USD ' + fmt((appTotalHa + appTotalIvaHa) * has), W - margin - 4, y + 19, { align: 'right' });
+        }
+        y += (has > 0 ? 28 : 20);
+
+        grandTotalHa += appTotalHa * (has > 0 ? has : 1);
+        grandTotalIvaHa += appTotalIvaHa * (has > 0 ? has : 1);
       }
-      y += (has > 0 ? 28 : 20);
+
+      y += 4; // spacing between apps
+    });
+
+    // ── Consolidated summary (if 2+ apps with cotizacion mode) ──
+    if (!esReceta && aplicaciones.filter(a => a.rows.length > 0).length >= 2) {
+      if (y > 250) { doc.addPage(); y = 15; }
+      doc.setFillColor(...accent);
+      doc.rect(margin, y, contentW, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL GENERAL (c/IVA)', margin + 4, y + 7);
+      doc.text('USD ' + fmt(grandTotalHa + grandTotalIvaHa), W - margin - 4, y + 7, { align: 'right' });
+      y += 14;
     }
 
     // ── Footer ──
+    if (y > 275) { doc.addPage(); y = 15; }
     doc.setFontSize(7);
     doc.setTextColor(...gris);
     doc.setFont('helvetica', 'italic');
@@ -1689,7 +1894,7 @@ const App = {
   },
 
   async compartirPDF(modo) {
-    if (!rows.length) return;
+    if (!aplicaciones.some(a => a.rows.length > 0)) return;
     const esReceta = modo === 'receta';
     const btnSelector = esReceta ? '#wa-bar .btn-outline' : '#wa-bar .btn-green';
     const btn = document.querySelector(btnSelector);

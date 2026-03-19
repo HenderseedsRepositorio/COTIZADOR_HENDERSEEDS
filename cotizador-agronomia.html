@@ -687,6 +687,8 @@ input, select, button { font-family: inherit; font-size: inherit; }
       <button class="plazo-chip" data-plazo="mayo2026" onclick="App.setListaPlazo(this)">Mayo 26</button>
       <button class="plazo-chip" data-plazo="dic2026" onclick="App.setListaPlazo(this)">Dic 26</button>
     </div>
+    <input type="text" id="lista-search" class="inp inp-sm" placeholder="🔍 Buscar producto..." autocomplete="off"
+      oninput="App.renderLista()" style="margin-bottom:8px;">
     <div id="lista-body"></div>
   </section>
 
@@ -1975,28 +1977,40 @@ const App = {
     App.renderLista(el.dataset.plazo);
   },
   renderLista(plazo) {
+    // Use current active plazo if not passed
+    if (!plazo) {
+      const activeChip = document.querySelector('#tab-lista .plazo-chip.active');
+      plazo = activeChip ? activeChip.dataset.plazo : 'contado';
+    }
+    const q = ($('lista-search') ? $('lista-search').value : '').toLowerCase().trim();
     // Agrupar todos los productos por proveedor
     const porProveedor = {};
     Object.entries(catalogo).forEach(([cat, prods]) => {
       prods.forEach(p => {
+        // Filter by search
+        if (q && !p.producto.toLowerCase().includes(q) && !(p.formulacion||'').toLowerCase().includes(q) && !cat.toLowerCase().includes(q) && !(p.proveedor||'').toLowerCase().includes(q)) return;
         const prov = p.proveedor || 'Sin proveedor';
         if (!porProveedor[prov]) porProveedor[prov] = [];
         porProveedor[prov].push({ ...p, categoria: cat });
       });
     });
-    // Ordenar proveedores alfabéticamente
     const proveedores = Object.keys(porProveedor).sort();
     let html = '';
     proveedores.forEach(prov => {
       html += `<div class="lista-cat">${prov}</div>`;
       porProveedor[prov].forEach(p => {
         const precio = Calc.precioConRecargo(p.precio_usd, plazo);
+        const form = p.formulacion ? `<span style="font-size:10px;color:var(--text-mut);margin-left:4px;">${p.formulacion}</span>` : '';
         html += `<div class="lista-row">
-          <div><div class="lista-name">${p.producto}</div><div class="lista-unit">${p.categoria} · ${p.unidad}</div></div>
+          <div style="min-width:0;">
+            <div class="lista-name">${p.producto}</div>
+            <div class="lista-unit">${p.categoria} · ${p.unidad}${form ? ' · ' : ''}${p.formulacion || ''}</div>
+          </div>
           <span class="lista-price">$${fmt(precio)}/${p.unidad}</span>
         </div>`;
       });
     });
+    if (!html && q) html = '<div style="padding:20px;text-align:center;color:var(--text-mut);font-size:.82rem;">Sin resultados para "' + q + '"</div>';
     $('lista-body').innerHTML = html;
   }
 };

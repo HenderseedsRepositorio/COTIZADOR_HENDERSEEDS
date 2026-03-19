@@ -378,9 +378,12 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
     <!-- ACCIONES -->
     <div class="no-print fu fu3" style="display:flex;gap:8px;margin-bottom:10px;">
-      <button onclick="Quote.show()" class="btn-share" style="background:var(--c-blue);">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M14 10l7-7M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg>
+      <button id="btnShareDirect" onclick="Quote.shareDirect()" class="btn-share">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Compartir Cotización
+      </button>
+      <button onclick="Quote.show()" class="btn-dl" style="flex:0;padding:13px 16px;" title="Vista previa">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </div>
 
@@ -968,6 +971,19 @@ const Quote = {
       const bg=idx%2===0?'#fafbfc':'#fff';
       return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\$${fmt(l.unitNeto*0.92)}</td><td class="q-lista">\$${fmt(l.unitNeto)}</td></tr>`;
     }).join('');
+  },
+  async shareDirect() {
+    if(!lastLC.length) return alert('Agregá al menos un híbrido antes de compartir.');
+    const btn=$('btnShareDirect'), orig=btn.innerHTML;
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
+    btn.disabled=true;
+    try {
+      await this.build();
+      $('quote-overlay').classList.add('visible');
+      const cliente=$('cliente').value||'Cliente';
+      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:420});
+    } catch(e) { if(e.name!=='AbortError') alert('Error al compartir. Probá con vista previa.'); }
+    finally { btn.innerHTML=orig; btn.disabled=false; $('quote-overlay').classList.remove('visible'); document.body.style.overflow=''; }
   },
   async show() {
     if(!lastLC.length) return alert('Agregá al menos un híbrido antes de compartir.');

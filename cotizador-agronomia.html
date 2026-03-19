@@ -9,26 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy: #1e293b;
-  --navy-light: #334155;
-  --navy-sky: #3b5998;
-  --accent: #D97706;
-  --accent-dark: #B45309;
-  --accent-bg: #FEF3C7;
-  --accent-light: #FBBF24;
+  --navy: #0d2d5e;
+  --navy-light: #1a4a8a;
+  --navy-sky: #2d6fc4;
+  --accent: #2d6fc4;
+  --accent-dark: #1a4a8a;
+  --accent-bg: #e8f0fe;
+  --accent-light: #5b9af5;
   --green: #16a34a;
   --green-bg: #dcfce7;
   --red: #ef4444;
   --bg: #f0f4fb;
   --card: #ffffff;
   --border: #e2e8f0;
-  --accent-border: #fde68a;
-  --text: #1e293b;
+  --accent-border: #b8cfef;
+  --text: #0d2033;
   --text-sec: #64748b;
   --text-mut: #94a3b8;
   --radius: 14px;
   --radius-sm: 9px;
-  --shadow: 0 2px 14px rgba(30,41,59,.08), 0 1px 3px rgba(30,41,59,.04);
+  --shadow: 0 2px 14px rgba(13,45,94,.08), 0 1px 3px rgba(13,45,94,.04);
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --title: 'Archivo Black', sans-serif;
@@ -46,28 +46,6 @@ body {
 input, select, button { font-family: inherit; font-size: inherit; }
 
 /* ── Header ── */
-.header {
-  background: var(--card);
-  color: var(--text);
-  padding: 10px 16px 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 14px rgba(13,45,94,.08), 0 1px 3px rgba(13,45,94,.04);
-}
-.header-inner {
-  max-width: 920px;
-  margin: 0 auto;
-}
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.brand { display: flex; align-items: center; gap: 2px; flex-direction: column; }
-.brand-logo { height: 38px; width: auto; object-fit: contain; }
-.brand small { font-size: 10px; opacity: .5; }
 
 /* ── Status bar ── */
 .status-bar {
@@ -79,7 +57,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   font-size: .62rem;
   color: var(--text-mut);
 }
-.status-bar .vname { font-weight: 700; color: var(--accent); cursor: pointer; }
+.status-bar .vname { font-weight: 700; color: var(--navy-sky); cursor: pointer; }
 .status-bar .vname:hover { text-decoration: underline; }
 
 /* ── Tabs (underline style) ── */
@@ -640,25 +618,28 @@ input, select, button { font-family: inherit; font-size: inherit; }
   </div>
 </div>
 
-<header class="header">
-  <div class="header-inner">
-    <div class="header-top" style="justify-content:flex-end;">
-      <img src="logo-henderseeds.png" alt="Henderseeds" class="brand-logo" style="height:30px;">
-    </div>
-    <div class="status-bar">
-      <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
-      <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
-      <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
-    </div>
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="cotizar">🧪 Cotizar</button>
-      <button class="tab-btn" data-tab="lista">📋 Lista</button>
-      <button class="tab-btn" data-tab="historial">📊 Historial</button>
-    </nav>
-  </div>
-</header>
+<div style="max-width:920px;margin:0 auto;padding:8px 8px 52px;">
 
-<main class="main">
+  <!-- HEADER (mismo estilo que Nidera) -->
+  <div class="card fu" style="padding:8px 16px;margin-bottom:2px;display:flex;align-items:center;justify-content:flex-end;">
+    <img src="logo-henderseeds.png" alt="Henderseeds" style="height:30px;width:auto;object-fit:contain;">
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
+    <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
+    <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
+  </div>
+
+  <!-- TABS -->
+  <nav style="display:flex;border-bottom:2px solid var(--border);margin-bottom:8px;">
+    <button class="tab-btn active" data-tab="cotizar">🧪 Cotizar</button>
+    <button class="tab-btn" data-tab="lista">📋 Lista</button>
+    <button class="tab-btn" data-tab="historial">📊 Historial</button>
+  </nav>
+
+<main style="max-width:920px;margin:0 auto;">
 
   <!-- ═══ TAB COTIZAR ═══ -->
   <section id="tab-cotizar" class="tab-content active">

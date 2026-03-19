@@ -511,7 +511,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .btn-add-app:hover { background: var(--accent); color: white; }
 .resumen-card { background: var(--card); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); border: 2px solid var(--accent-border); }
 .resumen-title { font-family: var(--title); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-dark); margin-bottom: 10px; }
-.resumen-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .78rem; border-bottom: 1px solid var(--bg); }
+.resumen-row { display: grid; grid-template-columns: 1fr 70px 65px 85px; gap: 6px; padding: 4px 0; font-size: .75rem; border-bottom: 1px solid var(--bg); align-items: center; }
 .resumen-row:last-child { border-bottom: none; }
 
 /* ── WA bar ── */
@@ -521,10 +521,10 @@ input, select, button { font-family: inherit; font-size: inherit; }
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 1280px;
+  max-width: 936px;
   background: white;
   border-top: 1px solid var(--border);
-  padding: 10px 12px;
+  padding: 10px 8px;
   display: flex;
   gap: 8px;
   z-index: 90;
@@ -1464,12 +1464,7 @@ const App = {
         ? `<button class="app-delete" onclick="App.removeAplicacion(${app.id})" title="Eliminar">&times;</button>`
         : '';
 
-      const totalesHtml = app.rows.length ? `
-        <div class="app-totales">
-          <div class="app-tot-row"><span>Costo/ha (s/IVA)</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt(netoHa)}</span></div>
-          <div class="app-tot-row"><span>IVA/ha</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt(ivaHa)}</span></div>
-          <div class="app-tot-row big"><span>Total (c/IVA)</span><span style="font-family:var(--mono);color:var(--accent-light);">USD ${fmt((netoHa + ivaHa) * mult)}</span></div>
-        </div>` : '';
+      const totalesHtml = '';
 
       const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
 
@@ -1592,16 +1587,6 @@ const App = {
       if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
     }
 
-    // Update app totals DOM
-    const appBlock = rowEl ? rowEl.closest('.app-block') : null;
-    if (appBlock) {
-      const mult = has > 0 ? has : 1;
-      const totRows = appBlock.querySelectorAll('.app-tot-row');
-      if (totRows[0]) totRows[0].querySelector('span:last-child').textContent = 'USD ' + fmt(netoHa);
-      if (totRows[1]) totRows[1].querySelector('span:last-child').textContent = 'USD ' + fmt(ivaHa);
-      if (totRows[2]) totRows[2].querySelector('span:last-child').textContent = 'USD ' + fmt((netoHa + ivaHa) * mult);
-    }
-
     App.renderConsolidado();
   },
 
@@ -1616,37 +1601,53 @@ const App = {
   renderConsolidado() {
     const el = $('resumen-consolidado');
     const appsWithRows = aplicaciones.filter(a => a.rows.length > 0);
-    if (appsWithRows.length < 2) { el.style.display = 'none'; return; }
+    if (!appsWithRows.length) { el.style.display = 'none'; return; }
 
     const recargo = App.getRecargo();
-    let grandNetoHa = 0, grandIvaHa = 0;
+    let grandNeto = 0, grandIva = 0;
 
-    // Group products across apps
+    // Group products across apps: sum vol, precio promedio ponderado, monto total
     const productMap = {};
     aplicaciones.forEach(app => {
       const has = app.hectareas || 0;
       app.rows.forEach(r => {
         const precioF = r.precio * (1 + recargo);
-        const costoHa = precioF * r.dosis;
-        grandNetoHa += costoHa * (has > 0 ? has : 1);
-        grandIvaHa += costoHa * (r.iva_pct / 100) * (has > 0 ? has : 1);
+        const vol = has > 0 ? r.dosis * has : 0;
+        const monto = precioF * vol;
+        grandNeto += monto;
+        grandIva += monto * (r.iva_pct / 100);
         const key = r.producto;
-        if (!productMap[key]) productMap[key] = { producto: r.producto, unidad: r.unidad, totalVol: 0 };
-        productMap[key].totalVol += r.dosis * (has > 0 ? has : 0);
+        if (!productMap[key]) productMap[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0, precio: precioF, totalMonto: 0 };
+        productMap[key].totalVol += vol;
+        productMap[key].totalMonto += monto;
+        productMap[key].precio = precioF; // last price (usually same)
       });
     });
 
     let html = '<div class="resumen-card">';
-    html += '<div class="resumen-title">Resumen Consolidado</div>';
+    html += '<div class="resumen-title">Resumen</div>';
+    // Header
+    html += `<div class="resumen-row" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-sec);border-bottom:1.5px solid var(--border);padding-bottom:4px;">
+      <span>Producto</span>
+      <span style="text-align:right;">Volumen</span>
+      <span style="text-align:right;">Precio</span>
+      <span style="text-align:right;">Monto s/IVA</span>
+    </div>`;
     Object.values(productMap).forEach(p => {
       html += `<div class="resumen-row">
-        <span>${p.producto}</span>
-        <span style="font-family:var(--mono);font-weight:600;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</span>
+        <span style="font-weight:600;font-size:.78rem;">${p.producto}</span>
+        <span style="font-family:var(--mono);font-weight:600;text-align:right;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</span>
+        <span style="font-family:var(--mono);text-align:right;">$${fmt(p.precio)}</span>
+        <span style="font-family:var(--mono);font-weight:600;text-align:right;">${p.totalMonto > 0 ? '$' + fmt(p.totalMonto) : '—'}</span>
       </div>`;
     });
-    html += `<div class="resumen-row" style="border-top:2px solid var(--accent-border);margin-top:6px;padding-top:6px;font-weight:700;">
-      <span>TOTAL GENERAL (c/IVA)</span>
-      <span style="font-family:var(--mono);color:var(--accent);">USD ${fmt(grandNetoHa + grandIvaHa)}</span>
+    html += `<div class="resumen-row" style="border-top:2px solid var(--accent-border);margin-top:6px;padding-top:8px;font-weight:700;">
+      <span>TOTAL (s/IVA)</span><span></span><span></span>
+      <span style="font-family:var(--mono);color:var(--navy);text-align:right;font-size:.92rem;">USD ${fmt(grandNeto)}</span>
+    </div>`;
+    html += `<div class="resumen-row" style="font-weight:700;">
+      <span>TOTAL (c/IVA)</span><span></span><span></span>
+      <span style="font-family:var(--mono);color:var(--accent);text-align:right;font-size:1rem;">USD ${fmt(grandNeto + grandIva)}</span>
     </div>`;
     html += '</div>';
     el.innerHTML = html;

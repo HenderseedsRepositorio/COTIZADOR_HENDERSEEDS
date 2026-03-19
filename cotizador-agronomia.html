@@ -356,6 +356,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   white-space: nowrap;
 }
 
+.cliente-dd { z-index: 200; }
 .cliente-dd .dd-item { font-size: 13px; padding: 6px 12px; }
 .cliente-dd .dd-add { color: var(--accent); font-weight: 700; font-size: 12px; }
 
@@ -810,6 +811,8 @@ let prodSeleccionado = null;
 let highlightIdx = -1;
 let ddItems = [];
 let clientes = [];
+let clienteHighlight = -1;
+let clienteMatches = [];
 
 /* ── Calc ── */
 const Calc = {
@@ -1167,6 +1170,16 @@ const App = {
     document.addEventListener('click', e => {
       if (!e.target.closest('.row-new-search') && !e.target.closest('.app-dropdown')) App.hideDropdown();
       if (!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
+    });
+
+    // Keyboard nav for cliente dropdown
+    $('cliente').addEventListener('keydown', e => {
+      const dd = $('cliente-dd');
+      if (!dd.classList.contains('show')) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.moveClienteHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveClienteHighlight(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); App.selectClienteHighlight(); }
+      else if (e.key === 'Escape') { App.hideClienteDD(); }
     });
 
     App.addAplicacion();
@@ -1969,28 +1982,43 @@ const App = {
     const q = $('cliente').value.trim().toLowerCase();
     const dd = $('cliente-dd');
     if (!clientes.length) { dd.classList.remove('show'); return; }
-    const matches = q
+    clienteMatches = q
       ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0, 10)
       : (showAll ? clientes.slice(0, 15) : []);
-    if (!matches.length && !q) { dd.classList.remove('show'); return; }
-    let html = matches.map(c =>
-      `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">
+    if (!clienteMatches.length && !q) { dd.classList.remove('show'); return; }
+    let html = clienteMatches.map((c, i) =>
+      `<div class="dd-item${i === clienteHighlight ? ' highlighted' : ''}" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">
         <span>${c.nombre}</span>
         <span style="font-size:11px;color:var(--text-mut);">${c.cuit || ''}</span>
       </div>`
     ).join('');
-    if (q && (!matches.length || !matches.some(c => c.nombre.toLowerCase() === q))) {
+    if (q && (!clienteMatches.length || !clienteMatches.some(c => c.nombre.toLowerCase() === q))) {
       html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
     }
     dd.innerHTML = html;
     dd.classList.add('show');
+    clienteHighlight = -1;
+  },
+  moveClienteHighlight(dir) {
+    if (!clienteMatches.length) return;
+    clienteHighlight = Math.max(0, Math.min(clienteMatches.length - 1, clienteHighlight + dir));
+    $('cliente-dd').querySelectorAll('.dd-item').forEach((el, i) => el.classList.toggle('highlighted', i === clienteHighlight));
+    const el = $('cliente-dd').querySelector('.dd-item.highlighted');
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  },
+  selectClienteHighlight() {
+    if (clienteHighlight >= 0 && clienteHighlight < clienteMatches.length) {
+      App.selectCliente(clienteMatches[clienteHighlight].nombre);
+    }
   },
   selectCliente(nombre) {
     $('cliente').value = nombre;
     $('cliente-dd').classList.remove('show');
+    clienteHighlight = -1;
   },
   hideClienteDD() {
     $('cliente-dd').classList.remove('show');
+    clienteHighlight = -1;
   },
   async addCliente() {
     const nombre = $('cliente').value.trim();

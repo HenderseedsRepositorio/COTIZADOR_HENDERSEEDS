@@ -732,7 +732,7 @@ const App = {
     if(!matches.length && !q){ dd.classList.remove('show'); return; }
     let html = matches.map(c =>
       `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g,"\\'")}')">`+
-      `<span>${c.nombre}</span><span style="font-size:.6rem;color:var(--c-light);">${c.cuit||''}</span></div>`
+      `<span>${c.nombre}</span></div>`
     ).join('');
     if(q && (!matches.length || !matches.some(c => c.nombre.toLowerCase()===q))) {
       html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;

@@ -57,6 +57,36 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .htable tbody tr:last-child td{border-bottom:none}
 .htable tbody tr:hover td{background:#f8faff}
 
+/* ══════ INLINE ROWS (hybrid selection) ══════ */
+.rows-header{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;padding:6px 10px;font-size:.58rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
+.row-item{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
+@keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.row-prod{display:flex;flex-direction:column;min-width:0}
+.row-prod-name{font-size:.76rem;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-prod-meta{font-size:.54rem;color:var(--c-light)}
+.row-inp{width:100%;padding:4px 5px;border:1.5px solid var(--c-border);border-radius:7px;font-family:var(--mono);font-size:.72rem;font-weight:600;text-align:right;color:var(--c-navy);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;-moz-appearance:textfield}
+.row-inp::-webkit-inner-spin-button,.row-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.row-inp:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
+select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 12 12'%3E%3Cpath fill='%230d2d5e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;text-align:left}
+.row-price{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--c-navy);text-align:right}
+.row-rm{width:24px;height:24px;border-radius:50%;border:none;background:none;color:#fca5a5;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.row-rm:hover{background:#fef2f2;color:#ef4444}
+
+/* Row new (search) */
+.row-new{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;align-items:center;background:var(--c-bg);border:1.5px dashed var(--c-border);border-radius:10px;padding:8px 10px;margin-top:2px}
+.row-new-search{position:relative}
+.row-new-search input{width:100%;padding:6px 9px;border:1.5px solid var(--c-border);border-radius:8px;font-size:.76rem;font-family:var(--font);outline:none;background:#fff;color:var(--c-dark);transition:border-color .15s,box-shadow .15s}
+.row-new-search input:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
+.row-new-search input::placeholder{color:var(--c-light)}
+
+/* Dropdown */
+.h-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--c-border);border-top:none;border-radius:0 0 10px 10px;max-height:260px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(13,45,94,.12);display:none}
+.h-dropdown.show{display:block}
+.dd-cat{font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-blue);padding:8px 12px 4px;background:var(--c-bg)}
+.dd-item{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;border-bottom:1px solid var(--c-bg);transition:background .1s}
+.dd-item:hover,.dd-item.highlighted{background:#eef3fb}
+.dd-item-price{font-family:var(--mono);font-size:.64rem;color:var(--c-blue);white-space:nowrap;font-weight:600}
+
 .mkt-table{width:100%;border-collapse:collapse}
 .mkt-table th{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:6px}
 .mkt-table th:first-child{text-align:left;padding-left:0}
@@ -308,12 +338,26 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
     <!-- HÍBRIDOS -->
     <div class="hcard fu fu2" style="padding:12px 15px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:7px;flex-wrap:wrap;">
-        <p class="slabel" style="margin:0;">Híbridos seleccionados</p>
-        <button onclick="Calc.addLine()" class="no-print" style="background:var(--c-green);color:#fff;font-size:.72rem;font-weight:700;padding:7px 15px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);box-shadow:0 2px 8px rgba(137,186,22,.26);">+ Agregar Híbrido</button>
+      <p class="slabel" style="margin:0 0 8px;">Híbridos seleccionados</p>
+      <div class="rows-header no-print">
+        <span>Híbrido</span>
+        <span style="text-align:center">Banda</span>
+        <span style="text-align:right">Cant.</span>
+        <span style="text-align:right">P. Neto</span>
+        <span></span>
       </div>
-      <div class="mob-wrap" style="overflow-x:auto;">
-        <table class="htable"><thead><tr><th>Híbrido</th><th>Banda</th><th>Cant.</th><th>P.&nbsp;Neto</th><th class="no-print" style="width:28px;"></th></tr></thead><tbody id="lineasBody"></tbody></table>
+      <div id="lineasBody"></div>
+      <!-- Fila nueva (buscador inline) -->
+      <div class="row-new no-print" id="row-new">
+        <div class="row-new-search">
+          <input type="text" id="hybridSearch" placeholder="+ Agregar híbrido..." autocomplete="off"
+            onfocus="Calc.showDropdown()" oninput="Calc.filterDropdown()">
+          <div class="h-dropdown" id="hybridDD"></div>
+        </div>
+        <span style="font-size:.66rem;color:var(--c-light);text-align:center;">—</span>
+        <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
+        <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
+        <span></span>
       </div>
     </div>
 
@@ -526,6 +570,8 @@ let CATALOGO = CATALOGO_DEFAULT;
 let lineas = [];
 let lastLC = [];
 let vendor = '';
+let highlightIdx = -1;
+let ddItems = [];
 
 /* ══════════════════════════════════════════════════════════════════
    UTILS
@@ -645,8 +691,18 @@ const App = {
     this.initUI();
     $('displayDate').innerText = dateStr();
     $('displayDateVisible').innerText = dateStr();
-    Calc.addLine();
     this.loadCatalog();
+    // Click-outside to close dropdown
+    document.addEventListener('click', e => {
+      if(!e.target.closest('.row-new-search') && !e.target.closest('#hybridDD')) Calc.hideDropdown();
+    });
+    // Keyboard navigation for hybrid search
+    $('hybridSearch').addEventListener('keydown', e => {
+      if(e.key==='ArrowDown'){ e.preventDefault(); Calc.moveHighlight(1); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); Calc.moveHighlight(-1); }
+      else if(e.key==='Enter'){ e.preventDefault(); if(highlightIdx>=0) Calc.selectFromDropdown(highlightIdx); }
+      else if(e.key==='Escape') Calc.hideDropdown();
+    });
   }
 };
 
@@ -654,13 +710,53 @@ const App = {
    CALC — cotizador engine
    ══════════════════════════════════════════════════════════════════ */
 const Calc = {
-  addLine() {
-    if(!CATALOGO.maiz.length) return alert('Catálogo vacío');
-    const first = CATALOGO.maiz[0];
-    lineas.push({tipo:'maiz',hibrido:first.id,banda:1,cant:0,lista:first.b1});
+  addHybrid(name) {
+    const h = findHybrid(name);
+    if(!h) return;
+    lineas.push({tipo:hybridType(name),hibrido:name,banda:1,cant:0,lista:h.b1});
     this.renderLines();
   },
   removeLine(i) { lineas.splice(i,1); this.renderLines(); },
+  /* ── Dropdown search ── */
+  showDropdown() { Calc.filterDropdown(); $('hybridDD').classList.add('show'); },
+  hideDropdown() { $('hybridDD').classList.remove('show'); highlightIdx=-1; },
+  filterDropdown() {
+    const q = $('hybridSearch').value.toLowerCase().trim();
+    ddItems = [];
+    let html = '';
+    [{label:'🌽 Maíz',items:CATALOGO.maiz},{label:'🌻 Girasol',items:CATALOGO.girasol}].forEach(grp => {
+      const matches = grp.items.filter(h => !q || h.id.toLowerCase().includes(q));
+      if(!matches.length) return;
+      html += `<div class="dd-cat">${grp.label}</div>`;
+      matches.forEach(h => {
+        const idx = ddItems.length;
+        ddItems.push(h);
+        html += `<div class="dd-item" onclick="Calc.selectFromDropdown(${idx})"><span>${h.id}</span><span class="dd-item-price">B1: $${fmt(h.b1)}</span></div>`;
+      });
+    });
+    if(!html) html = '<div style="padding:12px;font-size:.74rem;color:var(--c-light);text-align:center;">Sin resultados</div>';
+    $('hybridDD').innerHTML = html;
+    highlightIdx = -1;
+  },
+  selectFromDropdown(idx) {
+    const h = ddItems[idx];
+    if(!h) return;
+    Calc.hideDropdown();
+    $('hybridSearch').value = '';
+    Calc.addHybrid(h.id);
+    // Auto-focus quantity of last added row
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.row-item .row-inp[type="number"]');
+      if(inputs.length) { const last = inputs[inputs.length-1]; last.focus(); last.select(); }
+    }, 60);
+  },
+  moveHighlight(dir) {
+    const items = $('hybridDD').querySelectorAll('.dd-item');
+    if(!items.length) return;
+    if(highlightIdx>=0 && items[highlightIdx]) items[highlightIdx].classList.remove('highlighted');
+    highlightIdx = Math.max(-1, Math.min(items.length-1, highlightIdx+dir));
+    if(highlightIdx>=0 && items[highlightIdx]) { items[highlightIdx].classList.add('highlighted'); items[highlightIdx].scrollIntoView({block:'nearest'}); }
+  },
   updateLine(i, field, val) {
     const l = lineas[i];
     if(field==='hibrido') {
@@ -685,34 +781,29 @@ const Calc = {
     this.run();
   },
   renderLines() {
-    const optM = CATALOGO.maiz.map(h=>`<option value="${h.id}">${h.id}</option>`).join('');
-    const optG = CATALOGO.girasol.map(h=>`<option value="${h.id}">${h.id}</option>`).join('');
+    const emoji = t => t==='maiz' ? '🌽' : '🌻';
+    const h = name => findHybrid(name);
     $('lineasBody').innerHTML = lineas.map((l,i) => {
-      const selM = optM.replace(`value="${l.hibrido}"`, `value="${l.hibrido}" selected`);
-      const selG = optG.replace(`value="${l.hibrido}"`, `value="${l.hibrido}" selected`);
-      return `<tr>
-        <td data-label="Híbrido" style="padding-right:4px;">
-          <select class="no-print inp" style="min-width:130px;font-size:.7rem;padding:4px 20px 4px 6px;" onchange="Calc.updateLine(${i},'hibrido',this.value)">
-            <optgroup label="🌽 Maíz">${selM}</optgroup>
-            <optgroup label="🌻 Girasol">${selG}</optgroup>
-          </select>
-          <span class="print-only" style="font-size:.76rem;font-weight:600;">${l.hibrido}</span>
-        </td>
-        <td data-label="Banda" style="padding-right:4px;">
-          <select class="no-print inp" style="width:48px;font-size:.7rem;padding:4px 16px 4px 5px;" onchange="Calc.updateLine(${i},'banda',this.value)">
-            <option value="1" ${l.banda===1?'selected':''}>B1</option><option value="2" ${l.banda===2?'selected':''}>B2</option><option value="3" ${l.banda===3?'selected':''}>B3</option>
-          </select>
-          <span class="print-only" style="font-size:.76rem;">B${l.banda}</span>
-        </td>
-        <td data-label="Cant." style="padding-right:4px;">
-          <input type="number" class="no-print inp" style="width:56px;font-size:.7rem;padding:4px 6px;" value="${l.cant}" onblur="Calc.updateLine(${i},'cant',this.value)">
-          <span class="print-only" style="font-size:.76rem;">${l.cant}</span>
-        </td>
-        <td data-label="P. Neto" id="u-neto-${i}" style="padding-right:4px;font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--c-navy);">-</td>
-        <td style="display:none;" id="u-siva-${i}">-</td>
-        <td style="display:none;" id="s-civa-${i}">-</td>
-        <td class="no-print" style="padding:0;width:26px;"><button onclick="Calc.removeLine(${i})" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:#fca5a5;cursor:pointer;font-size:.88rem;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">✕</button></td>
-      </tr>`;
+      const hy = h(l.hibrido);
+      const hasB3 = hy && hy.b3 !== null;
+      return `<div class="row-item">
+        <div class="row-prod">
+          <span class="row-prod-name">${emoji(l.tipo)} ${l.hibrido}</span>
+          <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B1: $${fmt(hy?hy.b1:0)}</span>
+        </div>
+        <select class="row-inp" onchange="Calc.updateLine(${i},'banda',this.value)">
+          <option value="1" ${l.banda===1?'selected':''}>B1</option>
+          <option value="2" ${l.banda===2?'selected':''}>B2</option>
+          ${hasB3?`<option value="3" ${l.banda===3?'selected':''}>B3</option>`:''}
+        </select>
+        <input type="number" class="row-inp" value="${l.cant}" min="0"
+          onblur="Calc.updateLine(${i},'cant',this.value)"
+          oninput="Calc.updateLine(${i},'cant',this.value)">
+        <span class="row-price" id="u-neto-${i}">—</span>
+        <span style="display:none;" id="u-siva-${i}">-</span>
+        <span style="display:none;" id="s-civa-${i}">-</span>
+        <button class="row-rm" onclick="Calc.removeLine(${i})">✕</button>
+      </div>`;
     }).join('');
     this.run();
   },

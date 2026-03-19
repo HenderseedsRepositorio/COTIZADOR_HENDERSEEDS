@@ -47,12 +47,13 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
 /* ── Header ── */
 .header {
-  background: var(--navy);
-  color: white;
+  background: var(--card);
+  color: var(--text);
   padding: 8px 16px 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 14px rgba(13,45,94,.08), 0 1px 3px rgba(13,45,94,.04);
 }
 .header-inner {
   max-width: 920px;
@@ -84,7 +85,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 /* ── Tabs (underline style) ── */
 .tabs {
   display: flex;
-  border-bottom: 2px solid rgba(255,255,255,.1);
+  border-bottom: 2px solid var(--border);
 }
 .tab-btn {
   flex: 1;
@@ -101,7 +102,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   margin-bottom: -2px;
   white-space: nowrap;
 }
-.tab-btn.active { border-bottom-color: var(--accent); color: #fff; font-weight: 700; }
+.tab-btn.active { border-bottom-color: var(--accent); color: var(--navy); font-weight: 700; }
 
 /* ── Vendor overlay ── */
 #vendor-overlay {
@@ -614,11 +615,11 @@ input, select, button { font-family: inherit; font-size: inherit; }
 <header class="header">
   <div class="header-inner">
     <div class="header-top">
-      <a href="index.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.58rem;font-weight:600;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
-      <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="brand-logo" style="filter:brightness(0) invert(1);opacity:.9;">
+      <img src="00-LOGO HENDERSEEDS TRANSPARENTE.png" alt="Henderseeds" class="brand-logo" style="height:30px;">
       <span style="font-size:.62rem;color:var(--text-mut);" id="displayDate"></span>
     </div>
     <div class="status-bar">
+      <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
       <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
       <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
     </div>

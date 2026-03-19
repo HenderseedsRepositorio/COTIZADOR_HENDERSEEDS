@@ -58,8 +58,8 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .htable tbody tr:hover td{background:#f8faff}
 
 /* ══════ INLINE ROWS (hybrid selection) ══════ */
-.rows-header{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;padding:6px 10px;font-size:.58rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
-.row-item{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
+.rows-header{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;padding:6px 10px;font-size:.58rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
+.row-item{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
 @keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .row-prod{display:flex;flex-direction:column;min-width:0}
 .row-prod-name{font-size:.76rem;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -73,7 +73,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .row-rm:hover{background:#fef2f2;color:#ef4444}
 
 /* Row new (search) */
-.row-new{display:grid;grid-template-columns:1fr 56px 56px 80px 26px;gap:6px;align-items:center;background:var(--c-bg);border:1.5px dashed var(--c-border);border-radius:10px;padding:8px 10px;margin-top:2px;position:relative}
+.row-new{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;align-items:center;background:var(--c-bg);border:1.5px dashed var(--c-border);border-radius:10px;padding:8px 10px;margin-top:2px;position:relative}
 .row-new-search{position:static}
 .row-new-search input{width:100%;padding:6px 9px;border:1.5px solid var(--c-border);border-radius:8px;font-size:.76rem;font-family:var(--font);outline:none;background:#fff;color:var(--c-dark);transition:border-color .15s,box-shadow .15s}
 .row-new-search input:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}

@@ -860,6 +860,7 @@ const App = {
     App.hideDropdown();
     $('ot-search').value = '';
     App.renderOTRows();
+    App._focusDosis(rowIdCounter);
   },
 
   addManual(name) {
@@ -876,6 +877,15 @@ const App = {
     App.hideDropdown();
     $('ot-search').value = '';
     App.renderOTRows();
+    App._focusDosis(rowIdCounter);
+  },
+
+  _focusDosis(rid) {
+    const row = document.querySelector(`.row-item[data-rowid="${rid}"]`);
+    if (row) {
+      const dosisInp = row.querySelectorAll('.row-inp')[1];
+      if (dosisInp) { dosisInp.focus(); dosisInp.select(); }
+    }
   },
 
   hideDropdown() {
@@ -917,7 +927,11 @@ const App = {
       </div>`;
     }).join('');
 
-    // Totales
+    App._updateTotales();
+  },
+
+  _updateTotales() {
+    const has = parseFloat($('ot-has').value) || 0;
     const costoLabor = parseFloat($('ot-costo-labor').value) || 0;
     if (currentOTRows.length || costoLabor > 0) {
       let insumosHa = 0;
@@ -942,7 +956,19 @@ const App = {
     const r = currentOTRows.find(x => x.id === rid);
     if (!r) return;
     r[field] = parseFloat(val) || 0;
-    App.renderOTRows();
+    // Update computed values in-place without re-rendering (preserves focus)
+    const has = parseFloat($('ot-has').value) || 0;
+    const row = document.querySelector(`.row-item[data-rowid="${rid}"]`);
+    if (row) {
+      const costoHa = r.precio * r.dosis;
+      const volumen = has > 0 ? r.dosis * has : null;
+      const monto = has > 0 ? costoHa * has : null;
+      const vals = row.querySelectorAll('.row-val');
+      if (vals[0]) vals[0].textContent = volumen ? fmt(volumen) : '—';
+      if (vals[1]) vals[1].textContent = fmt(costoHa);
+      if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '—';
+    }
+    App._updateTotales();
   },
 
   removeOTRow(rid) {

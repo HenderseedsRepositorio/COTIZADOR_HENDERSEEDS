@@ -1166,7 +1166,7 @@ const App = {
     const o = data.ordenes.find(x => x.id === oid);
     if (!o) return;
     o.estado = estado;
-    save();
+    Storage.save(data);
     App.renderOrdenes();
   },
 

@@ -134,9 +134,20 @@ textarea.inp { resize: vertical; min-height: 60px; }
   display: inline-block; padding: 2px 8px; border-radius: 6px;
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
 }
-.badge-pendiente { background: var(--orange-bg); color: var(--orange); }
-.badge-en_curso { background: var(--green-bg); color: var(--green); }
-.badge-completada { background: var(--bg); color: var(--text-mut); }
+.badge-pendiente { background: #fef3cd; color: #856404; }
+.badge-en_curso { background: #cce5ff; color: #004085; }
+.badge-completada { background: var(--green-bg); color: var(--green); }
+.ot-productos-detail { font-size:12px; color:var(--text-sec); margin-top:6px; }
+.ot-productos-detail table { width:100%; border-collapse:collapse; }
+.ot-productos-detail th { text-align:left; font-weight:600; color:var(--text-mut); font-size:11px; text-transform:uppercase; padding:2px 6px 2px 0; }
+.ot-productos-detail td { padding:2px 6px 2px 0; font-family:var(--mono); }
+.ot-status-btns { display:flex; gap:4px; }
+.ot-status-btns button { border:none; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; cursor:pointer; opacity:.45; transition:opacity .15s; }
+.ot-status-btns button:hover { opacity:.75; }
+.ot-status-btns button.active { opacity:1; }
+.ot-status-btns .st-pend { background:#fef3cd; color:#856404; }
+.ot-status-btns .st-curso { background:#cce5ff; color:#004085; }
+.ot-status-btns .st-comp { background:var(--green-bg); color:var(--green); }
 
 /* ── Dropdown ── */
 .dropdown {
@@ -1145,6 +1156,14 @@ const App = {
   cancelEdit() { App.resetOTForm(); },
 
   /* ── Edit existing order ── */
+  cambiarEstadoOrden(oid, estado) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+    o.estado = estado;
+    save();
+    App.renderOrdenes();
+  },
+
   editOrden(oid) {
     const o = data.ordenes.find(x => x.id === oid);
     if (!o) return;
@@ -1228,22 +1247,35 @@ const App = {
       const tipoLabel = o.tipo || 'Pulverización terrestre';
       const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
 
+      const has = o.hectareas || 0;
+      const prodRows = o.productos.map(p => {
+        const vol = has > 0 ? fmt(p.dosis * has) : '—';
+        return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol} ${p.unidad || 'L'}</td><td>USD ${fmt(p.precio * p.dosis)}/ha</td></tr>`;
+      }).join('');
+
       return `<div class="card ot-card">
-        <div class="ot-header" onclick="App.editOrden('${o.id}')">
-          <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
-          <span class="badge badge-${o.estado}">${o.estado.replace('_', ' ')}</span>
+        <div class="ot-header">
+          <div class="ot-title" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
+          <div class="ot-status-btns">
+            <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" onclick="App.cambiarEstadoOrden('${o.id}','pendiente')">Pend.</button>
+            <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" onclick="App.cambiarEstadoOrden('${o.id}','en_curso')">Curso</button>
+            <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" onclick="App.cambiarEstadoOrden('${o.id}','completada')">Hecha</button>
+          </div>
         </div>
-        <div class="ot-detail" onclick="App.editOrden('${o.id}')">
+        <div class="ot-detail" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">
           ${tipoLabel} · ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
-          ${o.productos.length} producto${o.productos.length !== 1 ? 's' : ''} · ${o.hectareas || 0} has${o.cultivo ? ' · ' + o.cultivo : ''}
-          ${labor > 0 ? ` · Labor: $${fmt(labor)}/ha` : ''}
+          ${has} has${o.cultivo ? ' · ' + o.cultivo : ''}
+          ${labor > 0 ? ` · Labor: USD ${fmt(labor)}/ha` : ''}
         </div>
+        ${o.productos.length ? `<div class="ot-productos-detail">
+          <table><tr><th>Producto</th><th>Dosis</th><th>Vol.</th><th>$/ha</th></tr>${prodRows}</table>
+        </div>` : ''}
         <div class="ot-footer">
           <span class="ot-total">USD ${fmt(netoHa)}/ha</span>
-          <span style="font-family:var(--mono);font-size:13px;color:var(--text-sec);">${o.hectareas ? 'USD ' + fmt(total) + ' total' : ''}</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--text-sec);">${has ? 'USD ' + fmt(total) + ' total' : ''}</span>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="event.stopPropagation();App.compartirOrdenWA('${o.id}')">📲 WhatsApp</button>
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="event.stopPropagation();App.compartirOrdenWA('${o.id}')">📲 WA</button>
           <button class="btn btn-outline btn-sm" style="flex:1;" onclick="event.stopPropagation();App.exportarOrdenPDF('${o.id}')">📄 PDF</button>
           <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="event.stopPropagation();App.editOrden('${o.id}')">✏️ Editar</button>
         </div>

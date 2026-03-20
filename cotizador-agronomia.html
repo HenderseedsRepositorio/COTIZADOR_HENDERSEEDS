@@ -334,7 +334,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   white-space: nowrap;
 }
 
-.cliente-dd { z-index: 200; max-height: 60vh; }
+.cliente-dd { z-index: 500; max-height: 60vh; }
 .cliente-dd .dd-item { font-size: 13px; padding: 6px 12px; }
 .cliente-dd .dd-add { color: var(--accent); font-weight: 700; font-size: 12px; }
 
@@ -647,7 +647,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
       <!-- ── COLUMNA IZQUIERDA: Cotización ── -->
       <div class="col-cotiz">
-        <div class="card fu fu1" style="padding:12px 15px;">
+        <div class="card fu fu1" style="padding:12px 15px; position:relative; z-index:100;">
           <div style="position:relative;">
             <div class="form-lbl">Cliente</div>
             <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"

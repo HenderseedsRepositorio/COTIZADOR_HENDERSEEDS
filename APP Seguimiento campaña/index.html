@@ -1262,10 +1262,10 @@ const App = {
       return `<div class="card ot-card">
         <div class="ot-card-wrap">
           <div class="ot-card-main">
-            <div class="ot-header" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">
+            <div class="ot-header">
               <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
             </div>
-            <div class="ot-detail" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">
+            <div class="ot-detail">
               ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
               ${has} has${o.cultivo ? ' · ' + o.cultivo : ''}
             </div>
@@ -1301,12 +1301,23 @@ const App = {
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="event.stopPropagation();App.compartirOrdenWA('${o.id}')">📲 WA</button>
-          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="event.stopPropagation();App.exportarOrdenPDF('${o.id}')">📄 PDF</button>
-          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="event.stopPropagation();App.editOrden('${o.id}')">✏️ Editar</button>
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${o.id}')">📲 WA</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${o.id}')">📄 PDF</button>
+          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${o.id}')">✏️ Editar</button>
         </div>
       </div>`;
     }).join('');
+
+    // Bind status buttons directly after render
+    el.querySelectorAll('.ot-status-col button').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const oid = this.dataset.oid;
+        const estado = this.dataset.estado;
+        if (oid && estado) App.cambiarEstadoOrden(oid, estado);
+      });
+    });
   },
 
   /* ══════════════════════════════════════

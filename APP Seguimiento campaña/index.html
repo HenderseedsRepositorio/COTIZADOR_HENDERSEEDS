@@ -447,6 +447,14 @@ textarea.inp { resize: vertical; min-height: 60px; }
       <button class="chip green" data-filtro="en_curso" onclick="App.setFiltroOT(this)">En curso</button>
       <button class="chip" data-filtro="completada" onclick="App.setFiltroOT(this)">Completadas</button>
     </div>
+    <div class="form-row" style="margin-bottom:8px;">
+      <select id="ord-campo" class="inp inp-sm" onchange="App.onOrdCampoChange()">
+        <option value="">Todos los campos</option>
+      </select>
+      <select id="ord-lote" class="inp inp-sm" onchange="App.renderOrdenes()">
+        <option value="">Todos los lotes</option>
+      </select>
+    </div>
     <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off"
       oninput="App.renderOrdenes()" style="margin-bottom:8px;">
     <div id="ordenes-list"></div>
@@ -733,15 +741,30 @@ const App = {
      NUEVA ORDEN DE TRABAJO
      ══════════════════════════════════════ */
   refreshSelectors() {
-    // Campo selectors
+    // Campo selectors (Nueva OT)
     const campoOpts = '<option value="">— Elegir —</option>' +
       data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     $('ot-campo').innerHTML = campoOpts;
 
     // Analytics selectors
-    const anCampoOpts = '<option value="">— Todos —</option>' +
+    const allCampoOpts = '<option value="">— Todos —</option>' +
       data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-    $('an-campo').innerHTML = anCampoOpts;
+    $('an-campo').innerHTML = allCampoOpts;
+
+    // Ordenes selectors
+    const ordCampoOpts = '<option value="">Todos los campos</option>' +
+      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    $('ord-campo').innerHTML = ordCampoOpts;
+    $('ord-lote').innerHTML = '<option value="">Todos los lotes</option>';
+  },
+
+  onOrdCampoChange() {
+    const cid = $('ord-campo').value;
+    const c = data.campos.find(x => x.id === cid);
+    const loteOpts = '<option value="">Todos los lotes</option>' +
+      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('') : '');
+    $('ord-lote').innerHTML = loteOpts;
+    App.renderOrdenes();
   },
 
   onCampoChange() {
@@ -1148,6 +1171,11 @@ const App = {
       .filter(o => o.campana === data.campana)
       .filter(o => filtroOT === 'todas' || o.estado === filtroOT);
 
+    const filtCampo = $('ord-campo')?.value || '';
+    const filtLote = $('ord-lote')?.value || '';
+    if (filtCampo) ordenes = ordenes.filter(o => o.campoId === filtCampo);
+    if (filtLote) ordenes = ordenes.filter(o => o.loteId === filtLote);
+
     if (q) {
       ordenes = ordenes.filter(o => {
         const campo = data.campos.find(c => c.id === o.campoId);
@@ -1157,7 +1185,7 @@ const App = {
       });
     }
 
-    ordenes.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    ordenes.sort((a, b) => new Date(b.createdAt || b.fecha) - new Date(a.createdAt || a.fecha));
 
     if (!ordenes.length) {
       el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin órdenes de trabajo</p><p style="font-size:12px;margin-top:4px;">Creá tu primera orden en la pestaña "Nueva OT"</p></div>';

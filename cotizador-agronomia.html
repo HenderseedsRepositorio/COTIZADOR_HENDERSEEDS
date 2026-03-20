@@ -1443,7 +1443,7 @@ const App = {
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App.updateField(${app.id},${r.id},'precio',this.value)">
-          ${recargo > 0 ? `<span class="row-val" style="font-size:10px;color:var(--accent);font-weight:700;">$${fmt(precioFinal)}</span>` : ''}
+          ${recargo > 0 ? `<span class="row-val" style="color:var(--accent);font-weight:600;">$${fmt(precioFinal)}</span>` : ''}
           <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
             oninput="App.updateField(${app.id},${r.id},'dosis',this.value)">
@@ -1773,28 +1773,43 @@ const App = {
           if (vol) retiroMap[key].totalVol += vol;
         });
       } else {
-        const colC = [margin, margin + 62, margin + 86, margin + 110, margin + 134, margin + 158];
+        const pdfRecargo = App.getRecargo();
+        const colC = pdfRecargo > 0
+          ? [margin, margin + 56, margin + 76, margin + 96, margin + 116, margin + 138, margin + 158]
+          : [margin, margin + 62, margin + 86, margin + 110, margin + 134, margin + 158];
         doc.setFillColor(60, 60, 60);
         doc.rect(margin, y, contentW, 6, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('PRODUCTO', colC[0] + 2, y + 4);
-        doc.text('DOSIS/HA', colC[1] + 2, y + 4);
-        doc.text('VOLUMEN', colC[2] + 2, y + 4);
-        doc.text('PRECIO', colC[3] + 2, y + 4);
-        doc.text('$/HA', colC[4] + 2, y + 4);
-        doc.text('MONTO', colC[5] + 2, y + 4);
+        if (pdfRecargo > 0) {
+          doc.text('PRODUCTO', colC[0] + 2, y + 4);
+          doc.text('DOSIS/HA', colC[1] + 2, y + 4);
+          doc.text('VOLUMEN', colC[2] + 2, y + 4);
+          doc.text('CONTADO', colC[3] + 2, y + 4);
+          doc.text('FINANC.', colC[4] + 2, y + 4);
+          doc.text('$/HA', colC[5] + 2, y + 4);
+          doc.text('MONTO', colC[6] + 2, y + 4);
+        } else {
+          doc.text('PRODUCTO', colC[0] + 2, y + 4);
+          doc.text('DOSIS/HA', colC[1] + 2, y + 4);
+          doc.text('VOLUMEN', colC[2] + 2, y + 4);
+          doc.text('PRECIO', colC[3] + 2, y + 4);
+          doc.text('$/HA', colC[4] + 2, y + 4);
+          doc.text('MONTO', colC[5] + 2, y + 4);
+        }
         y += 6;
 
         let appTotalHa = 0, appTotalIvaHa = 0;
 
         app.rows.forEach((r, i) => {
           if (y > 272) { doc.addPage(); y = 12; }
-          const precioP = Calc.precioConRecargo(r.precio, plazoActual);
-          const costoHa = precioP * r.dosis;
+          const precioContado = r.precio;
+          const precioFin = r.precio * (1 + pdfRecargo);
+          const precioActivo = pdfRecargo > 0 ? precioFin : precioContado;
+          const costoHa = precioActivo * r.dosis;
           const vol = has > 0 ? r.dosis * has : null;
-          const monto = has > 0 ? precioP * r.dosis * has : null;
+          const monto = has > 0 ? precioActivo * r.dosis * has : null;
           appTotalHa += costoHa;
           appTotalIvaHa += costoHa * (r.iva_pct / 100);
 
@@ -1809,10 +1824,19 @@ const App = {
           doc.setTextColor(...gris);
           doc.text(vol ? fmt(vol) + ' ' + (r.unidad||'L') : '—', colC[2] + 2, y + 3.8);
           doc.setTextColor(...black);
-          doc.text('$' + fmt(precioP), colC[3] + 2, y + 3.8);
-          doc.text('$' + fmt(costoHa), colC[4] + 2, y + 3.8);
-          doc.setFont('helvetica', 'bold');
-          doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 3.8);
+          doc.text('$' + fmt(precioContado), colC[3] + 2, y + 3.8);
+          if (pdfRecargo > 0) {
+            doc.setTextColor(45, 111, 196);
+            doc.text('$' + fmt(precioFin), colC[4] + 2, y + 3.8);
+            doc.setTextColor(...black);
+            doc.text('$' + fmt(costoHa), colC[5] + 2, y + 3.8);
+            doc.setFont('helvetica', 'bold');
+            doc.text(monto ? '$' + fmt(monto) : '—', colC[6] + 2, y + 3.8);
+          } else {
+            doc.text('$' + fmt(costoHa), colC[4] + 2, y + 3.8);
+            doc.setFont('helvetica', 'bold');
+            doc.text(monto ? '$' + fmt(monto) : '—', colC[5] + 2, y + 3.8);
+          }
           y += 5.5;
           // Accumulate retiro
           const key = r.producto;

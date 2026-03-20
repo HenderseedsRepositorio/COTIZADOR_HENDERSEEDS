@@ -1419,6 +1419,9 @@ const App = {
   renderAplicaciones() {
     const container = $('aplicaciones-container');
     const recargo = App.getRecargo();
+    const gridCols = recargo > 0
+      ? '1fr 52px 68px 58px 62px 58px 62px 68px 24px'
+      : '1fr 52px 68px 62px 58px 62px 68px 24px';
 
     container.innerHTML = aplicaciones.map((app, appIdx) => {
       const has = app.hectareas || 0;
@@ -1431,7 +1434,7 @@ const App = {
         ivaHa += costoHa * (r.iva_pct / 100);
         const volumen = has > 0 ? r.dosis * has : null;
         const monto = has > 0 ? costoHa * has : null;
-        return `<div class="row-item" data-rowid="${r.id}">
+        return `<div class="row-item" data-rowid="${r.id}" style="grid-template-columns:${gridCols}">
           <div class="row-prod">
             <span class="row-prod-name">${r.producto}</span>
             <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
@@ -1440,6 +1443,7 @@ const App = {
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App.updateField(${app.id},${r.id},'precio',this.value)">
+          ${recargo > 0 ? `<span class="row-val" style="font-size:10px;color:var(--accent);font-weight:700;">$${fmt(precioFinal)}</span>` : ''}
           <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
             oninput="App.updateField(${app.id},${r.id},'dosis',this.value)">
@@ -1489,10 +1493,11 @@ const App = {
           </div>
 
           <div class="rows-scroll">
-            <div class="rows-header">
+            <div class="rows-header" style="grid-template-columns:${gridCols}">
               <span>Producto</span>
               <span style="text-align:right; color:var(--text-mut);">Sug.</span>
-              <span style="text-align:right">Precio</span>
+              <span style="text-align:right">Contado</span>
+              ${recargo > 0 ? '<span style="text-align:right;color:var(--accent);">Financ.</span>' : ''}
               <span style="text-align:right">Dosis</span>
               <span style="text-align:right">Vol.</span>
               <span style="text-align:right">$/ha</span>
@@ -1502,7 +1507,7 @@ const App = {
             <div id="rows-${app.id}">${rowsHtml}</div>
           </div>
 
-          <div class="row-new">
+          <div class="row-new" style="grid-template-columns:${gridCols}">
             <div class="row-new-search app-dropdown">
               <input type="text" id="search-${app.id}" placeholder="+ Agregar producto..." autocomplete="off"
                 onfocus="App.showDropdown(${app.id})" oninput="App.filterDropdown(${app.id})">
@@ -1510,6 +1515,7 @@ const App = {
             </div>
             <span class="row-val" style="color:var(--text-mut);">—</span>
             <span class="row-val" style="color:var(--text-mut);">—</span>
+            ${recargo > 0 ? '<span class="row-val" style="color:var(--text-mut);">—</span>' : ''}
             <span class="row-val" style="color:var(--text-mut);">—</span>
             <span class="row-val" style="color:var(--text-mut);">—</span>
             <span class="row-val" style="color:var(--text-mut);">—</span>
@@ -1566,7 +1572,7 @@ const App = {
       ivaHa += costoHa * (r.iva_pct / 100);
     });
 
-    // Update row DOM
+    // Update row DOM — find .row-val elements by position
     const rowEl = document.querySelector(`[data-rowid="${rid}"]`);
     if (rowEl) {
       const precioF = r.precio * (1 + recargo);
@@ -1574,12 +1580,13 @@ const App = {
       const volumen = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? costoHa * has : null;
       const vals = rowEl.querySelectorAll('.row-val');
-      // vals: [0]=sug(skip), [1]=vol, [2]=costo, [3]=monto — but sug is a span not .row-val inside row-prod
-      // Actually in the row: row-prod, sug-val, precio-inp, dosis-inp, vol-val, costo-val, monto-val, rm-btn
-      // .row-val elements after inputs: index 0=sug, 1=vol, 2=costo, 3=monto
-      if (vals[1]) vals[1].textContent = volumen ? fmt(volumen) : '—';
-      if (vals[2]) vals[2].textContent = fmt(costoHa);
-      if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
+      // With financiacion: [0]=sug, [1]=pfin, [2]=vol, [3]=costo, [4]=monto
+      // Without: [0]=sug, [1]=vol, [2]=costo, [3]=monto
+      const offset = recargo > 0 ? 1 : 0;
+      if (recargo > 0 && vals[1]) vals[1].textContent = '$' + fmt(precioF);
+      if (vals[1 + offset]) vals[1 + offset].textContent = volumen ? fmt(volumen) : '—';
+      if (vals[2 + offset]) vals[2 + offset].textContent = fmt(costoHa);
+      if (vals[3 + offset]) vals[3 + offset].textContent = monto ? fmt(monto) : '—';
     }
 
     App.renderConsolidado();

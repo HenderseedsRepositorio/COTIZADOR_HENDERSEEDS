@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Análisis — Cotizadores Henderseeds</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Archivo+Black&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d2d5e;
+  --blue: #2d6fc4;
+  --sky: #e8f0fe;
+  --green: #16a34a;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --bg: #f8fafc;
+  --card: #fff;
+  --text: #0d2033;
+  --text2: #64748b;
+  --border: #e2e8f0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+.hero { background: linear-gradient(135deg, var(--navy), var(--blue)); color: #fff; padding: 48px 24px; text-align: center; }
+.hero h1 { font-family: 'Archivo Black'; font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 8px; }
+.hero p { opacity: .7; font-size: .9rem; max-width: 500px; margin: 0 auto; }
+.hero .date { margin-top: 12px; font-size: .75rem; opacity: .5; }
+.container { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* Cards */
+.section { margin-bottom: 32px; }
+.section-title { font-family: 'Archivo Black'; font-size: 1rem; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card { background: var(--card); border-radius: 14px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(13,45,94,.06); border: 1px solid var(--border); }
+.card h3 { font-size: .85rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.card p, .card li { font-size: .8rem; color: var(--text2); }
+.card ul { padding-left: 18px; }
+.card li { margin-bottom: 4px; }
+.card code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-family: 'DM Mono'; font-size: .72rem; color: var(--navy); }
+
+/* Severity badges */
+.badge { display: inline-block; font-size: .6rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .05em; }
+.badge-critical { background: #fef2f2; color: var(--red); }
+.badge-high { background: #fff7ed; color: #c2410c; }
+.badge-medium { background: #fefce8; color: #a16207; }
+.badge-low { background: #f0fdf4; color: var(--green); }
+.badge-info { background: var(--sky); color: var(--blue); }
+
+/* Summary table */
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid var(--border); }
+.stat-num { font-family: 'Archivo Black'; font-size: 1.8rem; color: var(--navy); }
+.stat-label { font-size: .68rem; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+/* Comparison table */
+table { width: 100%; border-collapse: collapse; font-size: .75rem; margin: 12px 0; }
+th { background: var(--navy); color: #fff; padding: 8px 10px; text-align: left; font-size: .65rem; text-transform: uppercase; letter-spacing: .05em; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) { background: #f8fafc; }
+.check { color: var(--green); } .cross { color: var(--red); }
+
+/* Mockup */
+.mockup { background: #1e293b; border-radius: 12px; padding: 16px; margin: 16px 0; color: #94a3b8; font-family: 'DM Mono'; font-size: .7rem; line-height: 1.8; overflow-x: auto; }
+.mockup .hl { color: #5b9af5; } .mockup .gr { color: #89ba16; } .mockup .wh { color: #fff; } .mockup .yw { color: #fbbf24; }
+
+/* Recommendation */
+.rec { display: flex; gap: 12px; padding: 14px; border-radius: 10px; margin-bottom: 8px; }
+.rec-do { background: #f0fdf4; border-left: 3px solid var(--green); }
+.rec-dont { background: #fef2f2; border-left: 3px solid var(--red); }
+.rec-icon { font-size: 1.2rem; flex-shrink: 0; }
+.rec-text { font-size: .78rem; }
+.rec-text strong { color: var(--text); }
+
+/* Priority list */
+.priority { counter-reset: prio; }
+.prio-item { display: flex; gap: 12px; padding: 12px; margin-bottom: 8px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); align-items: flex-start; }
+.prio-item::before { counter-increment: prio; content: counter(prio); font-family: 'Archivo Black'; font-size: .9rem; color: var(--blue); background: var(--sky); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.prio-item .text { font-size: .78rem; }
+.prio-item .text strong { display: block; margin-bottom: 2px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>INFORME DE ANALISIS</h1>
+  <p>Cotizadores Henderseeds — Auditoría de código, diseño y recomendaciones</p>
+  <div class="date">19 de marzo de 2026</div>
+</div>
+
+<div class="container">
+
+<!-- ═══ RESUMEN EJECUTIVO ═══ -->
+<div class="section">
+  <div class="section-title">📊 Resumen Ejecutivo</div>
+  <div class="summary-grid">
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Archivos analizados</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">2</div><div class="stat-label">Bugs críticos</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#c2410c;">8</div><div class="stat-label">Issues altos</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">12</div><div class="stat-label">Mejoras sugeridas</div></div>
+  </div>
+</div>
+
+<!-- ═══ BUGS CRITICOS ═══ -->
+<div class="section">
+  <div class="section-title">🔴 Bugs Críticos — Arreglar YA</div>
+
+  <div class="card">
+    <h3><span class="badge badge-critical">Crítico</span> Cálculo doble en Total General del PDF (Agro)</h3>
+    <p>En <code>generarPDF()</code>, el total general multiplica <code>appTotalHa × hectáreas</code>, pero <code>appTotalHa</code> ya es la suma de <code>costoHa</code> (que es precio × dosis, o sea $/ha). Al multiplicar por has otra vez, se duplica el cálculo.</p>
+    <div class="rec rec-do"><span class="rec-icon">✅</span><div class="rec-text"><strong>Fix:</strong> Cambiar <code>grandTotalHa += appTotalHa * (has > 0 ? has : 1)</code> por <code>grandTotalHa += appTotalHa * has</code> y solo acumular cuando <code>has > 0</code>.</div></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-critical">Crítico</span> XSS en nombres de clientes y productos</h3>
+    <p>Los nombres de clientes y productos se insertan en el HTML via <code>innerHTML</code> sin escapar. Si un nombre contiene HTML (ej: <code>&lt;script&gt;</code>), se ejecuta como código.</p>
+    <div class="rec rec-do"><span class="rec-icon">✅</span><div class="rec-text"><strong>Fix:</strong> Escapar HTML antes de insertar: crear función <code>esc(str)</code> que reemplace <code>&lt; &gt; &amp; " '</code>. Aplicar en todos los <code>innerHTML</code> que usen datos del usuario.</div></div>
+  </div>
+</div>
+
+<!-- ═══ ISSUES ALTOS ═══ -->
+<div class="section">
+  <div class="section-title">🟠 Issues Altos — Corregir Pronto</div>
+
+  <div class="card">
+    <h3><span class="badge badge-high">Alto</span> Estado colapsado se pierde al editar (Agro)</h3>
+    <p>Si colapsás una aplicación y luego editás precio/dosis en otra, <code>renderAplicaciones()</code> reconstruye todo el DOM y se pierde el estado collapsed. Se expanden todas.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-high">Alto</span> IVA ignorado en el PDF de cotización (Agro)</h3>
+    <p>El PDF del resumen consolidado no incluye IVA en los cálculos, pero la pantalla sí muestra "TOTAL (c/IVA)". Inconsistencia entre lo que ve el vendedor y lo que recibe el cliente.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-high">Alto</span> Precisión de punto flotante en cálculos</h3>
+    <p>Operaciones como <code>Math.round((v+delta)*10)/10</code> pueden perder precisión con decimales. Para precios en USD, usar <code>Number((valor).toFixed(2))</code> en todos los cálculos finales.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-high">Alto</span> Tasa de financiación inconsistente (Agro)</h3>
+    <p><code>calcFinanciacion()</code> usa tasa directa (0.75 = 0.75%), pero <code>getRecargo()</code> divide por 100 (0.75/100 = 0.0075). Pueden dar resultados diferentes.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-high">Alto</span> Sin validación de campos antes de compartir</h3>
+    <p>Se puede compartir una cotización sin cliente, sin hectáreas, con precios en 0. No hay validación mínima antes de generar el PDF.</p>
+  </div>
+</div>
+
+<!-- ═══ CONSISTENCIA DE DISEÑO ═══ -->
+<div class="section">
+  <div class="section-title">🎨 Consistencia de Diseño</div>
+
+  <div class="card">
+    <h3>Variables CSS — 3 sistemas diferentes</h3>
+    <table>
+      <tr><th>Concepto</th><th>index.html</th><th>Nidera</th><th>Agro</th></tr>
+      <tr><td>Navy</td><td><code>--navy</code></td><td><code>--c-navy</code></td><td><code>--navy</code></td></tr>
+      <tr><td>Azul</td><td><code>--blue</code></td><td><code>--c-blue</code></td><td><code>--accent</code></td></tr>
+      <tr><td>Verde</td><td><code>--green</code> #89ba16</td><td><code>--c-green</code> #89ba16</td><td><code>--green</code> #16a34a</td></tr>
+      <tr><td>Borde</td><td><code>--border</code></td><td><code>--c-border</code></td><td><code>--border</code></td></tr>
+      <tr><td>Fondo</td><td><code>--bg</code></td><td><code>--c-bg</code></td><td><code>--bg</code></td></tr>
+      <tr><td>Radio</td><td>20px / 14px</td><td>14px / 9px</td><td><code>--radius</code> 14px</td></tr>
+      <tr><td>Sombra</td><td>hardcoded</td><td>hardcoded</td><td><code>--shadow</code></td></tr>
+    </table>
+    <div class="rec rec-do"><span class="rec-icon">💡</span><div class="rec-text"><strong>Recomendación:</strong> Unificar nombres de variables. El Agro tiene el mejor sistema (usa <code>--radius</code>, <code>--shadow</code> como variables). Adoptar ese patrón en los 3 archivos.</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Colores — Coinciden excepto verde</h3>
+    <table>
+      <tr><th>Color</th><th>Index</th><th>Nidera</th><th>Agro</th><th>Estado</th></tr>
+      <tr><td>Navy</td><td>#0d2d5e</td><td>#0d2d5e</td><td>#0d2d5e</td><td class="check">✓ OK</td></tr>
+      <tr><td>Blue mid</td><td>#1a4a8a</td><td>#1a4a8a</td><td>#1a4a8a</td><td class="check">✓ OK</td></tr>
+      <tr><td>Sky</td><td>#2d6fc4</td><td>#2d6fc4</td><td>#2d6fc4</td><td class="check">✓ OK</td></tr>
+      <tr><td>Background</td><td>#f0f4fb</td><td>#f0f4fb</td><td>#f0f4fb</td><td class="check">✓ OK</td></tr>
+      <tr><td>Verde</td><td>#89ba16</td><td>#89ba16</td><td>#16a34a</td><td class="cross">✗ Diferente</td></tr>
+      <tr><td>Focus input</td><td>—</td><td>azul</td><td>naranja residual</td><td class="cross">✗ Bug</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Tipografía — Mismas fuentes, escalas diferentes</h3>
+    <p>Los 3 usan DM Sans + Archivo Black + DM Mono. Pero las escalas varían:</p>
+    <ul>
+      <li>Nidera usa <code>.84rem, .82rem, .78rem</code> (escala REM compacta)</li>
+      <li>Agro mezcla <code>rem</code> y <code>px</code> (13px, 14px, 15px)</li>
+      <li>Index usa escala más grande (1.05rem título, .82rem botones)</li>
+    </ul>
+    <div class="rec rec-do"><span class="rec-icon">💡</span><div class="rec-text"><strong>Recomendación:</strong> Estandarizar a escala rem: .625 (10px), .75 (12px), .8125 (13px), .875 (14px), 1 (16px), 1.125 (18px).</div></div>
+  </div>
+</div>
+
+<!-- ═══ RENDIMIENTO ═══ -->
+<div class="section">
+  <div class="section-title">⚡ Rendimiento</div>
+
+  <div class="card">
+    <h3><span class="badge badge-medium">Medio</span> Re-renders completos innecesarios</h3>
+    <p>Tanto Nidera como Agro reconstruyen TODO el HTML con <code>innerHTML</code> cada vez que cambia un campo. Con muchos productos, esto causa "parpadeos" y pérdida de foco en inputs.</p>
+    <div class="rec rec-do"><span class="rec-icon">💡</span><div class="rec-text"><strong>Ya lo arreglamos parcialmente</strong> para hectáreas en Agro. Aplicar el mismo patrón (actualizar DOM inline) para precio y dosis en ambos cotizadores.</div></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="badge badge-medium">Medio</span> Dropdown sin debounce</h3>
+    <p>Cada tecla en el buscador de productos recorre TODO el catálogo (~294 productos) y reconstruye el dropdown HTML. Con catálogos grandes, puede lagear en móvil.</p>
+    <div class="rec rec-do"><span class="rec-icon">💡</span><div class="rec-text"><strong>Fix:</strong> Agregar debounce de 150ms al <code>oninput</code> del search.</div></div>
+  </div>
+</div>
+
+<!-- ═══ MEJORAS UX ═══ -->
+<div class="section">
+  <div class="section-title">📱 Mejoras de UX Recomendadas</div>
+
+  <div class="priority">
+    <div class="prio-item"><div class="text"><strong>Validación antes de compartir</strong>Pedir al menos: cliente + 1 producto con precio > 0. Mostrar toast rojo si falta algo.</div></div>
+    <div class="prio-item"><div class="text"><strong>Indicador de sincronización con Sheets</strong>Agregar timestamp "Última sync: hace 2 min" para que el vendedor sepa si los precios están frescos.</div></div>
+    <div class="prio-item"><div class="text"><strong>Confirmación antes de eliminar aplicación</strong>Hoy un click en × borra toda la aplicación con sus productos sin pedir confirmación.</div></div>
+    <div class="prio-item"><div class="text"><strong>Botón "Duplicar aplicación"</strong>Cuando un lote tiene productos similares a otro, poder duplicar y solo cambiar establecimiento/has.</div></div>
+    <div class="prio-item"><div class="text"><strong>Búsqueda de productos con categoría visible</strong>En el dropdown de agronomía, mostrar la categoría como tag visual (Herbicida, Fungicida, etc.) para identificar rápido.</div></div>
+    <div class="prio-item"><div class="text"><strong>Modo oscuro / alto contraste</strong>Para uso en campo con sol directo. Alternativamente, subir el contraste de los textos grises.</div></div>
+    <div class="prio-item"><div class="text"><strong>Guardar borrador local</strong>Si el vendedor cierra el browser sin compartir, poder recuperar la cotización en curso al volver a abrir.</div></div>
+  </div>
+</div>
+
+<!-- ═══ MEJORAS PDF ═══ -->
+<div class="section">
+  <div class="section-title">📄 Mejoras en PDF</div>
+
+  <div class="card">
+    <h3>Boceto: Cotización PDF mejorada</h3>
+    <div class="mockup">
+<span class="wh">┌──────────────────────────────────────────────────────────────┐</span>
+<span class="wh">│</span>  <span class="wh">Raggio, Gonzalo</span>                          <span class="yw">[Logo Henderseeds]</span>  <span class="wh">│</span>
+<span class="wh">│</span>  <span class="hl">19/3/2026 · Contado</span>                                        <span class="wh">│</span>
+<span class="wh">├──────────────────────────────────────────────────────────────┤</span>
+<span class="wh">│</span>                                                              <span class="wh">│</span>
+<span class="wh">│</span>  <span class="gr">■ SAN CEFE 1 — 45 has</span>                                      <span class="wh">│</span>
+<span class="wh">│</span>  ┌────────────┬────────┬────────┬────────┬───────┬──────────┐ <span class="wh">│</span>
+<span class="wh">│</span>  │ PRODUCTO   │DOSIS/HA│VOLUMEN │ PRECIO │ $/HA  │  MONTO   │ <span class="wh">│</span>
+<span class="wh">│</span>  ├────────────┼────────┼────────┼────────┼───────┼──────────┤ <span class="wh">│</span>
+<span class="wh">│</span>  │ Sulfo 20L  │ 2 L    │ 90 L   │ $4,60  │ $9,20 │ $414,00  │ <span class="wh">│</span>
+<span class="wh">│</span>  │ Acuron 5L  │ 1 L    │ 45 L   │ $41,20 │$41,20 │$1.854,00 │ <span class="wh">│</span>
+<span class="wh">│</span>  └────────────┴────────┴────────┴────────┴───────┴──────────┘ <span class="wh">│</span>
+<span class="wh">│</span>                                                              <span class="wh">│</span>
+<span class="wh">│</span>  <span class="gr">■ EMILSE — 33 has</span>                                          <span class="wh">│</span>
+<span class="wh">│</span>  ┌────────────┬────────┬────────┬────────┬───────┬──────────┐ <span class="wh">│</span>
+<span class="wh">│</span>  │ Sulfo 20L  │ 2 L    │ 66 L   │ $4,60  │ $9,20 │ $303,60  │ <span class="wh">│</span>
+<span class="wh">│</span>  │ Heat 0,35  │ 0.35 L │ 11,55L │$325,95 │$114,08│$3.764,72 │ <span class="wh">│</span>
+<span class="wh">│</span>  └────────────┴────────┴────────┴────────┴───────┴──────────┘ <span class="wh">│</span>
+<span class="wh">│</span>                                                              <span class="wh">│</span>
+<span class="wh">│</span>  <span class="yw">━━━ RETIRO TOTAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>  <span class="wh">│</span>
+<span class="wh">│</span>  │ SULFO TOUCHDOWN X 20L        156,00 L   $4,60    $717,60 │ <span class="wh">│</span>
+<span class="wh">│</span>  │ ACURON UNO X 5L               45,00 L  $41,20  $1.854,00 │ <span class="wh">│</span>
+<span class="wh">│</span>  │ HEAT X 0,35 KG                11,55 L $325,95  $3.764,72 │ <span class="wh">│</span>
+<span class="wh">│</span>  ├──────────────────────────────────────────────────────────┤ <span class="wh">│</span>
+<span class="wh">│</span>  │ <span class="wh">TOTAL (s/IVA)                              USD $6.336,32</span> │ <span class="wh">│</span>
+<span class="wh">│</span>  │ <span class="yw">TOTAL (c/IVA)                              USD $7.666,95</span> │ <span class="wh">│</span>
+<span class="wh">│</span>  └──────────────────────────────────────────────────────────┘ <span class="wh">│</span>
+<span class="wh">│</span>                                                              <span class="wh">│</span>
+<span class="wh">│</span>  <span class="hl">Henderseeds SRL — 19/3/2026</span>                                <span class="wh">│</span>
+<span class="wh">└──────────────────────────────────────────────────────────────┘</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PLAN DE ACCIÓN ═══ -->
+<div class="section">
+  <div class="section-title">🎯 Plan de Acción Recomendado</div>
+
+  <div class="card">
+    <h3>Fase 1 — Fixes Críticos (hacer ahora)</h3>
+    <ul>
+      <li>Corregir cálculo de Total General en PDF (doble multiplicación)</li>
+      <li>Escapar HTML en nombres de clientes/productos (XSS)</li>
+      <li>Arreglar inconsistencia de tasa de financiación</li>
+      <li>Corregir estado collapsed que se pierde al editar</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Fase 2 — Robustez (esta semana)</h3>
+    <ul>
+      <li>Agregar validación mínima antes de compartir (cliente + producto requeridos)</li>
+      <li>Confirmación antes de eliminar aplicación</li>
+      <li>Guardar borrador en localStorage (auto-save cada 30s)</li>
+      <li>Fix: foco naranja residual en inputs del Agro (cambiar a azul)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Fase 3 — UX (próxima semana)</h3>
+    <ul>
+      <li>Botón "Duplicar aplicación"</li>
+      <li>Debounce en buscador de productos</li>
+      <li>Timestamp de última sincronización</li>
+      <li>Mejorar responsive en celular (font-sizes mínimos 14px)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Fase 4 — Diseño (cuando haya tiempo)</h3>
+    <ul>
+      <li>Unificar variables CSS entre los 3 archivos</li>
+      <li>Estandarizar escala tipográfica</li>
+      <li>Unificar el verde (#89ba16 vs #16a34a)</li>
+      <li>Mejorar contraste para uso en campo</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ ESTADO ACTUAL ═══ -->
+<div class="section">
+  <div class="section-title">✅ Lo que ya está bien</div>
+  <div class="card">
+    <ul>
+      <li><strong>Arquitectura single-file</strong> — Simple de deployar, sin dependencias complejas</li>
+      <li><strong>Conexión a Sheets</strong> — Precios siempre actualizados desde la fuente real</li>
+      <li><strong>Sistema de múltiples aplicaciones</strong> — Bien implementado, cubre el caso de uso real</li>
+      <li><strong>PDF profesional</strong> — Limpio, apto para B&N, con retiro total</li>
+      <li><strong>Autocomplete de clientes</strong> — Compartido entre ambos cotizadores</li>
+      <li><strong>Historial en Sheets</strong> — Registro centralizado de cotizaciones</li>
+      <li><strong>Financiación flexible</strong> — Permite cotizar a diferentes plazos</li>
+      <li><strong>Sistema de descuentos Nidera</strong> — Pre-camp, contado, cross, volumen, zonal, henderseeds</li>
+      <li><strong>Compartir directo</strong> — Web Share API funciona bien en móvil</li>
+      <li><strong>Diseño general</strong> — Profesional, colores coherentes, tipografía moderna</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -602,6 +602,32 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .status { display: flex; align-items: center; gap: 5px; font-size: .62rem; color: var(--text-mut); padding: 6px 4px; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
 .status-dot.on { background: var(--green); }
+
+/* ── Mobile ── */
+@media (max-width: 639px) {
+  .status-bar { flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
+  .col-cotiz { min-width: 0; }
+  .app-block { overflow: hidden; }
+  .rows-scroll { margin: 0 -14px; padding: 0 14px; -webkit-overflow-scrolling: touch; }
+  .rows-header, .row-item { min-width: 520px; }
+  .row-new { display: flex; gap: 6px; min-width: 0; }
+  .row-new .row-new-search { flex: 1; }
+  .row-new .row-val, .row-new > span:last-child { display: none; }
+  .plazo-bar { flex-wrap: wrap; }
+  #fin-config { flex-basis: 100%; flex-wrap: wrap; gap: 6px !important; }
+  .resumen-row { grid-template-columns: 1fr 60px 55px 75px; font-size: .68rem; }
+  .wa-bar { padding: 8px 6px; gap: 6px; }
+  .wa-bar .btn { font-size: .72rem; padding: 10px 8px; }
+  .app-header { flex-wrap: wrap; gap: 4px; }
+  .app-summary { font-size: 10px; }
+}
+@media (max-width: 380px) {
+  body { font-size: 14px; }
+  .tab-btn { font-size: .68rem; padding: 9px 2px; }
+  .rows-header, .row-item { min-width: 480px; }
+  .card { padding: 10px; }
+  .app-block { padding: 10px; }
+}
 </style>
 </head>
 <body>

@@ -154,6 +154,10 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .ot-status-col .st-comp { background:#e8f5e9; color:var(--green); }
 .ot-status-col .st-comp.active { background:#388e3c; color:#fff; border-color:#2e7d32; }
 .ot-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--accent); padding:6px 0 2px; }
+.app-tab { border:1px solid var(--border); border-radius:6px; padding:3px 10px; font-size:11px; font-weight:600; cursor:pointer; background:white; color:var(--text-sec); transition:all .15s; }
+.app-tab.active { background:var(--accent); color:white; border-color:var(--accent); }
+.app-tab .app-tab-rm { margin-left:4px; opacity:.5; font-size:13px; }
+.app-tab .app-tab-rm:hover { opacity:1; }
 
 /* ── Dropdown ── */
 .dropdown {
@@ -339,41 +343,13 @@ textarea.inp { resize: vertical; min-height: 60px; }
   <!-- ═══ TAB NUEVA OT ═══ -->
   <section id="tab-nueva-ot" class="tab-content">
     <div class="card fu">
-      <!-- Campo / Lote selectors -->
+      <!-- Campo + Aplicador (shared across all aplicaciones) -->
       <div class="form-row" style="margin-bottom:10px;">
         <div>
           <div class="form-lbl">Campo</div>
           <select id="ot-campo" class="inp inp-sm" onchange="App.onCampoChange()">
             <option value="">— Elegir —</option>
           </select>
-        </div>
-        <div>
-          <div class="form-lbl">Lote</div>
-          <select id="ot-lote" class="inp inp-sm" onchange="App.onLoteChange()">
-            <option value="">— Elegir —</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row" style="margin-bottom:10px;">
-        <div>
-          <div class="form-lbl">Hectáreas</div>
-          <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" oninput="App.renderOTRows()">
-        </div>
-        <div>
-          <div class="form-lbl">Cultivo</div>
-          <input type="text" id="ot-cultivo" class="inp inp-sm" placeholder="Soja, Maíz..." readonly style="background:var(--bg);">
-        </div>
-      </div>
-
-      <!-- Tipo + Aplicador -->
-      <div class="form-row" style="margin-bottom:10px;">
-        <div style="position:relative;">
-          <div class="form-lbl">Tipo de labor</div>
-          <input type="text" id="ot-tipo" class="inp inp-sm"
-            placeholder="Ej: Pulverización..." value="Pulverización terrestre" autocomplete="off"
-            oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
-          <div class="dropdown" id="tipo-dd" style="z-index:70;"></div>
         </div>
         <div style="position:relative;">
           <div class="form-lbl">Aplicador</div>
@@ -382,55 +358,87 @@ textarea.inp { resize: vertical; min-height: 60px; }
           <div class="dropdown" id="aplicador-dd" style="z-index:60;"></div>
         </div>
       </div>
-
-      <!-- Tel aplicador + Fecha -->
       <div class="form-row" style="margin-bottom:10px;">
         <div>
           <div class="form-lbl">Tel. aplicador</div>
           <input type="tel" id="ot-tel" class="inp inp-sm" placeholder="Ej: 2317401234" autocomplete="off">
         </div>
         <div>
-          <div class="form-lbl">Fecha aplicación</div>
+          <div class="form-lbl">Fecha</div>
           <input type="date" id="ot-fecha" class="inp inp-sm">
         </div>
       </div>
 
-      <!-- Costo labor -->
-      <div class="form-row" style="margin-bottom:10px;">
-        <div>
-          <div class="form-lbl">Costo labor USD/ha</div>
-          <input type="number" id="ot-costo-labor" class="inp inp-sm" placeholder="0.00" step="0.01" min="0"
-            style="font-family:var(--mono);" oninput="App.renderOTRows()">
-        </div>
-        <div></div>
+      <!-- Aplicaciones tabs -->
+      <div style="display:flex;align-items:center;gap:6px;margin:12px 0 6px;">
+        <div class="form-lbl" style="margin:0;font-size:12px;">APLICACIONES</div>
+        <div id="app-tabs" style="display:flex;gap:4px;flex:1;"></div>
+        <button class="btn btn-sm btn-outline" style="font-size:11px;padding:3px 8px;" onclick="App.addAplicacion()">+ Aplicación</button>
       </div>
 
-      <!-- Products -->
-      <div class="form-lbl" style="margin-top:6px;">Productos</div>
-      <div class="rows-scroll" style="margin:0 -14px;padding:0 14px;">
-        <div class="rows-header">
-          <span>Producto</span>
-          <span style="text-align:right">Precio</span>
-          <span style="text-align:right">Dosis</span>
-          <span style="text-align:right">Vol.</span>
-          <span style="text-align:right">$/ha</span>
-          <span style="text-align:right">Monto</span>
+      <!-- Current aplicación block -->
+      <div id="app-block" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;background:var(--bg-card);">
+        <div class="form-row" style="margin-bottom:8px;">
+          <div>
+            <div class="form-lbl">Lote</div>
+            <select id="ot-lote" class="inp inp-sm" onchange="App.onLoteChange()">
+              <option value="">— Elegir —</option>
+            </select>
+          </div>
+          <div>
+            <div class="form-lbl">Hectáreas</div>
+            <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" oninput="App.renderOTRows()">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div>
+            <div class="form-lbl">Cultivo</div>
+            <input type="text" id="ot-cultivo" class="inp inp-sm" placeholder="Soja, Maíz..." readonly style="background:var(--bg);">
+          </div>
+          <div style="position:relative;">
+            <div class="form-lbl">Tipo de labor</div>
+            <input type="text" id="ot-tipo" class="inp inp-sm"
+              placeholder="Ej: Pulverización..." value="Pulverización terrestre" autocomplete="off"
+              oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
+            <div class="dropdown" id="tipo-dd" style="z-index:70;"></div>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div>
+            <div class="form-lbl">Costo labor USD/ha</div>
+            <input type="number" id="ot-costo-labor" class="inp inp-sm" placeholder="0.00" step="0.01" min="0"
+              style="font-family:var(--mono);" oninput="App.renderOTRows()">
+          </div>
+          <div></div>
+        </div>
+
+        <!-- Products -->
+        <div class="form-lbl" style="margin-top:4px;">Productos</div>
+        <div class="rows-scroll" style="margin:0 -10px;padding:0 10px;">
+          <div class="rows-header">
+            <span>Producto</span>
+            <span style="text-align:right">Precio</span>
+            <span style="text-align:right">Dosis</span>
+            <span style="text-align:right">Vol.</span>
+            <span style="text-align:right">$/ha</span>
+            <span style="text-align:right">Monto</span>
+            <span></span>
+          </div>
+          <div id="ot-rows"></div>
+        </div>
+        <div class="row-new" id="ot-row-new">
+          <div class="row-new-search app-dropdown">
+            <input type="text" id="ot-search" placeholder="+ Agregar producto..." autocomplete="off"
+              onfocus="App.showDropdown()" oninput="App.filterDropdown()">
+            <div class="dropdown" id="ot-dropdown"></div>
+          </div>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
+          <span class="row-val" style="color:var(--text-mut);">—</span>
           <span></span>
         </div>
-        <div id="ot-rows"></div>
-      </div>
-      <div class="row-new" id="ot-row-new">
-        <div class="row-new-search app-dropdown">
-          <input type="text" id="ot-search" placeholder="+ Agregar producto..." autocomplete="off"
-            onfocus="App.showDropdown()" oninput="App.filterDropdown()">
-          <div class="dropdown" id="ot-dropdown"></div>
-        </div>
-        <span class="row-val" style="color:var(--text-mut);">—</span>
-        <span class="row-val" style="color:var(--text-mut);">—</span>
-        <span class="row-val" style="color:var(--text-mut);">—</span>
-        <span class="row-val" style="color:var(--text-mut);">—</span>
-        <span class="row-val" style="color:var(--text-mut);">—</span>
-        <span></span>
       </div>
 
       <!-- Notas -->
@@ -558,8 +566,22 @@ async function loadCatalog() {
    APP STATE
    ══════════════════════════════════════ */
 let data = Storage.load();
+// Migrate old orders (single application) to new multi-application format
+data.ordenes.forEach(o => {
+  if (!o.aplicaciones && o.productos) {
+    o.aplicaciones = [{
+      loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
+      tipo: o.tipo, costoLabor: o.costoLabor || 0,
+      productos: o.productos
+    }];
+  }
+});
+Storage.save(data);
+
 let editingOrdenId = null;
-let currentOTRows = [];
+let aplicaciones = []; // array of {loteId, hectareas, cultivo, tipo, costoLabor, productos:[]}
+let currentAppIdx = 0; // which aplicación is currently being edited
+let currentOTRows = []; // shortcut to aplicaciones[currentAppIdx].productos
 let rowIdCounter = 0;
 let filtroOT = 'todas';
 let highlightIdx = -1;
@@ -618,6 +640,7 @@ const App = {
     $('ot-fecha').value = dateISO();
     $('campana-display').textContent = data.campana;
 
+    App._initAplicaciones();
     App.renderCampos();
     App.refreshSelectors();
     loadCatalog();
@@ -801,6 +824,77 @@ const App = {
     const l = c ? c.lotes.find(x => x.id === lid) : null;
     $('ot-has').value = l ? l.hectareas : '';
     $('ot-cultivo').value = l ? (l.cultivo || '') : '';
+  },
+
+  /* ── Multi-application management ── */
+  _initAplicaciones() {
+    aplicaciones = [{ loteId: '', hectareas: 0, cultivo: '', tipo: 'Pulverización terrestre', costoLabor: 0, productos: [] }];
+    currentAppIdx = 0;
+    currentOTRows = aplicaciones[0].productos;
+    App._renderAppTabs();
+  },
+
+  _renderAppTabs() {
+    const tabs = $('app-tabs');
+    tabs.innerHTML = aplicaciones.map((a, i) => {
+      const c = data.campos.find(x => x.id === $('ot-campo')?.value);
+      const l = c?.lotes.find(x => x.id === a.loteId);
+      const label = l ? l.nombre : 'Aplic. ' + (i + 1);
+      return `<span class="app-tab${i === currentAppIdx ? ' active' : ''}" onclick="App.switchApp(${i})">${label}${aplicaciones.length > 1 ? `<span class="app-tab-rm" onclick="event.stopPropagation();App.removeAplicacion(${i})">&times;</span>` : ''}</span>`;
+    }).join('');
+  },
+
+  addAplicacion() {
+    App.saveCurrentApp();
+    aplicaciones.push({ loteId: '', hectareas: 0, cultivo: '', tipo: 'Pulverización terrestre', costoLabor: 0, productos: [] });
+    currentAppIdx = aplicaciones.length - 1;
+    currentOTRows = aplicaciones[currentAppIdx].productos;
+    App._loadAppToForm();
+    App._renderAppTabs();
+    App.renderOTRows();
+  },
+
+  removeAplicacion(idx) {
+    if (aplicaciones.length <= 1) return;
+    aplicaciones.splice(idx, 1);
+    if (currentAppIdx >= aplicaciones.length) currentAppIdx = aplicaciones.length - 1;
+    currentOTRows = aplicaciones[currentAppIdx].productos;
+    App._loadAppToForm();
+    App._renderAppTabs();
+    App.renderOTRows();
+  },
+
+  switchApp(idx) {
+    if (idx === currentAppIdx) return;
+    App.saveCurrentApp();
+    currentAppIdx = idx;
+    currentOTRows = aplicaciones[currentAppIdx].productos;
+    App._loadAppToForm();
+    App._renderAppTabs();
+    App.renderOTRows();
+  },
+
+  saveCurrentApp() {
+    const a = aplicaciones[currentAppIdx];
+    if (!a) return;
+    a.loteId = $('ot-lote').value;
+    a.hectareas = parseFloat($('ot-has').value) || 0;
+    a.cultivo = $('ot-cultivo').value;
+    a.tipo = App.getTipo();
+    a.costoLabor = parseFloat($('ot-costo-labor').value) || 0;
+    a.productos = currentOTRows.map(r => ({ ...r }));
+  },
+
+  _loadAppToForm() {
+    const a = aplicaciones[currentAppIdx];
+    if (!a) return;
+    // Populate lote options for current campo
+    App.onCampoChange();
+    $('ot-lote').value = a.loteId;
+    $('ot-has').value = a.hectareas || '';
+    $('ot-cultivo').value = a.cultivo || '';
+    $('ot-tipo').value = a.tipo || 'Pulverización terrestre';
+    $('ot-costo-labor').value = a.costoLabor || '';
   },
 
   onAnCampoChange() {
@@ -1089,25 +1183,31 @@ const App = {
   /* ── Save order ── */
   saveOrden() {
     const cid = $('ot-campo').value;
-    const lid = $('ot-lote').value;
-    if (!cid || !lid) { alert('Seleccioná un campo y lote.'); return; }
-    if (!currentOTRows.length) { alert('Agregá al menos un producto.'); return; }
+    if (!cid) { alert('Seleccioná un campo.'); return; }
 
-    const has = parseFloat($('ot-has').value) || 0;
+    // Save current app state to array
+    App.saveCurrentApp();
+
+    // Validate: at least one aplicacion with lote and products
+    const valid = aplicaciones.some(a => a.loteId && a.productos.length);
+    if (!valid) { alert('Agregá al menos un lote con productos.'); return; }
+
     const orden = {
       id: editingOrdenId || Storage.nextId('ot'),
       campoId: cid,
-      loteId: lid,
-      hectareas: has,
-      cultivo: $('ot-cultivo').value,
-      tipo: App.getTipo(),
       aplicador: $('ot-aplicador').value.trim(),
       telAplicador: $('ot-tel').value.trim(),
       fecha: $('ot-fecha').value,
       estado: App.getEstado(),
-      costoLabor: parseFloat($('ot-costo-labor').value) || 0,
       notas: $('ot-notas').value.trim(),
-      productos: currentOTRows.map(r => ({ ...r })),
+      aplicaciones: aplicaciones.map(a => ({ ...a, productos: a.productos.map(p => ({ ...p })) })),
+      // Keep legacy fields from first app for backwards compat
+      loteId: aplicaciones[0].loteId,
+      hectareas: aplicaciones[0].hectareas,
+      cultivo: aplicaciones[0].cultivo,
+      tipo: aplicaciones[0].tipo,
+      costoLabor: aplicaciones[0].costoLabor,
+      productos: aplicaciones.flatMap(a => a.productos.map(p => ({ ...p }))),
       createdAt: editingOrdenId
         ? (data.ordenes.find(o => o.id === editingOrdenId)?.createdAt || new Date().toISOString())
         : new Date().toISOString(),
@@ -1143,7 +1243,7 @@ const App = {
 
   resetOTForm() {
     editingOrdenId = null;
-    currentOTRows = [];
+    App._initAplicaciones();
     $('ot-campo').value = '';
     $('ot-lote').innerHTML = '<option value="">— Elegir —</option>';
     $('ot-has').value = '';
@@ -1177,23 +1277,36 @@ const App = {
     editingOrdenId = o.id;
     $('ot-campo').value = o.campoId;
     App.onCampoChange();
-    setTimeout(() => {
-      $('ot-lote').value = o.loteId;
-      App.onLoteChange();
-    }, 10);
 
-    // Set tipo
-    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
-    // Set estado
+    // Load aplicaciones
+    if (o.aplicaciones && o.aplicaciones.length) {
+      aplicaciones = o.aplicaciones.map(a => ({
+        loteId: a.loteId, hectareas: a.hectareas, cultivo: a.cultivo,
+        tipo: a.tipo || 'Pulverización terrestre', costoLabor: a.costoLabor || 0,
+        productos: (a.productos || []).map(p => ({ ...p }))
+      }));
+    } else {
+      // Legacy single-app order
+      aplicaciones = [{
+        loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
+        tipo: o.tipo || 'Pulverización terrestre', costoLabor: o.costoLabor || 0,
+        productos: (o.productos || []).map(p => ({ ...p }))
+      }];
+    }
+    currentAppIdx = 0;
+    currentOTRows = aplicaciones[0].productos;
+    rowIdCounter = Math.max(rowIdCounter, ...aplicaciones.flatMap(a => a.productos.map(r => r.id || 0))) + 1;
+
+    // Load first app to form
+    App._loadAppToForm();
+    App._renderAppTabs();
+
+    // Set shared fields
     document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.toggle('active', c.dataset.estado === o.estado));
-
     $('ot-aplicador').value = o.aplicador || '';
     $('ot-tel').value = o.telAplicador || '';
     $('ot-fecha').value = o.fecha || dateISO();
-    $('ot-costo-labor').value = o.costoLabor || '';
     $('ot-notas').value = o.notas || '';
-    currentOTRows = (o.productos || []).map(p => ({ ...p }));
-    rowIdCounter = Math.max(rowIdCounter, ...currentOTRows.map(r => r.id || 0)) + 1;
     $('ot-cancel-btn').style.display = 'block';
 
     // Switch tab
@@ -1225,14 +1338,21 @@ const App = {
     const filtCampo = $('ord-campo')?.value || '';
     const filtLote = $('ord-lote')?.value || '';
     if (filtCampo) ordenes = ordenes.filter(o => o.campoId === filtCampo);
-    if (filtLote) ordenes = ordenes.filter(o => o.loteId === filtLote);
+    if (filtLote) ordenes = ordenes.filter(o => {
+      const apps = o.aplicaciones || [{ loteId: o.loteId }];
+      return apps.some(a => a.loteId === filtLote);
+    });
 
     if (q) {
       ordenes = ordenes.filter(o => {
         const campo = data.campos.find(c => c.id === o.campoId);
-        const lote = campo?.lotes.find(l => l.id === o.loteId);
-        const text = [campo?.nombre, lote?.nombre, o.aplicador, o.tipo, ...o.productos.map(p => p.producto)].join(' ').toLowerCase();
-        return text.includes(q);
+        const apps = o.aplicaciones || [{ loteId: o.loteId, tipo: o.tipo, productos: o.productos || [] }];
+        const parts = [campo?.nombre, o.aplicador];
+        apps.forEach(a => {
+          const lote = campo?.lotes.find(l => l.id === a.loteId);
+          parts.push(lote?.nombre, a.tipo, ...(a.productos || []).map(p => p.producto));
+        });
+        return parts.join(' ').toLowerCase().includes(q);
       });
     }
 
@@ -1245,50 +1365,53 @@ const App = {
 
     el.innerHTML = ordenes.map(o => {
       const campo = data.campos.find(c => c.id === o.campoId);
-      const lote = campo?.lotes.find(l => l.id === o.loteId);
-      const insumosHa = o.productos.reduce((s, p) => s + (p.precio * p.dosis), 0);
-      const labor = o.costoLabor || 0;
-      const netoHa = insumosHa + labor;
-      const total = netoHa * (o.hectareas || 0);
-      const tipoLabel = o.tipo || 'Pulverización terrestre';
+      const apps = o.aplicaciones || [{ loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo, tipo: o.tipo, costoLabor: o.costoLabor || 0, productos: o.productos || [] }];
       const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
 
-      const has = o.hectareas || 0;
-      const prodRows = o.productos.map(p => {
-        const costoHa = p.precio * p.dosis;
-        const vol = has > 0 ? fmt(p.dosis * has) : '—';
-        const monto = has > 0 ? fmt(costoHa * has) : '—';
-        return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol}</td><td>${fmt(costoHa)}</td><td>${monto}</td></tr>`;
+      // Build per-application blocks
+      const appBlocks = apps.map((a, ai) => {
+        const lote = campo?.lotes.find(l => l.id === a.loteId);
+        const has = a.hectareas || 0;
+        const tipoLabel = a.tipo || 'Pulverización terrestre';
+        const prodRows = a.productos.map(p => {
+          const vol = has > 0 ? fmt(p.dosis * has) : '—';
+          return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol}</td></tr>`;
+        }).join('');
+
+        return `<div style="${ai > 0 ? 'margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);' : ''}">
+          <div style="font-weight:600;font-size:12px;color:var(--navy);">${lote?.nombre || '?'} · ${has} has${a.cultivo ? ' · ' + a.cultivo : ''} · ${tipoLabel}</div>
+          ${a.productos.length ? `<table style="margin-top:4px;"><tr><th>Producto</th><th>Dosis</th><th>Vol.</th></tr>${prodRows}</table>` : ''}
+        </div>`;
       }).join('');
+
+      // Combined withdrawal summary (all products across all apps merged)
+      const allProds = {};
+      apps.forEach(a => {
+        const has = a.hectareas || 0;
+        a.productos.forEach(p => {
+          const key = p.producto;
+          if (!allProds[key]) allProds[key] = { producto: p.producto, unidad: p.unidad || 'L', totalVol: 0 };
+          allProds[key].totalVol += has > 0 ? p.dosis * has : 0;
+        });
+      });
+      const summaryRows = Object.values(allProds).map(p =>
+        `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`
+      ).join('');
 
       return `<div class="card ot-card">
         <div class="ot-card-wrap">
           <div class="ot-card-main">
             <div class="ot-header">
-              <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
+              <div class="ot-title">${campo?.nombre || '?'}</div>
             </div>
             <div class="ot-detail">
-              ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
-              ${has} has${o.cultivo ? ' · ' + o.cultivo : ''}
+              ${o.aplicador || 'Sin aplicador'} · ${fecha}
             </div>
-            ${o.productos.length || labor > 0 ? `<div class="ot-productos-detail">
-              <table>
-              <tr><th></th><th>Dosis</th><th>Vol.</th><th>$/ha</th><th>Monto</th></tr>
-              ${o.productos.length ? `<tr><td colspan="5" class="ot-section-label" style="padding:6px 0 2px;">Productos</td></tr>
-              ${prodRows}` : ''}
-              ${labor > 0 ? `<tr><td colspan="5" class="ot-section-label" style="padding:6px 0 2px;">Servicios</td></tr>
-              <tr>
-                <td style="font-family:inherit;font-weight:500;color:var(--text);">${tipoLabel}</td>
-                <td>—</td>
-                <td>${has > 0 ? fmtInt(has) + ' has' : '—'}</td>
-                <td>${fmt(labor)}</td>
-                <td>${has > 0 ? fmt(labor * has) : '—'}</td>
-              </tr>` : ''}
-              </table>
-            </div>` : ''}
-            <div class="ot-footer">
-              <span class="ot-total">USD ${fmt(netoHa)}/ha</span>
-              <span style="font-family:var(--mono);font-size:13px;color:var(--text-sec);">${has ? 'USD ' + fmt(total) + ' total' : ''}</span>
+            <div class="ot-productos-detail">
+              ${apps.length > 1 ? '<div class="ot-section-label">Aplicaciones</div>' : ''}
+              ${appBlocks}
+              ${apps.length > 1 && Object.keys(allProds).length ? `<div class="ot-section-label" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--accent);">Resumen retiro total</div>
+              <table><tr><th>Producto</th><th>Vol. total</th></tr>${summaryRows}</table>` : ''}
             </div>
           </div>
           <div class="ot-status-col">
@@ -1514,22 +1637,19 @@ const App = {
   },
 
   exportarPDF() {
+    App.saveCurrentApp(); // ensure current app state is saved
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, margin = 14, contentW = W - margin * 2;
 
     const cid = $('ot-campo').value;
-    const lid = $('ot-lote').value;
     const campo = data.campos.find(c => c.id === cid);
-    const lote = campo?.lotes.find(l => l.id === lid);
-    const has = parseFloat($('ot-has').value) || 0;
-    const tipo = App.getTipo();
-    const tipoLabel = tipo;
     const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
 
     const navy = [13, 45, 94];
     const accent = [45, 111, 196];
     const gris = [100, 116, 139];
+    const cols = [margin, margin + 90, margin + 120];
 
     let y = 15;
 
@@ -1542,92 +1662,88 @@ const App = {
     doc.text('ORDEN DE TRABAJO', margin, 14);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(tipoLabel + ' · ' + fecha, margin, 22);
+    doc.text(fecha, margin, 22);
     doc.text('Henderseeds SRL', W - margin, 14, { align: 'right' });
     doc.text('Campaña ' + data.campana, W - margin, 22, { align: 'right' });
 
     y = 40;
 
     // Info
-    doc.setTextColor(...navy);
-    doc.setFontSize(9);
+    doc.setTextColor(...navy); doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text('Campo:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(campo?.nombre || '—', margin + 20, y);
-    doc.setFont('helvetica', 'bold'); doc.text('Lote:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text(lote?.nombre || '—', W / 2 + 16, y);
-    y += 6;
-    doc.setFont('helvetica', 'bold'); doc.text('Hectáreas:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(String(has), margin + 26, y);
-    doc.setFont('helvetica', 'bold'); doc.text('Cultivo:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-cultivo').value || '—', W / 2 + 20, y);
-    y += 6;
-    doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', margin, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-aplicador').value || '—', margin + 26, y);
+    doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-aplicador').value || '—', W / 2 + 24, y);
     y += 10;
 
-    // Table header
-    const cols = [margin, margin + 70, margin + 95, margin + 120, margin + 145];
-    doc.setFillColor(...navy);
-    doc.rect(margin, y, contentW, 8, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PRODUCTO', cols[0] + 3, y + 5.5);
-    doc.text('DOSIS', cols[1] + 2, y + 5.5);
-    doc.text('VOL. TOTAL', cols[2] + 2, y + 5.5);
-    doc.text('$/HA', cols[3] + 2, y + 5.5);
-    doc.text('MONTO', cols[4] + 2, y + 5.5);
-    y += 8;
+    // Each aplicación
+    const allProds = {};
+    aplicaciones.forEach((app, ai) => {
+      if (y > 250) { doc.addPage(); y = 15; }
+      const lote = campo?.lotes.find(l => l.id === app.loteId);
+      const has = app.hectareas || 0;
+      const tipoLabel = app.tipo || 'Pulverización terrestre';
 
-    let netoHa = 0;
-    currentOTRows.forEach((r, i) => {
-      if (y > 265) { doc.addPage(); y = 15; }
-      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
-      const costoHa = r.precio * r.dosis;
-      const vol = has > 0 ? fmt(r.dosis * has) + ' ' + r.unidad : '—';
-      const monto = has > 0 ? fmt(costoHa * has) : '—';
-      netoHa += costoHa;
+      // App header
+      doc.setFillColor(...accent);
+      doc.rect(margin, y, contentW, 7, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+      doc.text((lote?.nombre || 'Lote ?') + ' · ' + has + ' has · ' + (app.cultivo || '') + ' · ' + tipoLabel, margin + 3, y + 5);
+      y += 9;
 
-      doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
-      const nombre = r.producto.length > 32 ? r.producto.substring(0, 30) + '...' : r.producto;
-      doc.text(nombre, cols[0] + 3, y + 4.5);
-      doc.text(r.dosis + ' ' + (r.unidad || 'L') + '/ha', cols[1] + 2, y + 4.5);
-      doc.setTextColor(...gris);
-      doc.text(vol, cols[2] + 2, y + 4.5);
-      doc.setTextColor(...navy);
-      doc.text('$' + fmt(r.precio), cols[3] + 2, y + 4.5);
-      doc.setFont('helvetica', 'bold');
-      doc.text(monto !== '—' ? '$' + monto : '—', cols[4] + 2, y + 4.5);
-      y += 7;
-    });
-
-    // Labor cost
-    const pdfCostoLabor = parseFloat($('ot-costo-labor').value) || 0;
-    if (pdfCostoLabor > 0) {
-      if (y > 265) { doc.addPage(); y = 15; }
+      // Table header
       doc.setFillColor(240, 244, 251); doc.rect(margin, y, contentW, 7, 'F');
       doc.setTextColor(...navy); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-      doc.text('LABOR (' + tipoLabel + ')', cols[0] + 3, y + 4.5);
-      doc.text('$' + fmt(pdfCostoLabor) + '/ha', cols[3] + 2, y + 4.5);
-      if (has > 0) doc.text('$' + fmt(pdfCostoLabor * has), cols[4] + 2, y + 4.5);
+      doc.text('PRODUCTO', cols[0] + 3, y + 4.5);
+      doc.text('DOSIS', cols[1] + 2, y + 4.5);
+      doc.text('VOL. TOTAL', cols[2] + 2, y + 4.5);
       y += 7;
-      netoHa += pdfCostoLabor;
-    }
 
-    // Totals
-    y += 3;
-    doc.setFillColor(...navy);
-    doc.rect(margin, y, contentW, has ? 22 : 12, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
-    doc.text('Total/ha (insumos + labor)', margin + 4, y + 8);
-    doc.text('USD ' + fmt(netoHa), W - margin - 4, y + 8, { align: 'right' });
-    if (has) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...accent);
-      doc.text('TOTAL ' + fmtInt(has) + ' has', margin + 4, y + 18);
-      doc.text('USD ' + fmt(netoHa * has), W - margin - 4, y + 18, { align: 'right' });
+      app.productos.forEach((r, i) => {
+        if (y > 265) { doc.addPage(); y = 15; }
+        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+        const vol = has > 0 ? fmt(r.dosis * has) + ' ' + (r.unidad || 'L') : '—';
+
+        doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+        const nombre = r.producto.length > 40 ? r.producto.substring(0, 38) + '...' : r.producto;
+        doc.text(nombre, cols[0] + 3, y + 4.5);
+        doc.text(r.dosis + ' ' + (r.unidad || 'L') + '/ha', cols[1] + 2, y + 4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(vol, cols[2] + 2, y + 4.5);
+        y += 7;
+
+        // Accumulate for combined summary
+        const key = r.producto;
+        if (!allProds[key]) allProds[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0 };
+        allProds[key].totalVol += has > 0 ? r.dosis * has : 0;
+      });
+      y += 4;
+    });
+
+    // Combined withdrawal summary (only if multiple apps)
+    if (aplicaciones.length > 1 && Object.keys(allProds).length) {
+      if (y > 240) { doc.addPage(); y = 15; }
+      y += 2;
+      doc.setFillColor(...navy); doc.rect(margin, y, contentW, 8, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+      doc.text('RESUMEN RETIRO TOTAL', margin + 3, y + 5.5);
+      doc.text('VOL. TOTAL', cols[2] + 2, y + 5.5);
+      y += 8;
+
+      Object.values(allProds).forEach((p, i) => {
+        if (y > 265) { doc.addPage(); y = 15; }
+        if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+        doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+        doc.text(p.producto, cols[0] + 3, y + 4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—', cols[2] + 2, y + 4.5);
+        y += 7;
+      });
+      y += 4;
     }
-    y += (has ? 28 : 16);
 
     // Notes
     if ($('ot-notas').value.trim()) {
+      if (y > 260) { doc.addPage(); y = 15; }
       doc.setFontSize(8); doc.setTextColor(...navy); doc.setFont('helvetica', 'bold');
       doc.text('Notas:', margin, y + 4);
       doc.setFont('helvetica', 'normal'); doc.setTextColor(...gris);
@@ -1638,10 +1754,9 @@ const App = {
 
     // Footer
     doc.setFontSize(7); doc.setTextColor(...gris); doc.setFont('helvetica', 'italic');
-    doc.text('Precios expresados en USD.', margin, y + 6);
-    doc.text('Henderseeds SRL — ' + fecha, margin, y + 10);
+    doc.text('Henderseeds SRL — ' + fecha, margin, y + 6);
 
-    const fileName = 'OT_' + (campo?.nombre || 'orden').replace(/\s+/g, '_') + '_' + (lote?.nombre || '').replace(/\s+/g, '_') + '.pdf';
+    const fileName = 'OT_' + (campo?.nombre || 'orden').replace(/\s+/g, '_') + '.pdf';
     try {
       const pdfBlob = doc.output('blob');
       const file = new File([pdfBlob], fileName, { type: 'application/pdf' });

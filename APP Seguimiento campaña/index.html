@@ -143,13 +143,16 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .ot-productos-detail td { padding:2px 6px 2px 0; font-family:var(--mono); }
 .ot-card-wrap { display:flex; gap:0; }
 .ot-card-main { flex:1; min-width:0; }
-.ot-status-col { display:flex; flex-direction:column; gap:4px; padding:10px 0 10px 10px; border-left:1px solid var(--bg); margin-left:10px; justify-content:center; }
-.ot-status-col button { border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:600; cursor:pointer; opacity:.4; transition:opacity .15s, transform .1s; white-space:nowrap; }
-.ot-status-col button:hover { opacity:.7; transform:scale(1.05); }
-.ot-status-col button.active { opacity:1; box-shadow:0 1px 4px rgba(0,0,0,.15); }
-.ot-status-col .st-pend { background:#fef3cd; color:#856404; }
-.ot-status-col .st-curso { background:#cce5ff; color:#004085; }
-.ot-status-col .st-comp { background:var(--green-bg); color:var(--green); }
+.ot-status-col { display:flex; flex-direction:column; gap:5px; padding:10px 0 10px 12px; border-left:2px solid var(--bg); margin-left:10px; justify-content:center; min-width:62px; }
+.ot-status-col button { border:2px solid transparent; border-radius:8px; padding:6px 10px; font-size:11px; font-weight:700; cursor:pointer; opacity:.35; transition:all .15s; white-space:nowrap; text-align:center; }
+.ot-status-col button:hover { opacity:.65; }
+.ot-status-col button.active { opacity:1; transform:scale(1.08); box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.ot-status-col .st-pend { background:#fff8e1; color:#856404; }
+.ot-status-col .st-pend.active { background:#ffc107; color:#fff; border-color:#e6ac00; }
+.ot-status-col .st-curso { background:#e3f2fd; color:#004085; }
+.ot-status-col .st-curso.active { background:#1976d2; color:#fff; border-color:#1565c0; }
+.ot-status-col .st-comp { background:#e8f5e9; color:var(--green); }
+.ot-status-col .st-comp.active { background:#388e3c; color:#fff; border-color:#2e7d32; }
 .ot-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--accent); padding:6px 0 2px; }
 
 /* ── Dropdown ── */
@@ -1261,7 +1264,6 @@ const App = {
           <div class="ot-card-main">
             <div class="ot-header" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">
               <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
-              <span class="badge badge-${o.estado}">${o.estado.replace('_', ' ')}</span>
             </div>
             <div class="ot-detail" onclick="App.editOrden('${o.id}')" style="cursor:pointer;">
               ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>

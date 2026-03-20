@@ -139,8 +139,9 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .badge-completada { background: var(--green-bg); color: var(--green); }
 .ot-productos-detail { font-size:12px; color:var(--text-sec); margin-top:6px; }
 .ot-productos-detail table { width:100%; border-collapse:collapse; }
-.ot-productos-detail th { text-align:left; font-weight:600; color:var(--text-mut); font-size:11px; text-transform:uppercase; padding:2px 6px 2px 0; }
-.ot-productos-detail td { padding:2px 6px 2px 0; font-family:var(--mono); }
+.ot-productos-detail th { font-weight:600; color:var(--text-mut); font-size:11px; text-transform:uppercase; padding:2px 4px 2px 0; }
+.ot-productos-detail td { padding:3px 4px 3px 0; font-family:var(--mono); font-size:11px; }
+.ot-productos-detail td:first-child { font-family:var(--font); font-weight:500; color:var(--text); }
 .ot-card-wrap { display:flex; gap:0; }
 .ot-card-main { flex:1; min-width:0; }
 .ot-status-col { display:flex; flex-direction:column; gap:5px; padding:10px 0 10px 12px; border-left:2px solid var(--bg); margin-left:10px; justify-content:center; min-width:62px; }
@@ -154,10 +155,12 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .ot-status-col .st-comp { background:#e8f5e9; color:var(--green); }
 .ot-status-col .st-comp.active { background:#388e3c; color:#fff; border-color:#2e7d32; }
 .ot-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--accent); padding:6px 0 2px; }
-.app-tab { border:1px solid var(--border); border-radius:6px; padding:3px 10px; font-size:11px; font-weight:600; cursor:pointer; background:white; color:var(--text-sec); transition:all .15s; }
-.app-tab.active { background:var(--accent); color:white; border-color:var(--accent); }
-.app-tab .app-tab-rm { margin-left:4px; opacity:.5; font-size:13px; }
-.app-tab .app-tab-rm:hover { opacity:1; }
+.app-block { border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; background:var(--bg-card); margin-bottom:6px; position:relative; z-index:1; }
+.app-block.active-app { z-index:20; }
+.app-block-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.app-block-title { font-family:var(--title); font-size:13px; font-weight:700; color:var(--navy); text-transform:uppercase; }
+.app-block-rm { background:none; border:none; font-size:16px; color:var(--text-mut); cursor:pointer; padding:2px 6px; }
+.app-block-rm:hover { color:var(--orange); }
 
 /* ── Dropdown ── */
 .dropdown {
@@ -342,14 +345,12 @@ textarea.inp { resize: vertical; min-height: 60px; }
 
   <!-- ═══ TAB NUEVA OT ═══ -->
   <section id="tab-nueva-ot" class="tab-content">
-    <div class="card fu">
-      <!-- Campo + Aplicador (shared across all aplicaciones) -->
-      <div class="form-row" style="margin-bottom:10px;">
+    <!-- Shared fields -->
+    <div class="card fu" style="margin-bottom:6px;position:relative;z-index:30;">
+      <div class="form-row" style="margin-bottom:8px;">
         <div>
-          <div class="form-lbl">Campo</div>
-          <select id="ot-campo" class="inp inp-sm" onchange="App.onCampoChange()">
-            <option value="">— Elegir —</option>
-          </select>
+          <div class="form-lbl">Fecha aplicación</div>
+          <input type="date" id="ot-fecha" class="inp inp-sm">
         </div>
         <div style="position:relative;">
           <div class="form-lbl">Aplicador</div>
@@ -358,94 +359,35 @@ textarea.inp { resize: vertical; min-height: 60px; }
           <div class="dropdown" id="aplicador-dd" style="z-index:60;"></div>
         </div>
       </div>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div>
-          <div class="form-lbl">Tel. aplicador</div>
-          <input type="tel" id="ot-tel" class="inp inp-sm" placeholder="Ej: 2317401234" autocomplete="off">
+      <div class="form-row">
+        <div style="position:relative;">
+          <div class="form-lbl">Tipo de labor</div>
+          <input type="text" id="ot-tipo" class="inp inp-sm" value="Pulverización terrestre"
+            placeholder="Ej: Pulverización..." autocomplete="off"
+            oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
         </div>
         <div>
-          <div class="form-lbl">Fecha</div>
-          <input type="date" id="ot-fecha" class="inp inp-sm">
+          <div class="form-lbl">Costo labor USD/ha</div>
+          <input type="number" id="ot-costo-labor" class="inp inp-sm" value="" placeholder="0.00" step="0.01" min="0"
+            style="font-family:var(--mono);">
         </div>
       </div>
+    </div>
 
-      <!-- Aplicaciones tabs -->
-      <div style="display:flex;align-items:center;gap:6px;margin:12px 0 6px;">
-        <div class="form-lbl" style="margin:0;font-size:12px;">APLICACIONES</div>
-        <div id="app-tabs" style="display:flex;gap:4px;flex:1;"></div>
-        <button class="btn btn-sm btn-outline" style="font-size:11px;padding:3px 8px;" onclick="App.addAplicacion()">+ Aplicación</button>
-      </div>
+    <!-- Aplicaciones (rendered dynamically) -->
+    <div id="ot-apps-container"></div>
 
-      <!-- Current aplicación block -->
-      <div id="app-block" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;background:var(--bg-card);">
-        <div class="form-row" style="margin-bottom:8px;">
-          <div>
-            <div class="form-lbl">Lote</div>
-            <select id="ot-lote" class="inp inp-sm" onchange="App.onLoteChange()">
-              <option value="">— Elegir —</option>
-            </select>
-          </div>
-          <div>
-            <div class="form-lbl">Hectáreas</div>
-            <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" oninput="App.renderOTRows()">
-          </div>
-        </div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div>
-            <div class="form-lbl">Cultivo</div>
-            <input type="text" id="ot-cultivo" class="inp inp-sm" placeholder="Soja, Maíz..." readonly style="background:var(--bg);">
-          </div>
-          <div style="position:relative;">
-            <div class="form-lbl">Tipo de labor</div>
-            <input type="text" id="ot-tipo" class="inp inp-sm"
-              placeholder="Ej: Pulverización..." value="Pulverización terrestre" autocomplete="off"
-              oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
-            <div class="dropdown" id="tipo-dd" style="z-index:70;"></div>
-          </div>
-        </div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div>
-            <div class="form-lbl">Costo labor USD/ha</div>
-            <input type="number" id="ot-costo-labor" class="inp inp-sm" placeholder="0.00" step="0.01" min="0"
-              style="font-family:var(--mono);" oninput="App.renderOTRows()">
-          </div>
-          <div></div>
-        </div>
+    <!-- Add aplicación button -->
+    <button class="btn btn-outline" style="width:100%;margin:8px 0;border-style:dashed;" onclick="App.addAplicacion()">+ Agregar Aplicación</button>
 
-        <!-- Products -->
-        <div class="form-lbl" style="margin-top:4px;">Productos</div>
-        <div class="rows-scroll" style="margin:0 -10px;padding:0 10px;">
-          <div class="rows-header">
-            <span>Producto</span>
-            <span style="text-align:right">Precio</span>
-            <span style="text-align:right">Dosis</span>
-            <span style="text-align:right">Vol.</span>
-            <span style="text-align:right">$/ha</span>
-            <span style="text-align:right">Monto</span>
-            <span></span>
-          </div>
-          <div id="ot-rows"></div>
-        </div>
-        <div class="row-new" id="ot-row-new">
-          <div class="row-new-search app-dropdown">
-            <input type="text" id="ot-search" placeholder="+ Agregar producto..." autocomplete="off"
-              onfocus="App.showDropdown()" oninput="App.filterDropdown()">
-            <div class="dropdown" id="ot-dropdown"></div>
-          </div>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span class="row-val" style="color:var(--text-mut);">—</span>
-          <span></span>
-        </div>
-      </div>
+    <!-- Resumen retiro -->
+    <div id="ot-resumen" class="card fu" style="display:none;"></div>
 
-      <!-- Notas -->
-      <div class="form-lbl" style="margin-top:10px;">Notas</div>
+    <!-- Notas + Estado + Save -->
+    <div class="card fu" style="margin-top:6px;">
+      <div class="form-lbl">Notas</div>
       <textarea id="ot-notas" class="inp inp-sm" placeholder="Instrucciones, condiciones climáticas..." rows="2"></textarea>
 
-      <!-- Estado -->
       <div class="form-lbl" style="margin-top:10px;">Estado</div>
       <div class="chip-bar" id="ot-estado-bar">
         <button class="chip orange active" data-estado="pendiente" onclick="App.setEstado(this)">Pendiente</button>
@@ -453,15 +395,15 @@ textarea.inp { resize: vertical; min-height: 60px; }
         <button class="chip" data-estado="completada" onclick="App.setEstado(this)">Completada</button>
       </div>
 
-      <!-- Totales -->
-      <div id="ot-totales" style="display:none;"></div>
-
-      <!-- Save -->
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn btn-accent" style="flex:1;" onclick="App.saveOrden()">Guardar Orden</button>
         <button class="btn btn-outline" id="ot-cancel-btn" style="display:none;" onclick="App.cancelEdit()">Cancelar</button>
       </div>
     </div>
+
+    <!-- Hidden: shared dropdown for product search (moves to active block) -->
+    <div class="dropdown" id="ot-dropdown" style="z-index:80;display:none;"></div>
+    <div class="dropdown" id="tipo-dd" style="z-index:70;display:none;"></div>
   </section>
 
   <!-- ═══ TAB ORDENES ═══ -->
@@ -570,7 +512,7 @@ let data = Storage.load();
 data.ordenes.forEach(o => {
   if (!o.aplicaciones && o.productos) {
     o.aplicaciones = [{
-      loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
+      campoId: o.campoId || '', loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
       tipo: o.tipo, costoLabor: o.costoLabor || 0,
       productos: o.productos
     }];
@@ -609,19 +551,21 @@ const App = {
 
     // Close dropdowns on outside click
     document.addEventListener('click', e => {
-      if (!e.target.closest('.row-new-search') && !e.target.closest('.app-dropdown')) App.hideDropdown();
+      if (!e.target.closest('.row-new-search') && !e.target.closest('#ot-dropdown')) App.hideDropdown();
       if (!e.target.closest('#ot-aplicador') && !e.target.closest('#aplicador-dd')) App.hideAplicadorDD();
       if (!e.target.closest('#ot-tipo') && !e.target.closest('#tipo-dd')) App.hideTipoDD();
     });
 
-    // Keyboard nav for product search
-    $('ot-search').addEventListener('keydown', e => {
+    // Keyboard nav for product search (delegated since inputs are dynamic)
+    document.addEventListener('keydown', e => {
+      const inp = e.target.closest('.app-search');
+      if (!inp) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); App.moveHighlight(1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveHighlight(-1); }
       else if (e.key === 'Enter') {
         e.preventDefault();
         if (highlightIdx >= 0) App.selectFromDropdown(highlightIdx);
-        else if ($('ot-search').value.trim()) App.addManual($('ot-search').value.trim());
+        else if (inp.value.trim()) App.addManual(inp.value.trim());
       }
       else if (e.key === 'Escape') App.hideDropdown();
     });
@@ -781,11 +725,6 @@ const App = {
      NUEVA ORDEN DE TRABAJO
      ══════════════════════════════════════ */
   refreshSelectors() {
-    // Campo selectors (Nueva OT)
-    const campoOpts = '<option value="">— Elegir —</option>' +
-      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-    $('ot-campo').innerHTML = campoOpts;
-
     // Analytics selectors
     const allCampoOpts = '<option value="">— Todos —</option>' +
       data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
@@ -796,6 +735,9 @@ const App = {
       data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     $('ord-campo').innerHTML = ordCampoOpts;
     $('ord-lote').innerHTML = '<option value="">Todos los lotes</option>';
+
+    // Re-render app blocks (campo options may have changed)
+    App.renderAllApps();
   },
 
   onOrdCampoChange() {
@@ -807,94 +749,261 @@ const App = {
     App.renderOrdenes();
   },
 
-  onCampoChange() {
-    const cid = $('ot-campo').value;
-    const c = data.campos.find(x => x.id === cid);
-    const loteOpts = '<option value="">— Elegir —</option>' +
-      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
-    $('ot-lote').innerHTML = loteOpts;
-    $('ot-has').value = '';
-    $('ot-cultivo').value = '';
-  },
-
-  onLoteChange() {
-    const cid = $('ot-campo').value;
-    const lid = $('ot-lote').value;
-    const c = data.campos.find(x => x.id === cid);
-    const l = c ? c.lotes.find(x => x.id === lid) : null;
-    $('ot-has').value = l ? l.hectareas : '';
-    $('ot-cultivo').value = l ? (l.cultivo || '') : '';
-  },
-
   /* ── Multi-application management ── */
   _initAplicaciones() {
-    aplicaciones = [{ loteId: '', hectareas: 0, cultivo: '', tipo: 'Pulverización terrestre', costoLabor: 0, productos: [] }];
+    aplicaciones = [{ campoId: '', loteId: '', hectareas: 0, cultivo: '', productos: [] }];
     currentAppIdx = 0;
     currentOTRows = aplicaciones[0].productos;
-    App._renderAppTabs();
-  },
-
-  _renderAppTabs() {
-    const tabs = $('app-tabs');
-    tabs.innerHTML = aplicaciones.map((a, i) => {
-      const c = data.campos.find(x => x.id === $('ot-campo')?.value);
-      const l = c?.lotes.find(x => x.id === a.loteId);
-      const label = l ? l.nombre : 'Aplic. ' + (i + 1);
-      return `<span class="app-tab${i === currentAppIdx ? ' active' : ''}" onclick="App.switchApp(${i})">${label}${aplicaciones.length > 1 ? `<span class="app-tab-rm" onclick="event.stopPropagation();App.removeAplicacion(${i})">&times;</span>` : ''}</span>`;
-    }).join('');
+    App.renderAllApps();
   },
 
   addAplicacion() {
-    App.saveCurrentApp();
-    aplicaciones.push({ loteId: '', hectareas: 0, cultivo: '', tipo: 'Pulverización terrestre', costoLabor: 0, productos: [] });
-    currentAppIdx = aplicaciones.length - 1;
-    currentOTRows = aplicaciones[currentAppIdx].productos;
-    App._loadAppToForm();
-    App._renderAppTabs();
-    App.renderOTRows();
+    App._readAllAppsFromDOM();
+    aplicaciones.push({ campoId: '', loteId: '', hectareas: 0, cultivo: '', productos: [] });
+    App.renderAllApps();
   },
 
   removeAplicacion(idx) {
     if (aplicaciones.length <= 1) return;
+    App._readAllAppsFromDOM();
     aplicaciones.splice(idx, 1);
     if (currentAppIdx >= aplicaciones.length) currentAppIdx = aplicaciones.length - 1;
     currentOTRows = aplicaciones[currentAppIdx].productos;
-    App._loadAppToForm();
-    App._renderAppTabs();
-    App.renderOTRows();
+    App.renderAllApps();
   },
 
-  switchApp(idx) {
-    if (idx === currentAppIdx) return;
-    App.saveCurrentApp();
+  setActiveApp(idx) {
     currentAppIdx = idx;
     currentOTRows = aplicaciones[currentAppIdx].productos;
-    App._loadAppToForm();
-    App._renderAppTabs();
-    App.renderOTRows();
+    document.querySelectorAll('.app-block').forEach((b, i) => b.classList.toggle('active-app', i === idx));
+  },
+
+  _readAllAppsFromDOM() {
+    document.querySelectorAll('.app-block').forEach((block, i) => {
+      const a = aplicaciones[i];
+      if (!a) return;
+      a.campoId = block.querySelector('.app-campo')?.value || '';
+      a.loteId = block.querySelector('.app-lote')?.value || '';
+      a.hectareas = parseFloat(block.querySelector('.app-has')?.value) || 0;
+      a.cultivo = block.querySelector('.app-cultivo')?.value || '';
+      // productos already updated via updateRow/addProduct
+    });
   },
 
   saveCurrentApp() {
-    const a = aplicaciones[currentAppIdx];
-    if (!a) return;
-    a.loteId = $('ot-lote').value;
-    a.hectareas = parseFloat($('ot-has').value) || 0;
-    a.cultivo = $('ot-cultivo').value;
-    a.tipo = App.getTipo();
-    a.costoLabor = parseFloat($('ot-costo-labor').value) || 0;
-    a.productos = currentOTRows.map(r => ({ ...r }));
+    App._readAllAppsFromDOM();
   },
 
-  _loadAppToForm() {
-    const a = aplicaciones[currentAppIdx];
-    if (!a) return;
-    // Populate lote options for current campo
-    App.onCampoChange();
-    $('ot-lote').value = a.loteId;
-    $('ot-has').value = a.hectareas || '';
-    $('ot-cultivo').value = a.cultivo || '';
-    $('ot-tipo').value = a.tipo || 'Pulverización terrestre';
-    $('ot-costo-labor').value = a.costoLabor || '';
+  renderAllApps() {
+    const container = $('ot-apps-container');
+    // Rescue shared dropdowns before clearing innerHTML (they may have been moved inside)
+    const dd = $('ot-dropdown');
+    const tdd = $('tipo-dd');
+    if (dd && dd.parentElement && dd.parentElement.closest('#ot-apps-container')) $('tab-nueva-ot').appendChild(dd);
+    if (tdd && tdd.parentElement && tdd.parentElement.closest('#ot-apps-container')) $('tab-nueva-ot').appendChild(tdd);
+
+    const campoOpts = '<option value="">— Campo —</option>' +
+      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+
+    container.innerHTML = aplicaciones.map((a, i) => {
+      const campo = data.campos.find(c => c.id === a.campoId);
+      const loteOpts = '<option value="">— Lote —</option>' +
+        (campo ? campo.lotes.map(l => `<option value="${l.id}"${l.id === a.loteId ? ' selected' : ''}>${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
+
+      const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
+      const has = a.hectareas || 0;
+      const prodRows = a.productos.map(r => {
+        const costoHa = r.precio * r.dosis;
+        const vol = has > 0 ? r.dosis * has : null;
+        const monto = has > 0 ? costoHa * has : null;
+        return `<div class="row-item" data-rowid="${r.id}" data-appidx="${i}" style="grid-template-columns:${gridCols}">
+          <div class="row-prod">
+            <span class="row-prod-name">${r.producto}</span>
+            <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+          </div>
+          <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+            onfocus="App.setActiveApp(${i})"
+            oninput="App.updateRow(${r.id},'precio',this.value)">
+          <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+            onfocus="App.setActiveApp(${i})"
+            oninput="App.updateRow(${r.id},'dosis',this.value)">
+          <span class="row-val">${vol ? fmt(vol) : '—'}</span>
+          <span class="row-val costo">${fmt(costoHa)}</span>
+          <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+          <button class="row-rm" onclick="App.setActiveApp(${i});App.removeOTRow(${r.id})">&times;</button>
+        </div>`;
+      }).join('');
+
+      return `<div class="app-block card fu" data-appidx="${i}" onclick="App.setActiveApp(${i})">
+        <div class="app-block-header">
+          <span class="app-block-title">Aplicación ${i + 1}</span>
+          ${aplicaciones.length > 1 ? `<button class="app-block-rm" onclick="event.stopPropagation();App.removeAplicacion(${i})">&times;</button>` : ''}
+        </div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <div>
+            <div class="form-lbl">Campo</div>
+            <select class="inp inp-sm app-campo" onchange="App.onAppCampoChange(${i},this.value)">
+              ${campoOpts.replace('value="' + a.campoId + '"', 'value="' + a.campoId + '" selected')}
+            </select>
+          </div>
+          <div>
+            <div class="form-lbl">Lote</div>
+            <select class="inp inp-sm app-lote" onchange="App.onAppLoteChange(${i},this)">
+              ${loteOpts}
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <div>
+            <div class="form-lbl">Hectáreas</div>
+            <input type="number" class="inp inp-sm app-has" value="${a.hectareas || ''}" placeholder="Has"
+              onfocus="App.setActiveApp(${i})" oninput="App.onAppHasChange(${i})">
+          </div>
+          <div>
+            <div class="form-lbl">Cultivo</div>
+            <input type="text" class="inp inp-sm app-cultivo" value="${a.cultivo || ''}" placeholder="Cultivo" readonly style="background:var(--bg);">
+          </div>
+        </div>
+        <div class="form-lbl" style="margin-top:4px;">Productos</div>
+        <div class="rows-scroll" style="margin:0 -12px;padding:0 12px;">
+          <div class="rows-header">
+            <span>Producto</span><span style="text-align:right">Precio</span><span style="text-align:right">Dosis</span>
+            <span style="text-align:right">Vol.</span><span style="text-align:right">$/ha</span><span style="text-align:right">Monto</span><span></span>
+          </div>
+          <div class="app-rows">${prodRows}</div>
+        </div>
+        <div class="row-new">
+          <div class="row-new-search app-dropdown" style="position:relative;">
+            <input type="text" class="app-search" placeholder="+ Agregar producto..." autocomplete="off"
+              onfocus="App.setActiveApp(${i});App.showDropdownFor(${i},this)" oninput="App.filterDropdownFor(${i},this)">
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    App._renderResumen();
+    currentOTRows = aplicaciones[currentAppIdx]?.productos || [];
+    // Show WA bar if there are products
+    const hasProds = aplicaciones.some(a => a.productos.length > 0);
+    $('wa-bar').style.display = hasProds ? 'flex' : 'none';
+  },
+
+  onAppCampoChange(idx, cid) {
+    aplicaciones[idx].campoId = cid;
+    const c = data.campos.find(x => x.id === cid);
+    const block = document.querySelectorAll('.app-block')[idx];
+    if (!block) return;
+    const loteSelect = block.querySelector('.app-lote');
+    loteSelect.innerHTML = '<option value="">— Lote —</option>' +
+      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
+    aplicaciones[idx].loteId = '';
+    block.querySelector('.app-has').value = '';
+    block.querySelector('.app-cultivo').value = '';
+    aplicaciones[idx].hectareas = 0;
+    aplicaciones[idx].cultivo = '';
+  },
+
+  onAppLoteChange(idx, sel) {
+    const a = aplicaciones[idx];
+    a.loteId = sel.value;
+    const c = data.campos.find(x => x.id === a.campoId);
+    const l = c?.lotes.find(x => x.id === a.loteId);
+    const block = document.querySelectorAll('.app-block')[idx];
+    if (block && l) {
+      block.querySelector('.app-has').value = l.hectareas;
+      block.querySelector('.app-cultivo').value = l.cultivo || '';
+      a.hectareas = l.hectareas;
+      a.cultivo = l.cultivo || '';
+    }
+  },
+
+  onAppHasChange(idx) {
+    // Update computed values in-place without re-rendering (preserves focus)
+    App._readAllAppsFromDOM();
+    const a = aplicaciones[idx];
+    const has = a.hectareas || 0;
+    const block = document.querySelectorAll('.app-block')[idx];
+    if (block) {
+      block.querySelectorAll('.row-item').forEach(row => {
+        const rid = parseInt(row.dataset.rowid);
+        const r = a.productos.find(p => p.id === rid);
+        if (!r) return;
+        const costoHa = r.precio * r.dosis;
+        const vol = has > 0 ? r.dosis * has : null;
+        const monto = has > 0 ? costoHa * has : null;
+        const vals = row.querySelectorAll('.row-val');
+        if (vals[0]) vals[0].textContent = vol ? fmt(vol) : '—';
+        if (vals[1]) vals[1].textContent = fmt(costoHa);
+        if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '—';
+      });
+    }
+    App._renderResumen();
+  },
+
+  showDropdownFor(idx, input) {
+    App.setActiveApp(idx);
+    // Position dropdown as fixed overlay below the input
+    const dd = $('ot-dropdown');
+    // Keep dropdown as direct child of the section (not inside app block)
+    $('tab-nueva-ot').appendChild(dd);
+    const rect = input.getBoundingClientRect();
+    dd.style.display = '';
+    dd.style.position = 'fixed';
+    dd.style.top = rect.bottom + 'px';
+    dd.style.left = rect.left + 'px';
+    dd.style.width = rect.width + 'px';
+    dd.style.right = 'auto';
+    dd.style.zIndex = '9999';
+    App.filterDropdownFor(idx, input);
+  },
+
+  filterDropdownFor(idx, input) {
+    App.setActiveApp(idx);
+    const q = input.value.toLowerCase().trim();
+    const dd = $('ot-dropdown');
+    ddItems = [];
+    highlightIdx = -1;
+    let html = '';
+
+    for (const [cat, items] of Object.entries(catalogo)) {
+      const matches = q ? items.filter(p => p.producto.toLowerCase().includes(q) || (p.formulacion || '').toLowerCase().includes(q)) : items;
+      if (!matches.length) continue;
+      html += `<div class="dd-cat">${cat}</div>`;
+      matches.forEach(p => {
+        const gi = ddItems.length;
+        ddItems.push(p);
+        html += `<div class="dd-item" data-idx="${gi}" onclick="App.selectFromDropdown(${gi})">${p.producto}<br><small style="color:var(--text-mut);">${p.formulacion || ''}</small></div>`;
+      });
+    }
+
+    if (q && !ddItems.some(p => p.producto.toLowerCase() === q)) {
+      html += `<div class="dd-item" onclick="App.addManual('${q.replace(/'/g, "\\'")}')""><span style="color:var(--accent);font-weight:600;">+ Agregar "${input.value.trim()}"</span></div>`;
+    }
+
+    dd.innerHTML = html;
+    dd.classList.toggle('show', html.length > 0);
+    dd.style.display = html.length > 0 ? '' : 'none';
+  },
+
+  _renderResumen() {
+    const allProds = {};
+    aplicaciones.forEach(a => {
+      const has = a.hectareas || 0;
+      a.productos.forEach(p => {
+        const key = p.producto;
+        if (!allProds[key]) allProds[key] = { producto: p.producto, unidad: p.unidad || 'L', totalVol: 0 };
+        allProds[key].totalVol += has > 0 ? p.dosis * has : 0;
+      });
+    });
+    const el = $('ot-resumen');
+    const prods = Object.values(allProds);
+    if (!prods.length) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.innerHTML = `<div class="form-lbl" style="font-size:13px;margin-bottom:6px;">RESUMEN RETIRO</div>
+      <table class="resumen-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+        <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px 0;">Producto</th><th style="text-align:right;padding:4px 0;">Vol. total</th></tr>
+        ${prods.map(p => `<tr><td style="padding:3px 0;font-weight:500;">${p.producto}</td><td style="text-align:right;font-family:var(--mono);padding:3px 0;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`).join('')}
+      </table>`;
   },
 
   onAnCampoChange() {
@@ -906,54 +1015,12 @@ const App = {
     App.renderAnalisis();
   },
 
-  setTipo(val) { $('ot-tipo').value = val; },
-
   setEstado(el) {
     document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
   },
 
-  getTipo() { return $('ot-tipo').value || 'Pulverización terrestre'; },
   getEstado() { return document.querySelector('#ot-estado-bar .chip.active')?.dataset.estado || 'pendiente'; },
-
-  /* ── Product dropdown ── */
-  showDropdown() {
-    App.filterDropdown();
-  },
-
-  filterDropdown() {
-    const q = $('ot-search').value.toLowerCase().trim();
-    const dd = $('ot-dropdown');
-    let html = '';
-    ddItems = [];
-    highlightIdx = -1;
-
-    Object.entries(catalogo).forEach(([cat, prods]) => {
-      const filtered = prods.filter(p =>
-        !q || p.producto.toLowerCase().includes(q) ||
-        (p.formulacion && p.formulacion.toLowerCase().includes(q))
-      );
-      if (!filtered.length) return;
-      html += `<div class="dd-cat">${cat}</div>`;
-      filtered.forEach(p => {
-        const idx = ddItems.length;
-        ddItems.push({ ...p, cat });
-        html += `<div class="dd-item" data-idx="${idx}" onclick="App.selectFromDropdown(${idx})">
-          <span>${p.producto} <span style="color:var(--text-mut);font-size:11px;">· ${p.proveedor || ''}</span></span>
-          <span class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad || 'L'}</span>
-        </div>`;
-      });
-    });
-
-    if (q) {
-      html += `<div class="dd-item" onclick="App.addManual('${q.replace(/'/g, "\\'")}')">
-        <span style="color:var(--accent);font-weight:600;">+ Agregar "${q}" manualmente</span>
-      </div>`;
-    }
-
-    dd.innerHTML = html;
-    dd.classList.toggle('show', html.length > 0);
-  },
 
   selectFromDropdown(idx) {
     const p = ddItems[idx];
@@ -968,10 +1035,11 @@ const App = {
       dosis: p.dosis_sug || 0,
       iva_pct: p.iva_pct || 0,
     });
+    const newId = currentOTRows[currentOTRows.length - 1].id;
     App.hideDropdown();
-    $('ot-search').value = '';
-    App.renderOTRows();
-    App._focusDosis(rowIdCounter);
+    App._appendProductRow(currentAppIdx, currentOTRows[currentOTRows.length - 1]);
+    App._renderResumen();
+    App._focusDosis(newId);
   },
 
   addManual(name) {
@@ -985,10 +1053,43 @@ const App = {
       dosis: 0,
       iva_pct: 0,
     });
+    const newId = currentOTRows[currentOTRows.length - 1].id;
     App.hideDropdown();
-    $('ot-search').value = '';
-    App.renderOTRows();
-    App._focusDosis(rowIdCounter);
+    App._appendProductRow(currentAppIdx, currentOTRows[currentOTRows.length - 1]);
+    App._renderResumen();
+    App._focusDosis(newId);
+  },
+
+  _appendProductRow(appIdx, r) {
+    const block = document.querySelectorAll('.app-block')[appIdx];
+    if (!block) return;
+    const rowsContainer = block.querySelector('.app-rows');
+    if (!rowsContainer) return;
+    const a = aplicaciones[appIdx];
+    const has = a.hectareas || 0;
+    const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
+    const costoHa = r.precio * r.dosis;
+    const vol = has > 0 ? r.dosis * has : null;
+    const monto = has > 0 ? costoHa * has : null;
+    const html = `<div class="row-item" data-rowid="${r.id}" data-appidx="${appIdx}" style="grid-template-columns:${gridCols}">
+      <div class="row-prod">
+        <span class="row-prod-name">${r.producto}</span>
+        <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+      </div>
+      <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+        onfocus="App.setActiveApp(${appIdx})"
+        oninput="App.updateRow(${r.id},'precio',this.value)">
+      <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+        onfocus="App.setActiveApp(${appIdx})"
+        oninput="App.updateRow(${r.id},'dosis',this.value)">
+      <span class="row-val">${vol ? fmt(vol) : '—'}</span>
+      <span class="row-val costo">${fmt(costoHa)}</span>
+      <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+      <button class="row-rm" onclick="App.setActiveApp(${appIdx});App.removeOTRow(${r.id})">&times;</button>
+    </div>`;
+    rowsContainer.insertAdjacentHTML('beforeend', html);
+    // Show WA bar
+    $('wa-bar').style.display = 'flex';
   },
 
   _focusDosis(rid) {
@@ -1001,6 +1102,7 @@ const App = {
 
   hideDropdown() {
     $('ot-dropdown').classList.remove('show');
+    $('ot-dropdown').style.display = 'none';
     highlightIdx = -1;
   },
 
@@ -1012,63 +1114,19 @@ const App = {
     });
   },
 
-  renderOTRows() {
-    const has = parseFloat($('ot-has').value) || 0;
-    const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
-
-    $('ot-rows').innerHTML = currentOTRows.map(r => {
-      const costoHa = r.precio * r.dosis;
-      const volumen = has > 0 ? r.dosis * has : null;
-      const monto = has > 0 ? costoHa * has : null;
-      return `<div class="row-item" data-rowid="${r.id}" style="grid-template-columns:${gridCols}">
-        <div class="row-prod">
-          <span class="row-prod-name">${r.producto}</span>
-          <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
-        </div>
-        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
-          onchange="App.updateRow(${r.id},'precio',this.value)"
-          oninput="App.updateRow(${r.id},'precio',this.value)">
-        <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
-          onchange="App.updateRow(${r.id},'dosis',this.value)"
-          oninput="App.updateRow(${r.id},'dosis',this.value)">
-        <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
-        <span class="row-val costo">${fmt(costoHa)}</span>
-        <span class="row-val">${monto ? fmt(monto) : '—'}</span>
-        <button class="row-rm" onclick="App.removeOTRow(${r.id})">&times;</button>
-      </div>`;
-    }).join('');
-
-    App._updateTotales();
-  },
-
-  _updateTotales() {
-    const has = parseFloat($('ot-has').value) || 0;
-    const costoLabor = parseFloat($('ot-costo-labor').value) || 0;
-    if (currentOTRows.length || costoLabor > 0) {
-      let insumosHa = 0;
-      currentOTRows.forEach(r => { insumosHa += r.precio * r.dosis; });
-      const netoHa = insumosHa + costoLabor;
-      const total = has > 0 ? netoHa * has : 0;
-      $('ot-totales').style.display = 'block';
-      $('ot-totales').innerHTML = `<div class="totales">
-        <div class="tot-row"><span>Insumos / ha</span><span class="mono">USD ${fmt(insumosHa)}</span></div>
-        ${costoLabor > 0 ? `<div class="tot-row"><span>Labor / ha</span><span class="mono">USD ${fmt(costoLabor)}</span></div>` : ''}
-        <div class="tot-row" style="border-top:1px solid rgba(255,255,255,.15);margin-top:4px;padding-top:6px;font-weight:700;"><span>Total / ha</span><span class="mono">USD ${fmt(netoHa)}</span></div>
-        ${has > 0 ? `<div class="tot-row big"><span>TOTAL ${fmtInt(has)} has</span><span class="mono">USD ${fmt(total)}</span></div>` : ''}
-      </div>`;
-      $('wa-bar').style.display = 'flex';
-    } else {
-      $('ot-totales').style.display = 'none';
-      $('wa-bar').style.display = 'none';
-    }
-  },
-
   updateRow(rid, field, val) {
-    const r = currentOTRows.find(x => x.id === rid);
+    // Find which app this row belongs to
+    let r = null, appIdx = currentAppIdx;
+    for (let i = 0; i < aplicaciones.length; i++) {
+      const found = aplicaciones[i].productos.find(x => x.id === rid);
+      if (found) { r = found; appIdx = i; break; }
+    }
     if (!r) return;
     r[field] = parseFloat(val) || 0;
+    // Get has from the correct app block
+    const block = document.querySelectorAll('.app-block')[appIdx];
+    const has = block ? (parseFloat(block.querySelector('.app-has')?.value) || 0) : (aplicaciones[appIdx].hectareas || 0);
     // Update computed values in-place without re-rendering (preserves focus)
-    const has = parseFloat($('ot-has').value) || 0;
     const row = document.querySelector(`.row-item[data-rowid="${rid}"]`);
     if (row) {
       const costoHa = r.precio * r.dosis;
@@ -1079,12 +1137,13 @@ const App = {
       if (vals[1]) vals[1].textContent = fmt(costoHa);
       if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '—';
     }
-    App._updateTotales();
+    App._renderResumen();
   },
 
   removeOTRow(rid) {
     currentOTRows = currentOTRows.filter(x => x.id !== rid);
-    App.renderOTRows();
+    aplicaciones[currentAppIdx].productos = currentOTRows;
+    App.renderAllApps();
   },
 
   /* ── Aplicador dropdown ── */
@@ -1121,19 +1180,26 @@ const App = {
       data.aplicadores.push(name);
       Storage.save(data);
     }
-    // Auto-fill saved phone
-    if (!data.aplicadoresTel) data.aplicadoresTel = {};
-    $('ot-tel').value = data.aplicadoresTel[name] || '';
   },
 
   hideAplicadorDD() { $('aplicador-dd').classList.remove('show'); },
 
-  /* ── Tipo de labor dropdown ── */
+  getTipo() { return $('ot-tipo')?.value || 'Pulverización terrestre'; },
+  getCostoLabor() { return parseFloat($('ot-costo-labor')?.value) || 0; },
+
   filterTipos(showAll) {
     const q = $('ot-tipo').value.toLowerCase().trim();
     const dd = $('tipo-dd');
+    const el = $('ot-tipo');
+    el.parentElement.style.position = 'relative';
+    el.parentElement.appendChild(dd);
+    dd.style.display = '';
+    dd.style.position = 'absolute';
+    dd.style.top = '100%';
+    dd.style.left = '0';
+    dd.style.right = '0';
+
     const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
-    // Merge defaults + custom saved tipos
     const allTipos = [...new Set([...defaults, ...(data.tiposLabor || [])])];
     const matches = allTipos.filter(t => showAll || !q || t.toLowerCase().includes(q));
 
@@ -1142,9 +1208,7 @@ const App = {
     ).join('');
 
     if (q && !matches.some(t => t.toLowerCase() === q)) {
-      html += `<div class="dd-item" onclick="App.selectTipo('${q.replace(/'/g, "\\'")}')">
-        <span style="color:var(--accent);font-weight:600;">+ Agregar "${$('ot-tipo').value.trim()}"</span>
-      </div>`;
+      html += `<div class="dd-item" onclick="App.selectTipo('${q.replace(/'/g, "\\'")}')"><span style="color:var(--accent);font-weight:600;">+ Agregar "${$('ot-tipo').value.trim()}"</span></div>`;
     }
 
     dd.innerHTML = html;
@@ -1157,14 +1221,11 @@ const App = {
     const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
     if (!defaults.includes(name)) {
       if (!data.tiposLabor) data.tiposLabor = [];
-      if (!data.tiposLabor.includes(name)) {
-        data.tiposLabor.push(name);
-        Storage.save(data);
-      }
+      if (!data.tiposLabor.includes(name)) { data.tiposLabor.push(name); Storage.save(data); }
     }
   },
 
-  hideTipoDD() { $('tipo-dd').classList.remove('show'); },
+  hideTipoDD() { $('tipo-dd').classList.remove('show'); $('tipo-dd').style.display = 'none'; },
 
   moveAplicadorHighlight(dir) {
     if (!aplicadorMatches.length) return;
@@ -1182,31 +1243,29 @@ const App = {
 
   /* ── Save order ── */
   saveOrden() {
-    const cid = $('ot-campo').value;
-    if (!cid) { alert('Seleccioná un campo.'); return; }
+    App._readAllAppsFromDOM();
 
-    // Save current app state to array
-    App.saveCurrentApp();
+    // Validate: at least one aplicacion with campo, lote and products
+    const valid = aplicaciones.some(a => a.campoId && a.loteId && a.productos.length);
+    if (!valid) { alert('Agregá al menos un campo/lote con productos.'); return; }
 
-    // Validate: at least one aplicacion with lote and products
-    const valid = aplicaciones.some(a => a.loteId && a.productos.length);
-    if (!valid) { alert('Agregá al menos un lote con productos.'); return; }
+    const tipo = App.getTipo();
+    const costoLabor = App.getCostoLabor();
 
     const orden = {
       id: editingOrdenId || Storage.nextId('ot'),
-      campoId: cid,
+      campoId: aplicaciones[0].campoId,
       aplicador: $('ot-aplicador').value.trim(),
-      telAplicador: $('ot-tel').value.trim(),
       fecha: $('ot-fecha').value,
+      tipo: tipo,
+      costoLabor: costoLabor,
       estado: App.getEstado(),
       notas: $('ot-notas').value.trim(),
-      aplicaciones: aplicaciones.map(a => ({ ...a, productos: a.productos.map(p => ({ ...p })) })),
-      // Keep legacy fields from first app for backwards compat
+      aplicaciones: aplicaciones.map(a => ({ ...a, tipo, costoLabor, productos: a.productos.map(p => ({ ...p })) })),
+      // Legacy compat
       loteId: aplicaciones[0].loteId,
       hectareas: aplicaciones[0].hectareas,
       cultivo: aplicaciones[0].cultivo,
-      tipo: aplicaciones[0].tipo,
-      costoLabor: aplicaciones[0].costoLabor,
       productos: aplicaciones.flatMap(a => a.productos.map(p => ({ ...p }))),
       createdAt: editingOrdenId
         ? (data.ordenes.find(o => o.id === editingOrdenId)?.createdAt || new Date().toISOString())
@@ -1215,13 +1274,9 @@ const App = {
       campana: data.campana,
     };
 
-    // Save aplicador + tel
+    // Save aplicador
     if (orden.aplicador && !data.aplicadores.includes(orden.aplicador)) {
       data.aplicadores.push(orden.aplicador);
-    }
-    if (orden.aplicador && orden.telAplicador) {
-      if (!data.aplicadoresTel) data.aplicadoresTel = {};
-      data.aplicadoresTel[orden.aplicador] = orden.telAplicador;
     }
 
     if (editingOrdenId) {
@@ -1244,19 +1299,13 @@ const App = {
   resetOTForm() {
     editingOrdenId = null;
     App._initAplicaciones();
-    $('ot-campo').value = '';
-    $('ot-lote').innerHTML = '<option value="">— Elegir —</option>';
-    $('ot-has').value = '';
-    $('ot-cultivo').value = '';
     $('ot-aplicador').value = '';
-    $('ot-tel').value = '';
     $('ot-fecha').value = dateISO();
-    $('ot-notas').value = '';
     $('ot-tipo').value = 'Pulverización terrestre';
     $('ot-costo-labor').value = '';
+    $('ot-notas').value = '';
     document.querySelectorAll('#ot-estado-bar .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     $('ot-cancel-btn').style.display = 'none';
-    App.renderOTRows();
   },
 
   cancelEdit() { App.resetOTForm(); },
@@ -1275,21 +1324,16 @@ const App = {
     if (!o) return;
 
     editingOrdenId = o.id;
-    $('ot-campo').value = o.campoId;
-    App.onCampoChange();
 
     // Load aplicaciones
     if (o.aplicaciones && o.aplicaciones.length) {
       aplicaciones = o.aplicaciones.map(a => ({
-        loteId: a.loteId, hectareas: a.hectareas, cultivo: a.cultivo,
-        tipo: a.tipo || 'Pulverización terrestre', costoLabor: a.costoLabor || 0,
+        campoId: a.campoId || o.campoId, loteId: a.loteId, hectareas: a.hectareas, cultivo: a.cultivo,
         productos: (a.productos || []).map(p => ({ ...p }))
       }));
     } else {
-      // Legacy single-app order
       aplicaciones = [{
-        loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
-        tipo: o.tipo || 'Pulverización terrestre', costoLabor: o.costoLabor || 0,
+        campoId: o.campoId, loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo,
         productos: (o.productos || []).map(p => ({ ...p }))
       }];
     }
@@ -1297,25 +1341,22 @@ const App = {
     currentOTRows = aplicaciones[0].productos;
     rowIdCounter = Math.max(rowIdCounter, ...aplicaciones.flatMap(a => a.productos.map(r => r.id || 0))) + 1;
 
-    // Load first app to form
-    App._loadAppToForm();
-    App._renderAppTabs();
-
     // Set shared fields
     document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.toggle('active', c.dataset.estado === o.estado));
     $('ot-aplicador').value = o.aplicador || '';
-    $('ot-tel').value = o.telAplicador || '';
     $('ot-fecha').value = o.fecha || dateISO();
+    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
+    $('ot-costo-labor').value = o.costoLabor || '';
     $('ot-notas').value = o.notas || '';
     $('ot-cancel-btn').style.display = 'block';
+
+    App.renderAllApps();
 
     // Switch tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelector('[data-tab="nueva-ot"]').classList.add('active');
     $('tab-nueva-ot').classList.add('active');
-
-    App.renderOTRows();
   },
 
   /* ══════════════════════════════════════
@@ -1368,19 +1409,23 @@ const App = {
       const apps = o.aplicaciones || [{ loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo, tipo: o.tipo, costoLabor: o.costoLabor || 0, productos: o.productos || [] }];
       const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
 
+      const tipoLabel = o.tipo || 'Pulverización terrestre';
+
       // Build per-application blocks
       const appBlocks = apps.map((a, ai) => {
-        const lote = campo?.lotes.find(l => l.id === a.loteId);
+        const appCampo = data.campos.find(c => c.id === (a.campoId || o.campoId));
+        const lote = appCampo?.lotes.find(l => l.id === a.loteId);
         const has = a.hectareas || 0;
-        const tipoLabel = a.tipo || 'Pulverización terrestre';
         const prodRows = a.productos.map(p => {
-          const vol = has > 0 ? fmt(p.dosis * has) : '—';
-          return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol}</td></tr>`;
+          const vol = has > 0 ? fmt(p.dosis * has) + ' ' + (p.unidad || 'L') : '—';
+          return `<tr><td>${p.producto}</td><td style="text-align:right;">${p.dosis} ${p.unidad || 'L'}/ha</td><td style="text-align:right;">${vol}</td></tr>`;
         }).join('');
 
         return `<div style="${ai > 0 ? 'margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);' : ''}">
-          <div style="font-weight:600;font-size:12px;color:var(--navy);">${lote?.nombre || '?'} · ${has} has${a.cultivo ? ' · ' + a.cultivo : ''} · ${tipoLabel}</div>
-          ${a.productos.length ? `<table style="margin-top:4px;"><tr><th>Producto</th><th>Dosis</th><th>Vol.</th></tr>${prodRows}</table>` : ''}
+          <div style="font-weight:700;font-size:12px;color:var(--navy);">${appCampo?.nombre || '?'}, ${lote?.nombre || '?'} · ${has} has${a.cultivo ? ' · ' + a.cultivo : ''}</div>
+          ${a.productos.length ? `<table class="ot-prod-table" style="margin-top:4px;width:100%;border-collapse:collapse;">
+            <tr><th style="text-align:left;width:auto;">Producto</th><th style="text-align:right;width:90px;">Dosis</th><th style="text-align:right;width:90px;">Vol.</th></tr>
+            ${prodRows}</table>` : ''}
         </div>`;
       }).join('');
 
@@ -1395,23 +1440,20 @@ const App = {
         });
       });
       const summaryRows = Object.values(allProds).map(p =>
-        `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`
+        `<tr><td>${p.producto}</td><td style="text-align:right;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`
       ).join('');
 
       return `<div class="card ot-card">
         <div class="ot-card-wrap">
           <div class="ot-card-main">
-            <div class="ot-header">
-              <div class="ot-title">${campo?.nombre || '?'}</div>
-            </div>
-            <div class="ot-detail">
-              ${o.aplicador || 'Sin aplicador'} · ${fecha}
+            <div class="ot-detail" style="color:var(--text-sec);font-size:12px;">
+              ${o.aplicador || 'Sin aplicador'} · ${tipoLabel} · ${fecha}
             </div>
             <div class="ot-productos-detail">
               ${apps.length > 1 ? '<div class="ot-section-label">Aplicaciones</div>' : ''}
               ${appBlocks}
               ${apps.length > 1 && Object.keys(allProds).length ? `<div class="ot-section-label" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--accent);">Resumen retiro total</div>
-              <table><tr><th>Producto</th><th>Vol. total</th></tr>${summaryRows}</table>` : ''}
+              <table class="ot-prod-table" style="width:100%;border-collapse:collapse;"><tr><th style="text-align:left;">Producto</th><th style="text-align:right;width:90px;">Vol. total</th></tr>${summaryRows}</table>` : ''}
             </div>
           </div>
           <div class="ot-status-col">
@@ -1609,26 +1651,52 @@ const App = {
   exportarOrdenPDF(oid) {
     const o = data.ordenes.find(x => x.id === oid);
     if (!o) return;
-    // Load order into form and export
-    App.editOrden(oid);
-    setTimeout(() => App.exportarPDF(), 200);
+    // Temporarily load aplicaciones from saved order and export
+    const prevApps = aplicaciones;
+    const prevIdx = currentAppIdx;
+    const prevRows = currentOTRows;
+    const apps = o.aplicaciones || [{ campoId: o.campoId, loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo, tipo: o.tipo, costoLabor: o.costoLabor || 0, productos: o.productos || [] }];
+    aplicaciones = apps;
+    currentAppIdx = 0;
+    currentOTRows = aplicaciones[0].productos;
+    // Temporarily set form fields needed by exportarPDF
+    const prevAplicador = $('ot-aplicador').value;
+    const prevFecha = $('ot-fecha').value;
+    const prevTipo = $('ot-tipo').value;
+    const prevCosto = $('ot-costo-labor').value;
+    const prevNotas = $('ot-notas').value;
+    $('ot-aplicador').value = o.aplicador || '';
+    $('ot-fecha').value = o.fecha || '';
+    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
+    $('ot-costo-labor').value = o.costoLabor || '';
+    $('ot-notas').value = o.notas || '';
+    App.exportarPDF();
+    // Restore
+    $('ot-aplicador').value = prevAplicador;
+    $('ot-fecha').value = prevFecha;
+    $('ot-tipo').value = prevTipo;
+    $('ot-costo-labor').value = prevCosto;
+    $('ot-notas').value = prevNotas;
+    aplicaciones = prevApps;
+    currentAppIdx = prevIdx;
+    currentOTRows = prevRows;
   },
 
   /* ── Share from form (Nueva OT) ── */
   compartirWA() {
-    // Build a temporary order object from form fields
+    App._readAllAppsFromDOM();
     const formOrder = {
-      campoId: $('ot-campo').value,
-      loteId: $('ot-lote').value,
-      hectareas: parseFloat($('ot-has').value) || 0,
-      cultivo: $('ot-cultivo').value,
+      campoId: aplicaciones[0]?.campoId || '',
+      loteId: aplicaciones[0]?.loteId || '',
+      hectareas: aplicaciones[0]?.hectareas || 0,
+      cultivo: aplicaciones[0]?.cultivo || '',
       tipo: App.getTipo(),
       aplicador: $('ot-aplicador').value.trim(),
-      telAplicador: $('ot-tel').value.trim(),
       fecha: $('ot-fecha').value,
-      costoLabor: parseFloat($('ot-costo-labor').value) || 0,
+      costoLabor: App.getCostoLabor(),
       notas: $('ot-notas').value.trim(),
-      productos: currentOTRows,
+      productos: aplicaciones.flatMap(a => a.productos),
+      aplicaciones: aplicaciones,
       campana: data.campana,
     };
     const msg = App._buildWAMsg(formOrder);
@@ -1642,7 +1710,7 @@ const App = {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, margin = 14, contentW = W - margin * 2;
 
-    const cid = $('ot-campo').value;
+    const cid = aplicaciones[0]?.campoId || '';
     const campo = data.campos.find(c => c.id === cid);
     const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
 
@@ -1673,6 +1741,9 @@ const App = {
     doc.setFont('helvetica', 'bold');
     doc.text('Campo:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(campo?.nombre || '—', margin + 20, y);
     doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-aplicador').value || '—', W / 2 + 24, y);
+    y += 6;
+    const tipoLabel = $('ot-tipo')?.value || 'Pulverización terrestre';
+    doc.setFont('helvetica', 'bold'); doc.text('Labor:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(tipoLabel, margin + 20, y);
     y += 10;
 
     // Each aplicación
@@ -1681,13 +1752,12 @@ const App = {
       if (y > 250) { doc.addPage(); y = 15; }
       const lote = campo?.lotes.find(l => l.id === app.loteId);
       const has = app.hectareas || 0;
-      const tipoLabel = app.tipo || 'Pulverización terrestre';
 
       // App header
       doc.setFillColor(...accent);
       doc.rect(margin, y, contentW, 7, 'F');
       doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
-      doc.text((lote?.nombre || 'Lote ?') + ' · ' + has + ' has · ' + (app.cultivo || '') + ' · ' + tipoLabel, margin + 3, y + 5);
+      doc.text((lote?.nombre || 'Lote ?') + ' · ' + has + ' has' + (app.cultivo ? ' · ' + app.cultivo : ''), margin + 3, y + 5);
       y += 9;
 
       // Table header

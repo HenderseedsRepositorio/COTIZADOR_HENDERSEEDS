@@ -1434,7 +1434,7 @@ const App = {
         return `<div class="row-item" data-rowid="${r.id}">
           <div class="row-prod">
             <span class="row-prod-name">${r.producto}</span>
-            <span class="row-prod-meta">${(r.proveedor||'').replace(/ S\\.A\\.?/g,'')} · ${r.unidad}</span>
+            <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
           </div>
           <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"

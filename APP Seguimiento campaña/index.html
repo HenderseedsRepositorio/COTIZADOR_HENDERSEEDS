@@ -1174,12 +1174,12 @@ const App = {
       const tipoLabel = o.tipo || 'Pulverización terrestre';
       const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
 
-      return `<div class="card ot-card" onclick="App.editOrden('${o.id}')">
-        <div class="ot-header">
+      return `<div class="card ot-card">
+        <div class="ot-header" onclick="App.editOrden('${o.id}')">
           <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
           <span class="badge badge-${o.estado}">${o.estado.replace('_', ' ')}</span>
         </div>
-        <div class="ot-detail">
+        <div class="ot-detail" onclick="App.editOrden('${o.id}')">
           ${tipoLabel} · ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
           ${o.productos.length} producto${o.productos.length !== 1 ? 's' : ''} · ${o.hectareas || 0} has${o.cultivo ? ' · ' + o.cultivo : ''}
           ${labor > 0 ? ` · Labor: $${fmt(labor)}/ha` : ''}
@@ -1187,6 +1187,11 @@ const App = {
         <div class="ot-footer">
           <span class="ot-total">USD ${fmt(netoHa)}/ha</span>
           <span style="font-family:var(--mono);font-size:13px;color:var(--text-sec);">${o.hectareas ? 'USD ' + fmt(total) + ' total' : ''}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="event.stopPropagation();App.compartirOrdenWA('${o.id}')">📲 WhatsApp</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="event.stopPropagation();App.exportarOrdenPDF('${o.id}')">📄 PDF</button>
+          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="event.stopPropagation();App.editOrden('${o.id}')">✏️ Editar</button>
         </div>
       </div>`;
     }).join('');
@@ -1300,14 +1305,13 @@ const App = {
   /* ══════════════════════════════════════
      COMPARTIR
      ══════════════════════════════════════ */
-  compartirWA() {
-    const cid = $('ot-campo').value;
-    const lid = $('ot-lote').value;
-    const campo = data.campos.find(c => c.id === cid);
-    const lote = campo?.lotes.find(l => l.id === lid);
-    const has = parseFloat($('ot-has').value) || 0;
-    const tipoLabel = App.getTipo();
-    const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
+
+  /* ── Build WA message from an order object ── */
+  _buildWAMsg(o) {
+    const campo = data.campos.find(c => c.id === o.campoId);
+    const lote = campo?.lotes.find(l => l.id === o.loteId);
+    const has = o.hectareas || 0;
+    const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
     const cliente = campo?.cliente || '';
 
     let msg = `📋 *ORDEN DE TRABAJO*\n`;
@@ -1315,42 +1319,78 @@ const App = {
     msg += `📅 *Fecha:* ${fecha}\n`;
     msg += `🌾 *Campo:* ${campo?.nombre || '—'}${cliente ? ' (' + cliente + ')' : ''}\n`;
     msg += `📍 *Lote:* ${lote?.nombre || '—'} — *${has} has*\n`;
-    if ($('ot-cultivo').value) msg += `🌱 *Cultivo:* ${$('ot-cultivo').value}\n`;
-    msg += `⚙️ *Labor:* ${tipoLabel}\n`;
-    msg += `👤 *Aplicador:* ${$('ot-aplicador').value || '—'}\n`;
+    if (o.cultivo) msg += `🌱 *Cultivo:* ${o.cultivo}\n`;
+    msg += `⚙️ *Labor:* ${o.tipo || '—'}\n`;
+    msg += `👤 *Aplicador:* ${o.aplicador || '—'}\n`;
     msg += `━━━━━━━━━━━━━━━━━━\n\n`;
 
     msg += `*PRODUCTOS A CARGAR:*\n`;
-    currentOTRows.forEach((r, i) => {
+    (o.productos || []).forEach((r, i) => {
       const vol = has > 0 ? fmt(r.dosis * has) : '—';
       msg += `${i + 1}. *${r.producto}*\n`;
       msg += `    Dosis: ${r.dosis} ${r.unidad}/ha\n`;
       msg += `    Total: *${vol} ${r.unidad}*\n`;
     });
 
-    const costoLabor = parseFloat($('ot-costo-labor').value) || 0;
+    const costoLabor = o.costoLabor || 0;
     let insumosHa = 0;
-    currentOTRows.forEach(r => { insumosHa += r.precio * r.dosis; });
+    (o.productos || []).forEach(r => { insumosHa += r.precio * r.dosis; });
     const totalHa = insumosHa + costoLabor;
 
     msg += `\n━━━━━━━━━━━━━━━━━━\n`;
-    if (costoLabor > 0) {
-      msg += `💰 Labor: USD ${fmt(costoLabor)}/ha\n`;
-    }
+    if (costoLabor > 0) msg += `💰 Labor: USD ${fmt(costoLabor)}/ha\n`;
     msg += `💵 *Total: USD ${fmt(totalHa)}/ha*`;
     if (has > 0) msg += ` — *USD ${fmt(totalHa * has)} total*`;
     msg += `\n`;
 
-    if ($('ot-notas').value.trim()) {
-      msg += `\n📝 *Notas:* ${$('ot-notas').value.trim()}\n`;
-    }
-    msg += `\n_Henderseeds SRL — Campaña ${data.campana}_`;
+    if (o.notas) msg += `\n📝 *Notas:* ${o.notas}\n`;
+    msg += `\n_Henderseeds SRL — Campaña ${o.campana || data.campana}_`;
+    return msg;
+  },
 
-    // Send to aplicador's phone if available
-    const tel = $('ot-tel').value.trim().replace(/[^0-9]/g, '');
-    const phone = tel ? '54' + tel : '';
-    const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
-    window.open(url, '_blank');
+  _getPhone(o) {
+    const tel = (o.telAplicador || '').replace(/[^0-9]/g, '');
+    return tel ? '54' + tel : '';
+  },
+
+  /* ── Share saved order via WA ── */
+  compartirOrdenWA(oid) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+    const msg = App._buildWAMsg(o);
+    const phone = App._getPhone(o);
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  },
+
+  /* ── Export saved order as PDF ── */
+  exportarOrdenPDF(oid) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+    // Load order into form and export
+    App.editOrden(oid);
+    setTimeout(() => App.exportarPDF(), 200);
+  },
+
+  /* ── Share from form (Nueva OT) ── */
+  compartirWA() {
+    // Build a temporary order object from form fields
+    const formOrder = {
+      campoId: $('ot-campo').value,
+      loteId: $('ot-lote').value,
+      hectareas: parseFloat($('ot-has').value) || 0,
+      cultivo: $('ot-cultivo').value,
+      tipo: App.getTipo(),
+      aplicador: $('ot-aplicador').value.trim(),
+      telAplicador: $('ot-tel').value.trim(),
+      fecha: $('ot-fecha').value,
+      costoLabor: parseFloat($('ot-costo-labor').value) || 0,
+      notas: $('ot-notas').value.trim(),
+      productos: currentOTRows,
+      campana: data.campana,
+    };
+    const msg = App._buildWAMsg(formOrder);
+    const phone = App._getPhone(formOrder);
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
   },
 
   exportarPDF() {

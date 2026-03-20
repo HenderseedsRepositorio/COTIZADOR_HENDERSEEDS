@@ -1255,8 +1255,10 @@ const App = {
 
       const has = o.hectareas || 0;
       const prodRows = o.productos.map(p => {
+        const costoHa = p.precio * p.dosis;
         const vol = has > 0 ? fmt(p.dosis * has) : '—';
-        return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol} ${p.unidad || 'L'}</td><td>USD ${fmt(p.precio * p.dosis)}/ha</td></tr>`;
+        const monto = has > 0 ? fmt(costoHa * has) : '—';
+        return `<tr><td style="font-family:inherit;font-weight:500;color:var(--text);">${p.producto}</td><td>${p.dosis} ${p.unidad || 'L'}/ha</td><td>${vol}</td><td>${fmt(costoHa)}</td><td>${monto}</td></tr>`;
       }).join('');
 
       return `<div class="card ot-card">
@@ -1269,24 +1271,19 @@ const App = {
               ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
               ${has} has${o.cultivo ? ' · ' + o.cultivo : ''}
             </div>
-            ${o.productos.length ? `<div class="ot-productos-detail">
-              <div class="ot-section-label">Productos</div>
+            ${o.productos.length || labor > 0 ? `<div class="ot-productos-detail">
               <table>
-              <tr><th>Producto</th><th>Dosis</th><th>Vol.</th><th>$/ha</th></tr>
-              ${prodRows}
-              </table>
-            </div>` : ''}
-            ${labor > 0 ? `<div class="ot-productos-detail">
-              <div class="ot-section-label">Servicios</div>
-              <table>
-              <tr><th>Servicio</th><th></th><th>Has</th><th>$/ha</th></tr>
+              <tr><th></th><th>Dosis</th><th>Vol.</th><th>$/ha</th><th>Monto</th></tr>
+              ${o.productos.length ? `<tr><td colspan="5" class="ot-section-label" style="padding:6px 0 2px;">Productos</td></tr>
+              ${prodRows}` : ''}
+              ${labor > 0 ? `<tr><td colspan="5" class="ot-section-label" style="padding:6px 0 2px;">Servicios</td></tr>
               <tr>
                 <td style="font-family:inherit;font-weight:500;color:var(--text);">${tipoLabel}</td>
-                <td></td>
+                <td>—</td>
                 <td>${has > 0 ? fmtInt(has) + ' has' : '—'}</td>
-                <td>USD ${fmt(labor)}/ha</td>
-              </tr>
-              ${has > 0 ? `<tr><td colspan="3" style="font-family:inherit;color:var(--text-mut);text-align:right;padding-right:8px;">${fmtInt(has)} has × USD ${fmt(labor)} =</td><td style="font-weight:700;">USD ${fmt(labor * has)}</td></tr>` : ''}
+                <td>${fmt(labor)}</td>
+                <td>${has > 0 ? fmt(labor * has) : '—'}</td>
+              </tr>` : ''}
               </table>
             </div>` : ''}
             <div class="ot-footer">

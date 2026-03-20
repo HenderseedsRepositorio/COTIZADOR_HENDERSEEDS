@@ -1295,9 +1295,9 @@ const App = {
             </div>
           </div>
           <div class="ot-status-col">
-            <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" onclick="event.stopPropagation();App.cambiarEstadoOrden('${o.id}','pendiente')">Pend.</button>
-            <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" onclick="event.stopPropagation();App.cambiarEstadoOrden('${o.id}','en_curso')">Curso</button>
-            <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" onclick="event.stopPropagation();App.cambiarEstadoOrden('${o.id}','completada')">Comp.</button>
+            <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" data-oid="${o.id}" data-estado="pendiente">Pend.</button>
+            <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" data-oid="${o.id}" data-estado="en_curso">Curso</button>
+            <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" data-oid="${o.id}" data-estado="completada">Comp.</button>
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
@@ -1657,7 +1657,18 @@ const App = {
 };
 
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+
+  // Event delegation for status buttons in Ordenes
+  $('ordenes-list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-oid][data-estado]');
+    if (btn) {
+      e.stopPropagation();
+      App.cambiarEstadoOrden(btn.dataset.oid, btn.dataset.estado);
+    }
+  });
+});
 </script>
 </body>
 </html>

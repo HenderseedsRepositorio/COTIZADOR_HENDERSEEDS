@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Seguimiento de Campaña — Henderseeds</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d2d5e;
+  --navy-light: #1a4a8a;
+  --navy-sky: #2d6fc4;
+  --accent: #2d6fc4;
+  --accent-dark: #1a4a8a;
+  --accent-bg: #e8f0fe;
+  --accent-light: #5b9af5;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --orange: #d97706;
+  --orange-bg: #fef3c7;
+  --red: #ef4444;
+  --bg: #f0f4fb;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --accent-border: #b8cfef;
+  --text: #0d2033;
+  --text-sec: #64748b;
+  --text-mut: #94a3b8;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 2px 14px rgba(13,45,94,.08), 0 1px 3px rgba(13,45,94,.04);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --title: 'Archivo Black', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 70px;
+}
+input, select, button, textarea { font-family: inherit; font-size: inherit; }
+
+/* ── Layout ── */
+.main { max-width: 920px; margin: 0 auto; padding: 8px 8px 52px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Header ── */
+.status-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 4px 0 6px; font-size: .62rem; color: var(--text-mut);
+}
+
+/* ── Tabs ── */
+.tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 8px; }
+.tab-btn {
+  flex: 1; background: none; border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-mut); font-size: .72rem; font-weight: 500;
+  padding: 10px 2px; cursor: pointer; transition: all .2s;
+  font-family: var(--font); margin-bottom: -2px; white-space: nowrap;
+}
+.tab-btn.active { border-bottom-color: var(--accent); color: var(--navy); font-weight: 700; }
+
+/* ── Card ── */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: var(--title); font-size: 12px; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--text-sec); margin-bottom: 10px;
+}
+
+/* ── Inputs ── */
+.inp {
+  width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; background: white;
+  color: var(--text); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,111,196,.12); }
+.inp-sm { padding: 6px 8px; font-size: 13px; }
+.inp-xs { padding: 4px 6px; font-size: 12px; width: 70px; text-align: right; font-family: var(--mono); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.form-lbl {
+  font-size: .62rem; font-weight: 700; color: var(--accent-dark);
+  text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px;
+}
+textarea.inp { resize: vertical; min-height: 60px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; padding: 13px 18px; border: none; border-radius: 99px;
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+  font-family: var(--font); transition: opacity .15s;
+}
+.btn:hover { opacity: .87; }
+.btn-accent { background: var(--accent); color: white; }
+.btn-green { background: #25d366; color: white; }
+.btn-outline { background: var(--navy-light); color: #fff; }
+.btn-danger { background: var(--red); color: white; }
+.btn-sm { font-size: .68rem; padding: 6px 14px; }
+.btn-add {
+  width: 100%; padding: 12px; border: 2px dashed var(--accent);
+  border-radius: var(--radius); background: var(--accent-bg);
+  color: var(--accent-dark); font-weight: 700; font-size: .8rem;
+  cursor: pointer; margin-bottom: 10px; transition: all .15s;
+}
+.btn-add:hover { background: var(--accent); color: white; }
+
+/* ── Chips / Toggle ── */
+.chip-bar { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.chip {
+  flex: 1; min-width: 0; padding: 8px 6px; border-radius: 10px;
+  font-size: .7rem; font-weight: 700; border: 1.5px solid var(--border);
+  background: white; cursor: pointer; text-align: center;
+  transition: all .15s; line-height: 1.2; font-family: var(--font);
+}
+.chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+.chip.green.active { background: var(--green); border-color: var(--green); }
+.chip.orange.active { background: var(--orange); border-color: var(--orange); }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+}
+.badge-pendiente { background: var(--orange-bg); color: var(--orange); }
+.badge-en_curso { background: var(--green-bg); color: var(--green); }
+.badge-completada { background: var(--bg); color: var(--text-mut); }
+
+/* ── Dropdown ── */
+.dropdown {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: white; border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  max-height: 250px; overflow-y: auto; z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12); display: none;
+}
+.dropdown.show { display: block; }
+.dd-cat {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--accent); padding: 8px 12px 4px; background: var(--bg);
+}
+.dd-item {
+  padding: 8px 12px; cursor: pointer; display: flex;
+  justify-content: space-between; align-items: center;
+  font-size: 13px; border-bottom: 1px solid var(--bg);
+}
+.dd-item:hover, .dd-item.highlighted { background: var(--accent-bg); }
+.dd-item-price { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; }
+
+/* ── Product rows ── */
+.rows-scroll { overflow-x: auto; margin: 0 -12px; padding: 0 12px; }
+.rows-header {
+  display: grid; grid-template-columns: 1fr 68px 62px 58px 62px 68px 24px;
+  gap: 6px; padding: 6px 10px; font-size: 10px; font-weight: 700;
+  color: var(--text-sec); text-transform: uppercase; letter-spacing: .3px;
+}
+.row-item {
+  display: grid; grid-template-columns: 1fr 68px 62px 58px 62px 68px 24px;
+  gap: 6px; align-items: center; background: var(--card);
+  border-radius: var(--radius-sm); padding: 10px; margin-bottom: 6px;
+  box-shadow: var(--shadow); animation: slideIn .2s ease; min-height: 48px;
+}
+.row-inp {
+  width: 100%; padding: 3px 4px; border: 1px solid var(--border);
+  border-radius: 4px; font-family: var(--mono); font-size: 12px;
+  font-weight: 600; text-align: right; color: var(--text);
+  background: white; outline: none;
+}
+.row-inp:focus { border-color: var(--accent); background: var(--accent-bg); }
+.row-new {
+  display: grid; grid-template-columns: 1fr 68px 62px 58px 62px 68px 24px;
+  gap: 6px; align-items: center; background: var(--bg);
+  border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  padding: 8px 10px; margin-bottom: 5px; position: relative;
+}
+.row-new-search { position: static; }
+.row-new-search input {
+  width: 100%; padding: 5px 8px; border: 1px solid var(--border);
+  border-radius: 4px; font-size: 13px; font-family: var(--font);
+  outline: none; background: white;
+}
+.row-new-search input:focus { border-color: var(--accent); }
+.row-new-search input::placeholder { color: var(--text-mut); }
+.app-dropdown .dropdown { left: 0; right: 0; top: 100%; }
+
+.row-prod { display: flex; flex-direction: column; min-width: 0; }
+.row-prod-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-prod-meta { font-size: 10px; color: var(--text-mut); }
+.row-val { font-family: var(--mono); font-size: 12px; font-weight: 500; text-align: right; }
+.row-val.costo { color: var(--accent); font-weight: 700; font-size: 13px; }
+.row-rm { background: none; border: none; color: var(--text-mut); font-size: 16px; cursor: pointer; padding: 2px; line-height: 1; text-align: center; }
+.row-rm:hover { color: var(--red); }
+
+/* ── Totales ── */
+.totales {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--navy-sky) 100%);
+  color: white; border-radius: var(--radius); padding: 14px 18px; margin-top: 8px;
+}
+.tot-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .78rem; }
+.tot-row span:first-child { opacity: .7; font-size: .72rem; }
+.tot-row.big { border-top: 1px solid rgba(255,255,255,.15); margin-top: 6px; padding-top: 10px; font-size: 1.1rem; font-weight: 700; }
+.tot-row.big span:first-child { opacity: 1; }
+.tot-row .mono { font-family: var(--mono); color: var(--accent-light); }
+
+/* ── Campo/Lote cards ── */
+.campo-card { border-left: 4px solid var(--accent); }
+.lote-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 10px; border-bottom: 1px solid var(--bg); gap: 8px;
+}
+.lote-row:last-child { border-bottom: none; }
+.lote-info { flex: 1; min-width: 0; }
+.lote-name { font-size: 13px; font-weight: 600; }
+.lote-meta { font-size: 11px; color: var(--text-sec); }
+.lote-actions { display: flex; gap: 4px; }
+.lote-actions button { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-mut); padding: 2px 4px; }
+.lote-actions button:hover { color: var(--navy); }
+
+/* ── Order cards ── */
+.ot-card { cursor: pointer; transition: border-color .15s; border: 1.5px solid transparent; }
+.ot-card:hover { border-color: var(--accent); }
+.ot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.ot-title { font-family: var(--title); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--navy); }
+.ot-detail { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
+.ot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--bg); }
+.ot-total { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent); }
+
+/* ── Analytics ── */
+.bar-chart { margin: 12px 0; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.bar-label { font-size: 12px; font-weight: 600; width: 100px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 22px; background: var(--bg); border-radius: 6px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width .4s ease; display: flex; align-items: center; padding-left: 6px; }
+.bar-fill span { font-size: 10px; font-weight: 700; color: white; white-space: nowrap; }
+.bar-amount { font-family: var(--mono); font-size: 12px; font-weight: 600; width: 80px; text-align: right; flex-shrink: 0; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.stat-val { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; color: var(--navy); }
+.stat-lbl { font-size: .62rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; margin-top: 2px; }
+
+/* ── WA bar ── */
+.wa-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 936px; background: white;
+  border-top: 1px solid var(--border); padding: 10px 8px;
+  display: none; gap: 8px; z-index: 90;
+}
+.wa-bar .btn { flex: 1; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.fu { animation: fadeUp .26s ease both; }
+
+/* ── Empty states ── */
+.empty { text-align: center; padding: 40px 20px; color: var(--text-mut); }
+.empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+/* ── Mobile ── */
+@media (max-width: 639px) {
+  .status-bar { flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
+  .rows-scroll { margin: 0 -14px; padding: 0 14px; -webkit-overflow-scrolling: touch; }
+  .rows-header, .row-item { min-width: 460px; }
+  .row-new { display: flex; gap: 6px; min-width: 0; }
+  .row-new .row-new-search { flex: 1; }
+  .row-new .row-val, .row-new > span:last-child { display: none; }
+  .wa-bar { padding: 8px 6px; gap: 6px; }
+  .wa-bar .btn { font-size: .72rem; padding: 10px 8px; }
+  .bar-label { width: 70px; font-size: 11px; }
+  .bar-amount { width: 65px; font-size: 11px; }
+}
+@media (max-width: 380px) {
+  body { font-size: 14px; }
+  .tab-btn { font-size: .64rem; padding: 9px 2px; }
+  .card { padding: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="main">
+
+  <!-- HEADER -->
+  <div class="card fu" style="padding:8px 16px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-family:var(--title);font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;">Seguimiento Campaña</span>
+    <img src="../logo-henderseeds.png" alt="Henderseeds" style="height:30px;width:auto;object-fit:contain;">
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <a href="../index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;">&larr; Menú</a>
+    <span>Campaña: <strong id="campana-display" style="color:var(--navy-sky);cursor:pointer;" onclick="App.editCampana()">2025/26</strong></span>
+    <span id="status-text" style="font-size:.58rem;">Datos locales</span>
+  </div>
+
+  <!-- TABS -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="campos">🌾 Campos</button>
+    <button class="tab-btn" data-tab="nueva-ot">📋 Nueva OT</button>
+    <button class="tab-btn" data-tab="ordenes">📑 Ordenes</button>
+    <button class="tab-btn" data-tab="analisis">📊 Análisis</button>
+  </nav>
+
+  <!-- ═══ TAB CAMPOS ═══ -->
+  <section id="tab-campos" class="tab-content active">
+    <div id="campos-list"></div>
+    <button class="btn-add" onclick="App.addCampo()">+ Agregar Campo</button>
+  </section>
+
+  <!-- ═══ TAB NUEVA OT ═══ -->
+  <section id="tab-nueva-ot" class="tab-content">
+    <div class="card fu">
+      <!-- Campo / Lote selectors -->
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Campo</div>
+          <select id="ot-campo" class="inp inp-sm" onchange="App.onCampoChange()">
+            <option value="">— Elegir —</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-lbl">Lote</div>
+          <select id="ot-lote" class="inp inp-sm" onchange="App.onLoteChange()">
+            <option value="">— Elegir —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Hectáreas</div>
+          <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" readonly style="background:var(--bg);">
+        </div>
+        <div>
+          <div class="form-lbl">Cultivo</div>
+          <input type="text" id="ot-cultivo" class="inp inp-sm" placeholder="Soja, Maíz..." readonly style="background:var(--bg);">
+        </div>
+      </div>
+
+      <!-- Tipo + Aplicador -->
+      <div class="form-row" style="margin-bottom:10px;">
+        <div style="position:relative;">
+          <div class="form-lbl">Tipo de labor</div>
+          <input type="text" id="ot-tipo" class="inp inp-sm"
+            placeholder="Ej: Pulverización..." value="Pulverización terrestre" autocomplete="off"
+            oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
+          <div class="dropdown" id="tipo-dd" style="z-index:70;"></div>
+        </div>
+        <div style="position:relative;">
+          <div class="form-lbl">Aplicador</div>
+          <input type="text" id="ot-aplicador" class="inp inp-sm" placeholder="Nombre..." autocomplete="off"
+            oninput="App.filterAplicadores()" onfocus="App.filterAplicadores(true)">
+          <div class="dropdown" id="aplicador-dd" style="z-index:60;"></div>
+        </div>
+      </div>
+
+      <!-- Tel aplicador + Fecha -->
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Tel. aplicador</div>
+          <input type="tel" id="ot-tel" class="inp inp-sm" placeholder="Ej: 2317401234" autocomplete="off">
+        </div>
+        <div>
+          <div class="form-lbl">Fecha aplicación</div>
+          <input type="date" id="ot-fecha" class="inp inp-sm">
+        </div>
+      </div>
+
+      <!-- Costo labor -->
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Costo labor USD/ha</div>
+          <input type="number" id="ot-costo-labor" class="inp inp-sm" placeholder="0.00" step="0.01" min="0"
+            style="font-family:var(--mono);" oninput="App.renderOTRows()">
+        </div>
+        <div></div>
+      </div>
+
+      <!-- Products -->
+      <div class="form-lbl" style="margin-top:6px;">Productos</div>
+      <div class="rows-scroll" style="margin:0 -14px;padding:0 14px;">
+        <div class="rows-header">
+          <span>Producto</span>
+          <span style="text-align:right">Precio</span>
+          <span style="text-align:right">Dosis</span>
+          <span style="text-align:right">Vol.</span>
+          <span style="text-align:right">$/ha</span>
+          <span style="text-align:right">Monto</span>
+          <span></span>
+        </div>
+        <div id="ot-rows"></div>
+      </div>
+      <div class="row-new" id="ot-row-new">
+        <div class="row-new-search app-dropdown">
+          <input type="text" id="ot-search" placeholder="+ Agregar producto..." autocomplete="off"
+            onfocus="App.showDropdown()" oninput="App.filterDropdown()">
+          <div class="dropdown" id="ot-dropdown"></div>
+        </div>
+        <span class="row-val" style="color:var(--text-mut);">—</span>
+        <span class="row-val" style="color:var(--text-mut);">—</span>
+        <span class="row-val" style="color:var(--text-mut);">—</span>
+        <span class="row-val" style="color:var(--text-mut);">—</span>
+        <span class="row-val" style="color:var(--text-mut);">—</span>
+        <span></span>
+      </div>
+
+      <!-- Notas -->
+      <div class="form-lbl" style="margin-top:10px;">Notas</div>
+      <textarea id="ot-notas" class="inp inp-sm" placeholder="Instrucciones, condiciones climáticas..." rows="2"></textarea>
+
+      <!-- Estado -->
+      <div class="form-lbl" style="margin-top:10px;">Estado</div>
+      <div class="chip-bar" id="ot-estado-bar">
+        <button class="chip orange active" data-estado="pendiente" onclick="App.setEstado(this)">Pendiente</button>
+        <button class="chip green" data-estado="en_curso" onclick="App.setEstado(this)">En curso</button>
+        <button class="chip" data-estado="completada" onclick="App.setEstado(this)">Completada</button>
+      </div>
+
+      <!-- Totales -->
+      <div id="ot-totales" style="display:none;"></div>
+
+      <!-- Save -->
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-accent" style="flex:1;" onclick="App.saveOrden()">Guardar Orden</button>
+        <button class="btn btn-outline" id="ot-cancel-btn" style="display:none;" onclick="App.cancelEdit()">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TAB ORDENES ═══ -->
+  <section id="tab-ordenes" class="tab-content">
+    <div class="chip-bar">
+      <button class="chip active" data-filtro="todas" onclick="App.setFiltroOT(this)">Todas</button>
+      <button class="chip orange" data-filtro="pendiente" onclick="App.setFiltroOT(this)">Pendientes</button>
+      <button class="chip green" data-filtro="en_curso" onclick="App.setFiltroOT(this)">En curso</button>
+      <button class="chip" data-filtro="completada" onclick="App.setFiltroOT(this)">Completadas</button>
+    </div>
+    <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off"
+      oninput="App.renderOrdenes()" style="margin-bottom:8px;">
+    <div id="ordenes-list"></div>
+  </section>
+
+  <!-- ═══ TAB ANÁLISIS ═══ -->
+  <section id="tab-analisis" class="tab-content">
+    <div class="card">
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Campo</div>
+          <select id="an-campo" class="inp inp-sm" onchange="App.onAnCampoChange()">
+            <option value="">— Todos —</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-lbl">Lote</div>
+          <select id="an-lote" class="inp inp-sm" onchange="App.renderAnalisis()">
+            <option value="">— Todos —</option>
+          </select>
+        </div>
+      </div>
+      <div id="analisis-body"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- WA bar -->
+<div class="wa-bar" id="wa-bar">
+  <button class="btn btn-green" onclick="App.compartirWA()">📲 Enviar Orden</button>
+  <button class="btn btn-outline" onclick="App.exportarPDF()">📄 PDF</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtInt = n => Number(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
+const dateISO = () => new Date().toISOString().slice(0, 10);
+
+/* ══════════════════════════════════════
+   STORAGE
+   ══════════════════════════════════════ */
+const Storage = {
+  KEY: 'sc_data',
+  _counter: 0,
+  defaults() {
+    return { campos: [], ordenes: [], aplicadores: [], campana: '2025/26' };
+  },
+  load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(this.KEY));
+      if (d && d.campos) return d;
+    } catch(e) {}
+    return this.defaults();
+  },
+  save(data) { localStorage.setItem(this.KEY, JSON.stringify(data)); },
+  nextId(prefix) { return prefix + '_' + Date.now() + '_' + (++this._counter); }
+};
+
+/* ══════════════════════════════════════
+   CATALOG (from Google Sheets)
+   ══════════════════════════════════════ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_kcpTVtGKSlDH9WHmVlRGNo-jt-QbLqlg5BNY5RGAhHV8kw/exec';
+let catalogo = {};
+
+async function loadCatalog() {
+  if (!API_URL) return;
+  try {
+    const res = await fetch(API_URL + '?action=getCatalogoAgro&_t=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    if (data.ok && data.catalogo) {
+      catalogo = data.catalogo;
+      const total = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
+      $('status-text').textContent = 'Sheets — ' + total + ' productos';
+    }
+  } catch(e) {
+    $('status-text').textContent = 'Offline — datos locales';
+  }
+}
+
+/* ══════════════════════════════════════
+   APP STATE
+   ══════════════════════════════════════ */
+let data = Storage.load();
+let editingOrdenId = null;
+let currentOTRows = [];
+let rowIdCounter = 0;
+let filtroOT = 'todas';
+let highlightIdx = -1;
+let ddItems = [];
+let aplicadorHighlight = -1;
+let aplicadorMatches = [];
+
+/* ══════════════════════════════════════
+   APP
+   ══════════════════════════════════════ */
+const App = {
+  init() {
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        $('tab-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'ordenes') App.renderOrdenes();
+        if (btn.dataset.tab === 'analisis') App.renderAnalisis();
+        if (btn.dataset.tab === 'nueva-ot') App.refreshSelectors();
+      });
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.row-new-search') && !e.target.closest('.app-dropdown')) App.hideDropdown();
+      if (!e.target.closest('#ot-aplicador') && !e.target.closest('#aplicador-dd')) App.hideAplicadorDD();
+      if (!e.target.closest('#ot-tipo') && !e.target.closest('#tipo-dd')) App.hideTipoDD();
+    });
+
+    // Keyboard nav for product search
+    $('ot-search').addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveHighlight(-1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlightIdx >= 0) App.selectFromDropdown(highlightIdx);
+        else if ($('ot-search').value.trim()) App.addManual($('ot-search').value.trim());
+      }
+      else if (e.key === 'Escape') App.hideDropdown();
+    });
+
+    // Keyboard nav for aplicador
+    $('ot-aplicador').addEventListener('keydown', e => {
+      const dd = $('aplicador-dd');
+      if (!dd.classList.contains('show')) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.moveAplicadorHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); App.moveAplicadorHighlight(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); App.selectAplicadorHighlight(); }
+      else if (e.key === 'Escape') App.hideAplicadorDD();
+    });
+
+    // Set today's date
+    $('ot-fecha').value = dateISO();
+    $('campana-display').textContent = data.campana;
+
+    App.renderCampos();
+    App.refreshSelectors();
+    loadCatalog();
+  },
+
+  /* ── Campaign ── */
+  editCampana() {
+    const c = prompt('Campaña:', data.campana);
+    if (c && c.trim()) {
+      data.campana = c.trim();
+      Storage.save(data);
+      $('campana-display').textContent = data.campana;
+    }
+  },
+
+  /* ══════════════════════════════════════
+     CAMPOS & LOTES
+     ══════════════════════════════════════ */
+  renderCampos() {
+    const el = $('campos-list');
+    if (!data.campos.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">🌾</div><p>Sin campos registrados</p><p style="font-size:12px;margin-top:4px;">Agregá tu primer campo para empezar</p></div>';
+      return;
+    }
+    el.innerHTML = data.campos.map(c => {
+      const lotesHtml = c.lotes.map(l => `
+        <div class="lote-row">
+          <div class="lote-info">
+            <div class="lote-name">${l.nombre}</div>
+            <div class="lote-meta">${l.hectareas} has · ${l.cultivo || '—'}</div>
+          </div>
+          <div class="lote-actions">
+            <button onclick="App.editLote('${c.id}','${l.id}')" title="Editar">✏️</button>
+            <button onclick="App.removeLote('${c.id}','${l.id}')" title="Eliminar">&times;</button>
+          </div>
+        </div>
+      `).join('');
+
+      return `<div class="card campo-card fu">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-family:var(--title);font-size:13px;color:var(--navy);text-transform:uppercase;">${c.nombre}</div>
+            <div style="font-size:11px;color:var(--text-sec);">${c.cliente ? 'Cliente: ' + c.cliente + ' · ' : ''}${c.localidad || ''}</div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-sm btn-accent" style="font-size:10px;padding:4px 8px;" onclick="App.editCampo('${c.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" style="font-size:10px;padding:4px 8px;" onclick="App.removeCampo('${c.id}')">&times;</button>
+          </div>
+        </div>
+        ${lotesHtml}
+        <button style="width:100%;padding:6px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;" onclick="App.addLote('${c.id}')">+ Agregar Lote</button>
+      </div>`;
+    }).join('');
+  },
+
+  addCampo() {
+    const nombre = prompt('Nombre del campo:');
+    if (!nombre || !nombre.trim()) return;
+    const cliente = prompt('Cliente / Productor (opcional):') || '';
+    const localidad = prompt('Localidad (opcional):') || '';
+    data.campos.push({
+      id: Storage.nextId('c'),
+      nombre: nombre.trim(),
+      cliente: cliente.trim(),
+      localidad: localidad.trim(),
+      lotes: []
+    });
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  editCampo(cid) {
+    const c = data.campos.find(x => x.id === cid);
+    if (!c) return;
+    const nombre = prompt('Nombre del campo:', c.nombre);
+    if (!nombre || !nombre.trim()) return;
+    c.nombre = nombre.trim();
+    c.cliente = (prompt('Cliente / Productor:', c.cliente) || '').trim();
+    c.localidad = (prompt('Localidad:', c.localidad) || '').trim();
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  removeCampo(cid) {
+    if (!confirm('¿Eliminar este campo y todos sus lotes?')) return;
+    data.campos = data.campos.filter(x => x.id !== cid);
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  addLote(cid) {
+    const c = data.campos.find(x => x.id === cid);
+    if (!c) return;
+    const nombre = prompt('Nombre del lote:');
+    if (!nombre || !nombre.trim()) return;
+    const has = parseFloat(prompt('Hectáreas:') || '0') || 0;
+    const cultivo = (prompt('Cultivo (ej: Soja 1ra, Maíz):') || '').trim();
+    c.lotes.push({
+      id: Storage.nextId('l'),
+      nombre: nombre.trim(),
+      hectareas: has,
+      cultivo: cultivo
+    });
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  editLote(cid, lid) {
+    const c = data.campos.find(x => x.id === cid);
+    if (!c) return;
+    const l = c.lotes.find(x => x.id === lid);
+    if (!l) return;
+    const nombre = prompt('Nombre del lote:', l.nombre);
+    if (!nombre || !nombre.trim()) return;
+    l.nombre = nombre.trim();
+    l.hectareas = parseFloat(prompt('Hectáreas:', l.hectareas) || l.hectareas) || l.hectareas;
+    l.cultivo = (prompt('Cultivo:', l.cultivo) || '').trim();
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  removeLote(cid, lid) {
+    if (!confirm('¿Eliminar este lote?')) return;
+    const c = data.campos.find(x => x.id === cid);
+    if (!c) return;
+    c.lotes = c.lotes.filter(x => x.id !== lid);
+    Storage.save(data);
+    App.renderCampos();
+    App.refreshSelectors();
+  },
+
+  /* ══════════════════════════════════════
+     NUEVA ORDEN DE TRABAJO
+     ══════════════════════════════════════ */
+  refreshSelectors() {
+    // Campo selectors
+    const campoOpts = '<option value="">— Elegir —</option>' +
+      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    $('ot-campo').innerHTML = campoOpts;
+
+    // Analytics selectors
+    const anCampoOpts = '<option value="">— Todos —</option>' +
+      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    $('an-campo').innerHTML = anCampoOpts;
+  },
+
+  onCampoChange() {
+    const cid = $('ot-campo').value;
+    const c = data.campos.find(x => x.id === cid);
+    const loteOpts = '<option value="">— Elegir —</option>' +
+      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
+    $('ot-lote').innerHTML = loteOpts;
+    $('ot-has').value = '';
+    $('ot-cultivo').value = '';
+  },
+
+  onLoteChange() {
+    const cid = $('ot-campo').value;
+    const lid = $('ot-lote').value;
+    const c = data.campos.find(x => x.id === cid);
+    const l = c ? c.lotes.find(x => x.id === lid) : null;
+    $('ot-has').value = l ? l.hectareas : '';
+    $('ot-cultivo').value = l ? (l.cultivo || '') : '';
+  },
+
+  onAnCampoChange() {
+    const cid = $('an-campo').value;
+    const c = data.campos.find(x => x.id === cid);
+    const loteOpts = '<option value="">— Todos —</option>' +
+      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('') : '');
+    $('an-lote').innerHTML = loteOpts;
+    App.renderAnalisis();
+  },
+
+  setTipo(val) { $('ot-tipo').value = val; },
+
+  setEstado(el) {
+    document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  },
+
+  getTipo() { return $('ot-tipo').value || 'Pulverización terrestre'; },
+  getEstado() { return document.querySelector('#ot-estado-bar .chip.active')?.dataset.estado || 'pendiente'; },
+
+  /* ── Product dropdown ── */
+  showDropdown() {
+    App.filterDropdown();
+  },
+
+  filterDropdown() {
+    const q = $('ot-search').value.toLowerCase().trim();
+    const dd = $('ot-dropdown');
+    let html = '';
+    ddItems = [];
+    highlightIdx = -1;
+
+    Object.entries(catalogo).forEach(([cat, prods]) => {
+      const filtered = prods.filter(p =>
+        !q || p.producto.toLowerCase().includes(q) ||
+        (p.formulacion && p.formulacion.toLowerCase().includes(q))
+      );
+      if (!filtered.length) return;
+      html += `<div class="dd-cat">${cat}</div>`;
+      filtered.forEach(p => {
+        const idx = ddItems.length;
+        ddItems.push({ ...p, cat });
+        html += `<div class="dd-item" data-idx="${idx}" onclick="App.selectFromDropdown(${idx})">
+          <span>${p.producto} <span style="color:var(--text-mut);font-size:11px;">· ${p.proveedor || ''}</span></span>
+          <span class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad || 'L'}</span>
+        </div>`;
+      });
+    });
+
+    if (q) {
+      html += `<div class="dd-item" onclick="App.addManual('${q.replace(/'/g, "\\'")}')">
+        <span style="color:var(--accent);font-weight:600;">+ Agregar "${q}" manualmente</span>
+      </div>`;
+    }
+
+    dd.innerHTML = html;
+    dd.classList.toggle('show', html.length > 0);
+  },
+
+  selectFromDropdown(idx) {
+    const p = ddItems[idx];
+    if (!p) return;
+    currentOTRows.push({
+      id: ++rowIdCounter,
+      producto: p.producto,
+      categoria: p.cat || 'Otros',
+      formulacion: p.formulacion || '',
+      unidad: p.unidad || 'L',
+      precio: p.precio_usd || 0,
+      dosis: p.dosis_sug || 0,
+      iva_pct: p.iva_pct || 0,
+    });
+    App.hideDropdown();
+    $('ot-search').value = '';
+    App.renderOTRows();
+  },
+
+  addManual(name) {
+    currentOTRows.push({
+      id: ++rowIdCounter,
+      producto: name,
+      categoria: 'Otros',
+      formulacion: '',
+      unidad: 'L',
+      precio: 0,
+      dosis: 0,
+      iva_pct: 0,
+    });
+    App.hideDropdown();
+    $('ot-search').value = '';
+    App.renderOTRows();
+  },
+
+  hideDropdown() {
+    $('ot-dropdown').classList.remove('show');
+    highlightIdx = -1;
+  },
+
+  moveHighlight(dir) {
+    if (!ddItems.length) return;
+    highlightIdx = Math.max(-1, Math.min(ddItems.length - 1, highlightIdx + dir));
+    document.querySelectorAll('#ot-dropdown .dd-item').forEach((el, i) => {
+      el.classList.toggle('highlighted', parseInt(el.dataset.idx) === highlightIdx);
+    });
+  },
+
+  renderOTRows() {
+    const has = parseFloat($('ot-has').value) || 0;
+    const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
+
+    $('ot-rows').innerHTML = currentOTRows.map(r => {
+      const costoHa = r.precio * r.dosis;
+      const volumen = has > 0 ? r.dosis * has : null;
+      const monto = has > 0 ? costoHa * has : null;
+      return `<div class="row-item" data-rowid="${r.id}" style="grid-template-columns:${gridCols}">
+        <div class="row-prod">
+          <span class="row-prod-name">${r.producto}</span>
+          <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+        </div>
+        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+          onchange="App.updateRow(${r.id},'precio',this.value)"
+          oninput="App.updateRow(${r.id},'precio',this.value)">
+        <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+          onchange="App.updateRow(${r.id},'dosis',this.value)"
+          oninput="App.updateRow(${r.id},'dosis',this.value)">
+        <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
+        <span class="row-val costo">${fmt(costoHa)}</span>
+        <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+        <button class="row-rm" onclick="App.removeOTRow(${r.id})">&times;</button>
+      </div>`;
+    }).join('');
+
+    // Totales
+    const costoLabor = parseFloat($('ot-costo-labor').value) || 0;
+    if (currentOTRows.length || costoLabor > 0) {
+      let insumosHa = 0;
+      currentOTRows.forEach(r => { insumosHa += r.precio * r.dosis; });
+      const netoHa = insumosHa + costoLabor;
+      const total = has > 0 ? netoHa * has : 0;
+      $('ot-totales').style.display = 'block';
+      $('ot-totales').innerHTML = `<div class="totales">
+        <div class="tot-row"><span>Insumos / ha</span><span class="mono">USD ${fmt(insumosHa)}</span></div>
+        ${costoLabor > 0 ? `<div class="tot-row"><span>Labor / ha</span><span class="mono">USD ${fmt(costoLabor)}</span></div>` : ''}
+        <div class="tot-row" style="border-top:1px solid rgba(255,255,255,.15);margin-top:4px;padding-top:6px;font-weight:700;"><span>Total / ha</span><span class="mono">USD ${fmt(netoHa)}</span></div>
+        ${has > 0 ? `<div class="tot-row big"><span>TOTAL ${fmtInt(has)} has</span><span class="mono">USD ${fmt(total)}</span></div>` : ''}
+      </div>`;
+      $('wa-bar').style.display = 'flex';
+    } else {
+      $('ot-totales').style.display = 'none';
+      $('wa-bar').style.display = 'none';
+    }
+  },
+
+  updateRow(rid, field, val) {
+    const r = currentOTRows.find(x => x.id === rid);
+    if (!r) return;
+    r[field] = parseFloat(val) || 0;
+    App.renderOTRows();
+  },
+
+  removeOTRow(rid) {
+    currentOTRows = currentOTRows.filter(x => x.id !== rid);
+    App.renderOTRows();
+  },
+
+  /* ── Aplicador dropdown ── */
+  filterAplicadores(showAll) {
+    const q = $('ot-aplicador').value.toLowerCase().trim();
+    const dd = $('aplicador-dd');
+    aplicadorMatches = data.aplicadores.filter(a => showAll || !q || a.toLowerCase().includes(q));
+    aplicadorHighlight = -1;
+
+    if (!aplicadorMatches.length && !q) {
+      dd.classList.remove('show');
+      return;
+    }
+
+    let html = aplicadorMatches.map((a, i) =>
+      `<div class="dd-item" onclick="App.selectAplicador('${a.replace(/'/g, "\\'")}')">${a}</div>`
+    ).join('');
+
+    if (q && !aplicadorMatches.includes(q)) {
+      html += `<div class="dd-item" onclick="App.selectAplicador('${q.replace(/'/g, "\\'")}')">
+        <span style="color:var(--accent);font-weight:600;">+ "${q}"</span>
+      </div>`;
+    }
+
+    dd.innerHTML = html;
+    dd.classList.toggle('show', html.length > 0);
+  },
+
+  selectAplicador(name) {
+    $('ot-aplicador').value = name;
+    App.hideAplicadorDD();
+    // Save to list if new
+    if (!data.aplicadores.includes(name)) {
+      data.aplicadores.push(name);
+      Storage.save(data);
+    }
+    // Auto-fill saved phone
+    if (!data.aplicadoresTel) data.aplicadoresTel = {};
+    $('ot-tel').value = data.aplicadoresTel[name] || '';
+  },
+
+  hideAplicadorDD() { $('aplicador-dd').classList.remove('show'); },
+
+  /* ── Tipo de labor dropdown ── */
+  filterTipos(showAll) {
+    const q = $('ot-tipo').value.toLowerCase().trim();
+    const dd = $('tipo-dd');
+    const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
+    // Merge defaults + custom saved tipos
+    const allTipos = [...new Set([...defaults, ...(data.tiposLabor || [])])];
+    const matches = allTipos.filter(t => showAll || !q || t.toLowerCase().includes(q));
+
+    let html = matches.map(t =>
+      `<div class="dd-item" onclick="App.selectTipo('${t.replace(/'/g, "\\'")}')">${t}</div>`
+    ).join('');
+
+    if (q && !matches.some(t => t.toLowerCase() === q)) {
+      html += `<div class="dd-item" onclick="App.selectTipo('${q.replace(/'/g, "\\'")}')">
+        <span style="color:var(--accent);font-weight:600;">+ Agregar "${$('ot-tipo').value.trim()}"</span>
+      </div>`;
+    }
+
+    dd.innerHTML = html;
+    dd.classList.toggle('show', html.length > 0);
+  },
+
+  selectTipo(name) {
+    $('ot-tipo').value = name;
+    App.hideTipoDD();
+    const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
+    if (!defaults.includes(name)) {
+      if (!data.tiposLabor) data.tiposLabor = [];
+      if (!data.tiposLabor.includes(name)) {
+        data.tiposLabor.push(name);
+        Storage.save(data);
+      }
+    }
+  },
+
+  hideTipoDD() { $('tipo-dd').classList.remove('show'); },
+
+  moveAplicadorHighlight(dir) {
+    if (!aplicadorMatches.length) return;
+    aplicadorHighlight = Math.max(0, Math.min(aplicadorMatches.length - 1, aplicadorHighlight + dir));
+    $('aplicador-dd').querySelectorAll('.dd-item').forEach((el, i) => {
+      el.classList.toggle('highlighted', i === aplicadorHighlight);
+    });
+  },
+
+  selectAplicadorHighlight() {
+    if (aplicadorHighlight >= 0 && aplicadorMatches[aplicadorHighlight]) {
+      App.selectAplicador(aplicadorMatches[aplicadorHighlight]);
+    }
+  },
+
+  /* ── Save order ── */
+  saveOrden() {
+    const cid = $('ot-campo').value;
+    const lid = $('ot-lote').value;
+    if (!cid || !lid) { alert('Seleccioná un campo y lote.'); return; }
+    if (!currentOTRows.length) { alert('Agregá al menos un producto.'); return; }
+
+    const has = parseFloat($('ot-has').value) || 0;
+    const orden = {
+      id: editingOrdenId || Storage.nextId('ot'),
+      campoId: cid,
+      loteId: lid,
+      hectareas: has,
+      cultivo: $('ot-cultivo').value,
+      tipo: App.getTipo(),
+      aplicador: $('ot-aplicador').value.trim(),
+      telAplicador: $('ot-tel').value.trim(),
+      fecha: $('ot-fecha').value,
+      estado: App.getEstado(),
+      costoLabor: parseFloat($('ot-costo-labor').value) || 0,
+      notas: $('ot-notas').value.trim(),
+      productos: currentOTRows.map(r => ({ ...r })),
+      createdAt: editingOrdenId
+        ? (data.ordenes.find(o => o.id === editingOrdenId)?.createdAt || new Date().toISOString())
+        : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      campana: data.campana,
+    };
+
+    // Save aplicador + tel
+    if (orden.aplicador && !data.aplicadores.includes(orden.aplicador)) {
+      data.aplicadores.push(orden.aplicador);
+    }
+    if (orden.aplicador && orden.telAplicador) {
+      if (!data.aplicadoresTel) data.aplicadoresTel = {};
+      data.aplicadoresTel[orden.aplicador] = orden.telAplicador;
+    }
+
+    if (editingOrdenId) {
+      const idx = data.ordenes.findIndex(o => o.id === editingOrdenId);
+      if (idx >= 0) data.ordenes[idx] = orden;
+    } else {
+      data.ordenes.push(orden);
+    }
+
+    Storage.save(data);
+    App.resetOTForm();
+    // Switch to ordenes tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-tab="ordenes"]').classList.add('active');
+    $('tab-ordenes').classList.add('active');
+    App.renderOrdenes();
+  },
+
+  resetOTForm() {
+    editingOrdenId = null;
+    currentOTRows = [];
+    $('ot-campo').value = '';
+    $('ot-lote').innerHTML = '<option value="">— Elegir —</option>';
+    $('ot-has').value = '';
+    $('ot-cultivo').value = '';
+    $('ot-aplicador').value = '';
+    $('ot-tel').value = '';
+    $('ot-fecha').value = dateISO();
+    $('ot-notas').value = '';
+    $('ot-tipo').value = 'Pulverización terrestre';
+    $('ot-costo-labor').value = '';
+    document.querySelectorAll('#ot-estado-bar .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+    $('ot-cancel-btn').style.display = 'none';
+    App.renderOTRows();
+  },
+
+  cancelEdit() { App.resetOTForm(); },
+
+  /* ── Edit existing order ── */
+  editOrden(oid) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+
+    editingOrdenId = o.id;
+    $('ot-campo').value = o.campoId;
+    App.onCampoChange();
+    setTimeout(() => {
+      $('ot-lote').value = o.loteId;
+      App.onLoteChange();
+    }, 10);
+
+    // Set tipo
+    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
+    // Set estado
+    document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.toggle('active', c.dataset.estado === o.estado));
+
+    $('ot-aplicador').value = o.aplicador || '';
+    $('ot-tel').value = o.telAplicador || '';
+    $('ot-fecha').value = o.fecha || dateISO();
+    $('ot-costo-labor').value = o.costoLabor || '';
+    $('ot-notas').value = o.notas || '';
+    currentOTRows = (o.productos || []).map(p => ({ ...p }));
+    rowIdCounter = Math.max(rowIdCounter, ...currentOTRows.map(r => r.id || 0)) + 1;
+    $('ot-cancel-btn').style.display = 'block';
+
+    // Switch tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-tab="nueva-ot"]').classList.add('active');
+    $('tab-nueva-ot').classList.add('active');
+
+    App.renderOTRows();
+  },
+
+  /* ══════════════════════════════════════
+     ORDENES LIST
+     ══════════════════════════════════════ */
+  setFiltroOT(el) {
+    document.querySelectorAll('#tab-ordenes .chip-bar .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    filtroOT = el.dataset.filtro;
+    App.renderOrdenes();
+  },
+
+  renderOrdenes() {
+    const el = $('ordenes-list');
+    const q = ($('ordenes-search')?.value || '').toLowerCase().trim();
+    let ordenes = data.ordenes
+      .filter(o => o.campana === data.campana)
+      .filter(o => filtroOT === 'todas' || o.estado === filtroOT);
+
+    if (q) {
+      ordenes = ordenes.filter(o => {
+        const campo = data.campos.find(c => c.id === o.campoId);
+        const lote = campo?.lotes.find(l => l.id === o.loteId);
+        const text = [campo?.nombre, lote?.nombre, o.aplicador, o.tipo, ...o.productos.map(p => p.producto)].join(' ').toLowerCase();
+        return text.includes(q);
+      });
+    }
+
+    ordenes.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    if (!ordenes.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin órdenes de trabajo</p><p style="font-size:12px;margin-top:4px;">Creá tu primera orden en la pestaña "Nueva OT"</p></div>';
+      return;
+    }
+
+    el.innerHTML = ordenes.map(o => {
+      const campo = data.campos.find(c => c.id === o.campoId);
+      const lote = campo?.lotes.find(l => l.id === o.loteId);
+      const insumosHa = o.productos.reduce((s, p) => s + (p.precio * p.dosis), 0);
+      const labor = o.costoLabor || 0;
+      const netoHa = insumosHa + labor;
+      const total = netoHa * (o.hectareas || 0);
+      const tipoLabel = o.tipo || 'Pulverización terrestre';
+      const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
+
+      return `<div class="card ot-card" onclick="App.editOrden('${o.id}')">
+        <div class="ot-header">
+          <div class="ot-title">${campo?.nombre || '?'} › ${lote?.nombre || '?'}</div>
+          <span class="badge badge-${o.estado}">${o.estado.replace('_', ' ')}</span>
+        </div>
+        <div class="ot-detail">
+          ${tipoLabel} · ${o.aplicador || 'Sin aplicador'} · ${fecha}<br>
+          ${o.productos.length} producto${o.productos.length !== 1 ? 's' : ''} · ${o.hectareas || 0} has${o.cultivo ? ' · ' + o.cultivo : ''}
+          ${labor > 0 ? ` · Labor: $${fmt(labor)}/ha` : ''}
+        </div>
+        <div class="ot-footer">
+          <span class="ot-total">USD ${fmt(netoHa)}/ha</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--text-sec);">${o.hectareas ? 'USD ' + fmt(total) + ' total' : ''}</span>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  /* ══════════════════════════════════════
+     ANÁLISIS
+     ══════════════════════════════════════ */
+  renderAnalisis() {
+    const el = $('analisis-body');
+    const campoId = $('an-campo').value;
+    const loteId = $('an-lote').value;
+
+    // Filter completed orders for current campaign
+    let ordenes = data.ordenes.filter(o =>
+      o.campana === data.campana && o.estado === 'completada'
+    );
+
+    if (campoId) ordenes = ordenes.filter(o => o.campoId === campoId);
+    if (loteId) ordenes = ordenes.filter(o => o.loteId === loteId);
+
+    if (!ordenes.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>Sin datos de análisis</p><p style="font-size:12px;margin-top:4px;">Completá órdenes de trabajo para ver el análisis</p></div>';
+      return;
+    }
+
+    // Aggregate
+    let totalHas = 0;
+    let totalCost = 0;
+    const byCategory = {};
+    const byTipo = {};
+    const lotesSeen = new Set();
+
+    ordenes.forEach(o => {
+      const key = o.campoId + ':' + o.loteId;
+      if (!lotesSeen.has(key)) {
+        lotesSeen.add(key);
+        totalHas += o.hectareas || 0;
+      }
+      const tipoLabel = o.tipo || 'Pulverización terrestre';
+      let ordenCost = 0;
+      o.productos.forEach(p => {
+        const cost = p.precio * p.dosis * (o.hectareas || 0);
+        ordenCost += cost;
+        const cat = p.categoria || 'Otros';
+        byCategory[cat] = (byCategory[cat] || 0) + cost;
+      });
+      // Labor cost
+      const laborCost = (o.costoLabor || 0) * (o.hectareas || 0);
+      if (laborCost > 0) {
+        ordenCost += laborCost;
+        byCategory['Labor'] = (byCategory['Labor'] || 0) + laborCost;
+      }
+      totalCost += ordenCost;
+      byTipo[tipoLabel] = (byTipo[tipoLabel] || 0) + ordenCost;
+    });
+
+    const costoHa = totalHas > 0 ? totalCost / totalHas : 0;
+
+    // Stats
+    let html = `<div class="stat-grid">
+      <div class="stat-box"><div class="stat-val">USD ${fmt(totalCost)}</div><div class="stat-lbl">Total aplicado</div></div>
+      <div class="stat-box"><div class="stat-val">USD ${fmt(costoHa)}</div><div class="stat-lbl">Costo / ha</div></div>
+      <div class="stat-box"><div class="stat-val">${fmtInt(totalHas)}</div><div class="stat-lbl">Hectáreas</div></div>
+      <div class="stat-box"><div class="stat-val">${ordenes.length}</div><div class="stat-lbl">Aplicaciones</div></div>
+    </div>`;
+
+    // Bar chart by category
+    const catColors = {
+      'Herbicidas': '#16a34a', 'Fungicidas': '#2d6fc4', 'Insecticidas': '#d97706',
+      'Fertilizantes': '#8b5cf6', 'Coadyuvantes': '#ec4899', 'Otros': '#94a3b8',
+      'Semillas': '#0d9488', 'Inoculantes': '#6366f1', 'Labor': '#f97316'
+    };
+    const maxCat = Math.max(...Object.values(byCategory), 1);
+
+    html += '<div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin:12px 0 8px;">Desglose por categoría</div>';
+    html += '<div class="bar-chart">';
+    Object.entries(byCategory).sort((a, b) => b[1] - a[1]).forEach(([cat, val]) => {
+      const pct = (val / totalCost * 100).toFixed(1);
+      const w = (val / maxCat * 100).toFixed(0);
+      const color = catColors[cat] || '#94a3b8';
+      html += `<div class="bar-row">
+        <span class="bar-label">${cat}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${color};"><span>${pct}%</span></div></div>
+        <span class="bar-amount">$${fmt(val)}</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    // Orders table
+    html += '<div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin:16px 0 8px;">Aplicaciones completadas</div>';
+    ordenes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
+      const campo = data.campos.find(c => c.id === o.campoId);
+      const lote = campo?.lotes.find(l => l.id === o.loteId);
+      const netoHa = o.productos.reduce((s, p) => s + (p.precio * p.dosis), 0) + (o.costoLabor || 0);
+      const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
+      const tipoLabel = o.tipo || '—';
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg);font-size:12px;">
+        <div>
+          <span style="font-weight:600;">${fecha}</span>
+          <span style="color:var(--text-sec);">· ${tipoLabel} · ${o.productos.length} prod</span>
+          ${!campoId ? `<span style="color:var(--text-mut);font-size:10px;"> · ${campo?.nombre} › ${lote?.nombre}</span>` : ''}
+        </div>
+        <span style="font-family:var(--mono);font-weight:600;color:var(--accent);">$${fmt(netoHa)}/ha</span>
+      </div>`;
+    });
+
+    el.innerHTML = html;
+  },
+
+  /* ══════════════════════════════════════
+     COMPARTIR
+     ══════════════════════════════════════ */
+  compartirWA() {
+    const cid = $('ot-campo').value;
+    const lid = $('ot-lote').value;
+    const campo = data.campos.find(c => c.id === cid);
+    const lote = campo?.lotes.find(l => l.id === lid);
+    const has = parseFloat($('ot-has').value) || 0;
+    const tipoLabel = App.getTipo();
+    const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
+    const cliente = campo?.cliente || '';
+
+    let msg = `📋 *ORDEN DE TRABAJO*\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n`;
+    msg += `📅 *Fecha:* ${fecha}\n`;
+    msg += `🌾 *Campo:* ${campo?.nombre || '—'}${cliente ? ' (' + cliente + ')' : ''}\n`;
+    msg += `📍 *Lote:* ${lote?.nombre || '—'} — *${has} has*\n`;
+    if ($('ot-cultivo').value) msg += `🌱 *Cultivo:* ${$('ot-cultivo').value}\n`;
+    msg += `⚙️ *Labor:* ${tipoLabel}\n`;
+    msg += `👤 *Aplicador:* ${$('ot-aplicador').value || '—'}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n\n`;
+
+    msg += `*PRODUCTOS A CARGAR:*\n`;
+    currentOTRows.forEach((r, i) => {
+      const vol = has > 0 ? fmt(r.dosis * has) : '—';
+      msg += `${i + 1}. *${r.producto}*\n`;
+      msg += `    Dosis: ${r.dosis} ${r.unidad}/ha\n`;
+      msg += `    Total: *${vol} ${r.unidad}*\n`;
+    });
+
+    const costoLabor = parseFloat($('ot-costo-labor').value) || 0;
+    let insumosHa = 0;
+    currentOTRows.forEach(r => { insumosHa += r.precio * r.dosis; });
+    const totalHa = insumosHa + costoLabor;
+
+    msg += `\n━━━━━━━━━━━━━━━━━━\n`;
+    if (costoLabor > 0) {
+      msg += `💰 Labor: USD ${fmt(costoLabor)}/ha\n`;
+    }
+    msg += `💵 *Total: USD ${fmt(totalHa)}/ha*`;
+    if (has > 0) msg += ` — *USD ${fmt(totalHa * has)} total*`;
+    msg += `\n`;
+
+    if ($('ot-notas').value.trim()) {
+      msg += `\n📝 *Notas:* ${$('ot-notas').value.trim()}\n`;
+    }
+    msg += `\n_Henderseeds SRL — Campaña ${data.campana}_`;
+
+    // Send to aplicador's phone if available
+    const tel = $('ot-tel').value.trim().replace(/[^0-9]/g, '');
+    const phone = tel ? '54' + tel : '';
+    const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+  },
+
+  exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, margin = 14, contentW = W - margin * 2;
+
+    const cid = $('ot-campo').value;
+    const lid = $('ot-lote').value;
+    const campo = data.campos.find(c => c.id === cid);
+    const lote = campo?.lotes.find(l => l.id === lid);
+    const has = parseFloat($('ot-has').value) || 0;
+    const tipo = App.getTipo();
+    const tipoLabel = tipo;
+    const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
+
+    const navy = [13, 45, 94];
+    const accent = [45, 111, 196];
+    const gris = [100, 116, 139];
+
+    let y = 15;
+
+    // Header
+    doc.setFillColor(...navy);
+    doc.rect(0, 0, W, 32, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('ORDEN DE TRABAJO', margin, 14);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(tipoLabel + ' · ' + fecha, margin, 22);
+    doc.text('Henderseeds SRL', W - margin, 14, { align: 'right' });
+    doc.text('Campaña ' + data.campana, W - margin, 22, { align: 'right' });
+
+    y = 40;
+
+    // Info
+    doc.setTextColor(...navy);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Campo:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(campo?.nombre || '—', margin + 20, y);
+    doc.setFont('helvetica', 'bold'); doc.text('Lote:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text(lote?.nombre || '—', W / 2 + 16, y);
+    y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Hectáreas:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(String(has), margin + 26, y);
+    doc.setFont('helvetica', 'bold'); doc.text('Cultivo:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-cultivo').value || '—', W / 2 + 20, y);
+    y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', margin, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-aplicador').value || '—', margin + 26, y);
+    y += 10;
+
+    // Table header
+    const cols = [margin, margin + 70, margin + 95, margin + 120, margin + 145];
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PRODUCTO', cols[0] + 3, y + 5.5);
+    doc.text('DOSIS', cols[1] + 2, y + 5.5);
+    doc.text('VOL. TOTAL', cols[2] + 2, y + 5.5);
+    doc.text('$/HA', cols[3] + 2, y + 5.5);
+    doc.text('MONTO', cols[4] + 2, y + 5.5);
+    y += 8;
+
+    let netoHa = 0;
+    currentOTRows.forEach((r, i) => {
+      if (y > 265) { doc.addPage(); y = 15; }
+      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
+      const costoHa = r.precio * r.dosis;
+      const vol = has > 0 ? fmt(r.dosis * has) + ' ' + r.unidad : '—';
+      const monto = has > 0 ? fmt(costoHa * has) : '—';
+      netoHa += costoHa;
+
+      doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+      const nombre = r.producto.length > 32 ? r.producto.substring(0, 30) + '...' : r.producto;
+      doc.text(nombre, cols[0] + 3, y + 4.5);
+      doc.text(r.dosis + ' ' + (r.unidad || 'L') + '/ha', cols[1] + 2, y + 4.5);
+      doc.setTextColor(...gris);
+      doc.text(vol, cols[2] + 2, y + 4.5);
+      doc.setTextColor(...navy);
+      doc.text('$' + fmt(r.precio), cols[3] + 2, y + 4.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(monto !== '—' ? '$' + monto : '—', cols[4] + 2, y + 4.5);
+      y += 7;
+    });
+
+    // Labor cost
+    const pdfCostoLabor = parseFloat($('ot-costo-labor').value) || 0;
+    if (pdfCostoLabor > 0) {
+      if (y > 265) { doc.addPage(); y = 15; }
+      doc.setFillColor(240, 244, 251); doc.rect(margin, y, contentW, 7, 'F');
+      doc.setTextColor(...navy); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+      doc.text('LABOR (' + tipoLabel + ')', cols[0] + 3, y + 4.5);
+      doc.text('$' + fmt(pdfCostoLabor) + '/ha', cols[3] + 2, y + 4.5);
+      if (has > 0) doc.text('$' + fmt(pdfCostoLabor * has), cols[4] + 2, y + 4.5);
+      y += 7;
+      netoHa += pdfCostoLabor;
+    }
+
+    // Totals
+    y += 3;
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, has ? 22 : 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.text('Total/ha (insumos + labor)', margin + 4, y + 8);
+    doc.text('USD ' + fmt(netoHa), W - margin - 4, y + 8, { align: 'right' });
+    if (has) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...accent);
+      doc.text('TOTAL ' + fmtInt(has) + ' has', margin + 4, y + 18);
+      doc.text('USD ' + fmt(netoHa * has), W - margin - 4, y + 18, { align: 'right' });
+    }
+    y += (has ? 28 : 16);
+
+    // Notes
+    if ($('ot-notas').value.trim()) {
+      doc.setFontSize(8); doc.setTextColor(...navy); doc.setFont('helvetica', 'bold');
+      doc.text('Notas:', margin, y + 4);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(...gris);
+      const lines = doc.splitTextToSize($('ot-notas').value.trim(), contentW - 20);
+      doc.text(lines, margin + 16, y + 4);
+      y += 4 + lines.length * 4;
+    }
+
+    // Footer
+    doc.setFontSize(7); doc.setTextColor(...gris); doc.setFont('helvetica', 'italic');
+    doc.text('Precios expresados en USD.', margin, y + 6);
+    doc.text('Henderseeds SRL — ' + fecha, margin, y + 10);
+
+    const fileName = 'OT_' + (campo?.nombre || 'orden').replace(/\s+/g, '_') + '_' + (lote?.nombre || '').replace(/\s+/g, '_') + '.pdf';
+    try {
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Orden de Trabajo' });
+      } else {
+        doc.save(fileName);
+      }
+    } catch(err) {
+      if (err.name !== 'AbortError') doc.save(fileName);
+    }
+  },
+
+  /* ── Delete order ── */
+  deleteOrden(oid) {
+    if (!confirm('¿Eliminar esta orden?')) return;
+    data.ordenes = data.ordenes.filter(o => o.id !== oid);
+    Storage.save(data);
+    App.renderOrdenes();
+  },
+};
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>

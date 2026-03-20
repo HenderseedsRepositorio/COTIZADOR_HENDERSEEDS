@@ -89,7 +89,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
 /* Cliente dropdown */
 .cliente-wrap{position:relative}
-.cliente-dd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--c-border);border-top:none;border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;z-index:60;box-shadow:0 8px 24px rgba(13,45,94,.12);display:none}
+.cliente-dd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--c-border);border-top:none;border-radius:0 0 10px 10px;max-height:60vh;overflow-y:auto;z-index:60;box-shadow:0 8px 24px rgba(13,45,94,.12);display:none}
 .cliente-dd.show{display:block}
 .cliente-dd .dd-item{padding:6px 12px;font-size:.76rem}
 .cliente-dd .dd-add{color:var(--c-green);font-weight:700;font-size:.68rem}
@@ -728,8 +728,8 @@ const App = {
     const dd = $('cliente-dd');
     if(!clientes.length){ dd.classList.remove('show'); return; }
     const matches = q
-      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0,10)
-      : (showAll ? clientes.slice(0,15) : []);
+      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0,30)
+      : (showAll ? clientes.slice(0,30) : []);
     if(!matches.length && !q){ dd.classList.remove('show'); return; }
     let html = matches.map(c =>
       `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g,"\\'")}')">`+

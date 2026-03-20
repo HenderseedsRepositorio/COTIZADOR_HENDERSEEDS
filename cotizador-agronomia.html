@@ -334,7 +334,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   white-space: nowrap;
 }
 
-.cliente-dd { z-index: 200; }
+.cliente-dd { z-index: 200; max-height: 60vh; }
 .cliente-dd .dd-item { font-size: 13px; padding: 6px 12px; }
 .cliente-dd .dd-add { color: var(--accent); font-weight: 700; font-size: 12px; }
 
@@ -1951,8 +1951,8 @@ const App = {
     const dd = $('cliente-dd');
     if (!clientes.length) { dd.classList.remove('show'); return; }
     clienteMatches = q
-      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0, 10)
-      : (showAll ? clientes.slice(0, 15) : []);
+      ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0, 30)
+      : (showAll ? clientes.slice(0, 30) : []);
     if (!clienteMatches.length && !q) { dd.classList.remove('show'); return; }
     let html = clienteMatches.map((c, i) =>
       `<div class="dd-item${i === clienteHighlight ? ' highlighted' : ''}" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">

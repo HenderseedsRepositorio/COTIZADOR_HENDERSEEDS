@@ -184,7 +184,7 @@ body {
 <body>
 
 <div class="container">
-  <img src="logo-henderseeds.png" alt="Henderseeds" class="logo" id="heroLogo">
+  <img src="assets/logo-henderseeds.png" alt="Henderseeds" class="logo" id="heroLogo">
   <div class="title">COTIZADORES</div>
   <div class="subtitle">Seleccioná vendedor y cotizador</div>
 
@@ -215,6 +215,15 @@ body {
     <div class="cot-btn-text">
       <span class="cot-btn-name">Cotizador Agronomía</span>
       <span class="cot-btn-desc">Herbicidas · Fungicidas · Insecticidas</span>
+    </div>
+    <span class="cot-btn-arrow">&rarr;</span>
+  </a>
+
+  <!-- Seguimiento Campaña -->
+  <a href="campana.html" class="cot-btn" id="cardCampana">
+    <div class="cot-btn-text">
+      <span class="cot-btn-name">Seguimiento Campaña</span>
+      <span class="cot-btn-desc">Campos · Lotes · Insumos · Labores</span>
     </div>
     <span class="cot-btn-arrow">&rarr;</span>
   </a>
@@ -266,13 +275,13 @@ body {
       // Fallback: yellow N text
       nideraImg.parentElement.innerHTML = '<span style="font-family:Archivo Black,sans-serif;font-size:1.4rem;color:#0d2d5e;font-weight:900;">N</span>';
     };
-    img.src = 'Logo-nidera.svg';
+    img.src = 'assets/Logo-nidera.svg';
   }
 
   // Fallback for main logo
   var heroLogo = document.getElementById('heroLogo');
   heroLogo.onerror = function() {
-    this.src = '00-LOGO HENDERSEEDS TRANSPARENTE.png';
+    this.src = 'assets/00-LOGO HENDERSEEDS TRANSPARENTE.png';
     this.onerror = function() { this.style.display = 'none'; };
   };
 })();

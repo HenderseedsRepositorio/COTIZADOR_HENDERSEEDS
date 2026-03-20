@@ -1,11 +1,10 @@
-# ── Subcarpetas de desarrollo ──
-1-Cotizador Semillas (Nidera)/PRUEBA/
-1-Cotizador Semillas (Nidera)/Versiones viejas index/
-1-Cotizador Semillas (Nidera)/juego-memoria/
-2-Cotizador Agronomia (Henderseeds)/cotizador-agro-starter/
-2-Cotizador Agronomia (Henderseeds)/cotizador-agro-starter.zip
-2-Cotizador Agronomia (Henderseeds)/sheets/
-2-Cotizador Agronomia (Henderseeds)/resumen/
+# ── Archive (versiones viejas, pruebas, juegos) ──
+archive/
+
+# ── Subcarpetas legacy (contenido no trackeado que queda local) ──
+1-Cotizador Semillas (Nidera)/
+2-Cotizador Agronomia (Henderseeds)/
+APP Seguimiento campaña/
 
 # ── Claude / editor config ──
 .claude/
@@ -17,10 +16,10 @@ CLAUDE.md
 *.xlsx
 *.zip
 *.txt
+
+# ── Imagenes (excepto assets/) ──
 *.png
-!00-LOGO HENDERSEEDS TRANSPARENTE.png
-!logo-henderseeds.png
-!2-Cotizador Agronomia (Henderseeds)/00-LOGO HENDERSEEDS TRANSPARENTE.png
+!assets/*.png
 
 # ── OS ──
 .DS_Store

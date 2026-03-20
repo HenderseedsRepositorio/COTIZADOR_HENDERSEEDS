@@ -341,7 +341,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
       <div class="form-row" style="margin-bottom:10px;">
         <div>
           <div class="form-lbl">Hectáreas</div>
-          <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" readonly style="background:var(--bg);">
+          <input type="number" id="ot-has" class="inp inp-sm" placeholder="Has" oninput="App.renderOTRows()">
         </div>
         <div>
           <div class="form-lbl">Cultivo</div>

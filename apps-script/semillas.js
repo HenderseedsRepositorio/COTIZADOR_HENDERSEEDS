@@ -169,7 +169,7 @@ function getHistorial() {
   if (lastRow <= 1) return [];
   var startRow = Math.max(2, lastRow - 99);
   var numRows = lastRow - startRow + 1;
-  var numCols = 19;
+  var numCols = 20;
   var range = sheet.getRange(startRow, 1, numRows, numCols);
   var values = range.getValues();
   return values;
@@ -213,7 +213,8 @@ function registrarCotizacion(data) {
       item.valZ || 0,
       item.valP || 0,
       item.totalSIVA || 0,
-      item.totalCIVA || 0
+      item.totalCIVA || 0,
+      data.establecimiento || '—'
     ]);
   }
 

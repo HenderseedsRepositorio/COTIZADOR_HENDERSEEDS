@@ -340,6 +340,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
       </div>
+      <div style="margin-top:6px;"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Establecimiento</label><input type="text" id="establecimiento" placeholder="Nombre del campo (opcional)" class="inp" style="font-size:.82rem;padding:7px 9px;width:100%;box-sizing:border-box;"></div>
     </div>
 
     <!-- HÍBRIDOS -->
@@ -970,8 +971,8 @@ const Calc = {
       const fZP=(1-valZ/100)*(1-valP/100);
       const fVol=fVAct!==null?fVAct:this.getVolFactor(l.tipo,esM?bM:bG);
       const pVol=Math.round((1-fVol)*1000)/10;
-      const unit=l.lista*fPre*fC*fCre*fCro*fVol*fZP;
-      const cant=+l.cant, siva=unit*cant, civa=siva*(1+CONFIG.IVA);
+      const unit=Math.round(l.lista*fPre*fC*fCre*fCro*fVol*fZP*100)/100;
+      const cant=+l.cant, siva=Math.round(unit*cant*100)/100, civa=Math.round(siva*(1+CONFIG.IVA)*100)/100;
 
       $(`u-neto-${i}`).innerText=`\$${fmt(unit)}`;
       $(`u-siva-${i}`).innerText=`\$${fmt(siva)}`;
@@ -1162,37 +1163,67 @@ const Sheets = {
 const Quote = {
   async build() {
     const lc=lastLC, net=lc.reduce((s,l)=>s+l.totalSIVA,0);
+    const hasCont=lc.some(l=>l.pCont>0);
+    // If contado is active, unitNeto already includes the 8% — calculate lista (pre-contado) price
+    // If contado is NOT active, unitNeto IS the lista price
+    const contFactor=hasCont?0.92:1;
+
     $('q-fecha').innerText=dateStr();
     $('q-vendedor').innerText=vendor||'—';
     $('q-cliente').innerText=$('cliente').value||'—';
     $('q-cuit').innerText=$('cuit').value||'';
+    const estab=$('establecimiento').value;
+    if(estab) $('q-cliente').innerText+=` — ${estab}`;
     $('q-neto').innerText=`USD ${fmt(net)}`;
-    $('q-contado').innerText=`USD ${fmt(net*0.92)}`;
+    $('q-contado').innerText=`USD ${fmt(net)}`;
+    $('q-iva').innerText=`USD ${fmt(net*CONFIG.IVA)}`;
+    $('q-final').innerText=`USD ${fmt(net*(1+CONFIG.IVA))}`;
 
-    // Descuentos summary
+    // Descuentos summary — show ALL active discounts
     let dHtml='';
     const addDesc=(tipo,emoji,color,label)=>{
       const m=lc.find(l=>l.tipo===tipo);
       if(!m)return;
-      dHtml+=`<div style="background:#f8faff;border-radius:6px;padding:6px 10px;border-left:3px solid ${color};"><p style="margin:0 0 3px;font-size:.56rem;font-weight:700;color:${color};text-transform:uppercase;">${emoji} ${label}</p><p style="margin:0;font-size:.62rem;color:#475569;line-height:1.5;">Zonal: ${m.valZ}% · Hend: ${m.valP}% · Vol: ${m.pVol}%</p></div>`;
+      const parts=[];
+      if(m.pPre>0) parts.push(`Pre-campaña: ${m.pPre}%`);
+      if(m.pCont>0) parts.push(`Contado: ${m.pCont}%`);
+      if(m.pCre>0) parts.push(`Crecer: ${m.pCre}%`);
+      if(m.pCro>0) parts.push(`Cross: ${m.pCro}%`);
+      if(m.pVol>0) parts.push(`Vol: ${m.pVol}%`);
+      if(m.valZ>0) parts.push(`Zonal: ${m.valZ}%`);
+      if(m.valP>0) parts.push(`Hend: ${m.valP}%`);
+      if(!parts.length) return;
+      dHtml+=`<div style="background:#f8faff;border-radius:6px;padding:6px 10px;border-left:3px solid ${color};"><p style="margin:0 0 3px;font-size:.56rem;font-weight:700;color:${color};text-transform:uppercase;">${emoji} ${label}</p><p style="margin:0;font-size:.62rem;color:#475569;line-height:1.5;">${parts.join(' · ')}</p></div>`;
     };
     addDesc('maiz','🌽','#89ba16','Maíz');
     addDesc('girasol','🌻','#f59e0b','Girasol');
     $('q-descuentos').innerHTML=dHtml;
-    $('q-iva').innerText=`USD ${fmt(net*CONFIG.IVA)}`;
-    $('q-final').innerText=`USD ${fmt(net*(1+CONFIG.IVA))}`;
+    if(dHtml) $('q-descuentos').style.display='grid';
 
     $('q-numero').innerText='⏳ Registrando...';
     const num=await Sheets.register();
     $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL (sin sincronizar)';
 
+    // Column headers: if contado active show Contado + Lista, otherwise just Neto
+    const colContHead=hasCont?'Contado':'Neto';
+    const colListHead=hasCont?'Lista':'';
+
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
-      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\$${fmt(l.unitNeto*0.92)}</td><td class="q-lista">\$${fmt(l.unitNeto)}</td></tr>`;
+      const listaPrice=hasCont?`<td class="q-lista">\\$${fmt(l.unitNeto/contFactor)}</td>`:'';
+      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\\$${fmt(l.unitNeto)}</td>${listaPrice}</tr>`;
     }).join('');
   },
+  _validate() {
+    if(!vendor) { Toast.warn('Falta vendedor','Seleccioná un vendedor antes de cotizar.'); return false; }
+    if(!$('cliente').value.trim()) { Toast.warn('Falta cliente','Ingresá el nombre del cliente.'); return false; }
+    if(!lastLC.length) { Toast.warn('Sin híbridos','Agregá al menos un híbrido antes de compartir.'); return false; }
+    const sinCant=lastLC.filter(l=>!l.cant||l.cant<=0);
+    if(sinCant.length) { Toast.warn('Cantidad en 0',`${sinCant.map(l=>l.hibrido).join(', ')} tiene cantidad 0.`); return false; }
+    return true;
+  },
   async shareDirect() {
-    if(!lastLC.length) return alert('Agregá al menos un híbrido antes de compartir.');
+    if(!this._validate()) return;
     const btn=$('btnShareDirect'), orig=btn.innerHTML;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
@@ -1208,7 +1239,7 @@ const Quote = {
     finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
   async show() {
-    if(!lastLC.length) return alert('Agregá al menos un híbrido antes de compartir.');
+    if(!this._validate()) return;
     await this.build();
     $('quote-overlay').classList.add('visible');
     document.body.style.overflow='hidden';

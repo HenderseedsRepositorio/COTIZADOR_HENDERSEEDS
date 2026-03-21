@@ -1,0 +1,2090 @@
+{
+  "lotes": [
+    {
+      "id": "l_imported_DJ1",
+      "nombre": "DJ1",
+      "hectareas": 75.0,
+      "cultivo": "Maiz"
+    },
+    {
+      "id": "l_imported_DJ2",
+      "nombre": "DJ2",
+      "hectareas": 55.0,
+      "cultivo": "Maiz tardio"
+    },
+    {
+      "id": "l_imported_DJ3",
+      "nombre": "DJ3",
+      "hectareas": 70.0,
+      "cultivo": "Maiz tardio"
+    },
+    {
+      "id": "l_imported_EP1",
+      "nombre": "EP1",
+      "hectareas": 70.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_EP2",
+      "nombre": "EP2",
+      "hectareas": 40.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_EP3",
+      "nombre": "EP3",
+      "hectareas": 14.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_EP4",
+      "nombre": "EP4",
+      "hectareas": 45.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_DH",
+      "nombre": "DH",
+      "hectareas": 190.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_PO1",
+      "nombre": "PO1",
+      "hectareas": 35.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_PO2",
+      "nombre": "PO2",
+      "hectareas": 35.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_SC1",
+      "nombre": "SC1",
+      "hectareas": 62.0,
+      "cultivo": "Maiz tardio"
+    },
+    {
+      "id": "l_imported_SC2",
+      "nombre": "SC2",
+      "hectareas": 48.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_SC3",
+      "nombre": "SC3",
+      "hectareas": 37.0,
+      "cultivo": "Girasol"
+    },
+    {
+      "id": "l_imported_SC4",
+      "nombre": "SC4",
+      "hectareas": 86.0,
+      "cultivo": "Maiz tardio"
+    }
+  ],
+  "ordenes": [
+    {
+      "id": "ot_imported_1",
+      "aplicador": "gary",
+      "fecha": "2024-07-08",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC4",
+              "hectareas": 86.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.07,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.07,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.93,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.115,
+              "precio": 9.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 0.93,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.1,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-07-08T12:00:00.000Z",
+      "updatedAt": "2024-07-08T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_2",
+      "aplicador": "gary",
+      "fecha": "2024-08-27",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC1",
+              "hectareas": 60.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.05,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.0,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.165,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.1,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.0,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-08-27T12:00:00.000Z",
+      "updatedAt": "2024-08-27T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_3",
+      "aplicador": "gary",
+      "fecha": "2024-08-27",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC2",
+              "hectareas": 48.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_SC3",
+              "hectareas": 37.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.058,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.047,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.17,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.115,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "DIFLUFENICAN 50 SIGMA X 5 LT",
+              "dosis": 0.235,
+              "precio": 46.66,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.094,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 1.88,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-08-27T12:00:00.000Z",
+      "updatedAt": "2024-08-27T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_4",
+      "aplicador": "gary",
+      "fecha": "2024-09-06",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 170.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.053,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.047,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.175,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.117,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.0,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-09-06T12:00:00.000Z",
+      "updatedAt": "2024-09-06T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_5",
+      "aplicador": "pueblas",
+      "fecha": "2024-09-12",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DH",
+              "hectareas": 90.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP2",
+              "hectareas": 14.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP3",
+              "hectareas": 41.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP4",
+              "hectareas": 45.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "FULL CONTROL x 5 LT",
+              "dosis": 0.052,
+              "precio": 36.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.052,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.05,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DIFLUFENICAN 50 SIGMA X 5 LT",
+              "dosis": 0.21,
+              "precio": 46.66,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.1,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-09-12T12:00:00.000Z",
+      "updatedAt": "2024-09-12T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_6",
+      "aplicador": "gary",
+      "fecha": "2024-10-18",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC2",
+              "hectareas": 48.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_SC3",
+              "hectareas": 37.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.058,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.105,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.17,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DIFLUFENICAN 50 SIGMA X 5 LT",
+              "dosis": 0.294,
+              "precio": 46.66,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "TRASPECT M X 20 LT",
+              "dosis": 0.47,
+              "precio": 7.1,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 1.88,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-10-18T12:00:00.000Z",
+      "updatedAt": "2024-10-18T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_7",
+      "aplicador": "pueblas",
+      "fecha": "2024-10-30",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DH",
+              "hectareas": 190.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP1",
+              "hectareas": 85.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP2",
+              "hectareas": 35.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP3",
+              "hectareas": 15.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP4",
+              "hectareas": 45.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.052,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.102,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.31,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DIFLUFENICAN 50 SIGMA X 5 LT",
+              "dosis": 0.228,
+              "precio": 46.66,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "CLETODIM ZYNION® PLUS X 20 LT",
+              "dosis": 0.457,
+              "precio": 8.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.08,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.1,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-10-30T12:00:00.000Z",
+      "updatedAt": "2024-10-30T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_8",
+      "aplicador": "pueblas",
+      "fecha": "2024-11-13",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DJ1",
+              "hectareas": 75.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "l_imported_DJ2",
+              "hectareas": 70.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "l_imported_DJ3",
+              "hectareas": 65.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 3.25,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-13T12:00:00.000Z",
+      "updatedAt": "2024-11-13T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_9",
+      "aplicador": "lucas",
+      "fecha": "2024-11-15",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_campito",
+              "hectareas": 16.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "ACTIVE SECATO X 20 LT",
+              "dosis": 1.0,
+              "precio": 1.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.272,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.18,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "TRASPECT M X 20 LT",
+              "dosis": 0.545,
+              "precio": 7.1,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.08,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 3.25,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-15T12:00:00.000Z",
+      "updatedAt": "2024-11-15T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_10",
+      "aplicador": "gary",
+      "fecha": "2024-11-14",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC1",
+              "hectareas": 60.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "l_imported_SC4",
+              "hectareas": 86.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.054,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.27,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.95,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.17,
+              "precio": 9.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "VESDUA X 5 LT",
+              "dosis": 0.1,
+              "precio": 35.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.082,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.33,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-14T12:00:00.000Z",
+      "updatedAt": "2024-11-14T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_11",
+      "aplicador": "gary",
+      "fecha": "2024-11-13",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 170.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.053,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.29,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.055,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.175,
+              "precio": 9.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "VESDUA X 5 LT",
+              "dosis": 0.09,
+              "precio": 35.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "CAREXO X 1 LT",
+              "dosis": 0.082,
+              "precio": 120.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.35,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-13T12:00:00.000Z",
+      "updatedAt": "2024-11-13T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_12",
+      "aplicador": "gary",
+      "fecha": "2024-11-13",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC2",
+              "hectareas": 46.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_SC3",
+              "hectareas": 36.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "IMATRON X 5 LT",
+              "dosis": 0.182,
+              "precio": 44.4,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.12,
+              "precio": 21.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-13T12:00:00.000Z",
+      "updatedAt": "2024-11-13T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_13",
+      "aplicador": "pueblas",
+      "fecha": "2024-11-21",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PO1",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_PO2",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.09,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.255,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.0,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.19,
+              "precio": 22.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "TRASPECT M X 20 LT",
+              "dosis": 0.51,
+              "precio": 7.1,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.128,
+              "precio": 21.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.56,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-21T12:00:00.000Z",
+      "updatedAt": "2024-11-21T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_14",
+      "aplicador": "pueblas",
+      "fecha": "2024-11-18",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DH",
+              "hectareas": 175.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP4",
+              "hectareas": 45.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.22,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.2,
+              "precio": 22.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "HALOXIFOP VELOCITY X 5 LT",
+              "dosis": 0.175,
+              "precio": 22.14,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.13,
+              "precio": 21.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "IMATRON X 5 LT",
+              "dosis": 0.185,
+              "precio": 44.4,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-18T12:00:00.000Z",
+      "updatedAt": "2024-11-18T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_15",
+      "aplicador": "pueblas",
+      "fecha": "2024-11-23",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_EP2",
+              "hectareas": 14.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "l_imported_EP3",
+              "hectareas": 46.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.27,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "IMATRON X 5 LT",
+              "dosis": 0.185,
+              "precio": 44.4,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.18,
+              "precio": 22.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PARAQUAT SIGMA X 20 LT",
+              "dosis": 2.0,
+              "precio": 3.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.115,
+              "precio": 21.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-23T12:00:00.000Z",
+      "updatedAt": "2024-11-23T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_16",
+      "aplicador": "pueblas",
+      "fecha": "2024-11-24",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_EP1",
+              "hectareas": 70.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.2,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "IMATRON X 5 LT",
+              "dosis": 0.185,
+              "precio": 44.4,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.17,
+              "precio": 22.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "TRASPECT M X 20 LT",
+              "dosis": 0.57,
+              "precio": 7.1,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.115,
+              "precio": 21.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-11-24T12:00:00.000Z",
+      "updatedAt": "2024-11-24T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_17",
+      "aplicador": "pueblas",
+      "fecha": "2024-12-10",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DJ1",
+              "hectareas": 75.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "l_imported_DJ2",
+              "hectareas": 75.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "l_imported_DJ3",
+              "hectareas": 50.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.08,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "ACTIVE SECATO X 20 LT",
+              "dosis": 0.4,
+              "precio": 1.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.265,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.165,
+              "precio": 9.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 4.0,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-12-10T12:00:00.000Z",
+      "updatedAt": "2024-12-10T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_18",
+      "aplicador": "gary",
+      "fecha": "2024-12-13",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 95.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.063,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.315,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "HEAT X 0,35 KG",
+              "dosis": 0.037,
+              "precio": 320.0,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.05,
+              "precio": 6.3,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.021,
+              "precio": 99.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.1,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-12-13T12:00:00.000Z",
+      "updatedAt": "2024-12-13T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_19",
+      "aplicador": "gary",
+      "fecha": "2024-12-13",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC4",
+              "hectareas": 86.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.058,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.069,
+              "precio": 30.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 0.93,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.175,
+              "precio": 9.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "MAYORAL X 5 LT",
+              "dosis": 0.232,
+              "precio": 59.5,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 6,
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.023,
+              "precio": 99.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 7,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.09,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-12-13T12:00:00.000Z",
+      "updatedAt": "2024-12-13T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_20",
+      "aplicador": "gary",
+      "fecha": "2024-12-27",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_SC1",
+              "hectareas": 60.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.165,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.65,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-12-27T12:00:00.000Z",
+      "updatedAt": "2024-12-27T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_21",
+      "aplicador": "gary",
+      "fecha": "2024-12-27",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 60.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 35.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "DICAMBA SIGMA X 10LT",
+              "dosis": 0.165,
+              "precio": 10.7,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 5,
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.65,
+              "precio": 4.89,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2024-12-27T12:00:00.000Z",
+      "updatedAt": "2024-12-27T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_22",
+      "aplicador": "pueblas",
+      "fecha": "2025-01-19",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_DJ1",
+              "hectareas": 70.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "l_imported_DJ2",
+              "hectareas": 70.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "l_imported_DJ3",
+              "hectareas": 50.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.26,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "MESOTRIONE LEKTOR X 5 LT",
+              "dosis": 0.315,
+              "precio": 72.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2025-01-19T12:00:00.000Z",
+      "updatedAt": "2025-01-19T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_23",
+      "aplicador": "pueblas",
+      "fecha": "2025-01-15",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_EP1",
+              "hectareas": 70.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.285,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2025-01-15T12:00:00.000Z",
+      "updatedAt": "2025-01-15T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_24",
+      "aplicador": "gary",
+      "fecha": "2025-01-18",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "completada",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 94.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "id": 1,
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.32,
+              "precio": 15.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 2,
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.06,
+              "precio": 8.4,
+              "unidad": "Kg",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 3,
+              "producto": "MESOTRIONE LEKTOR X 5 LT",
+              "dosis": 0.32,
+              "precio": 72.0,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            },
+            {
+              "id": 4,
+              "producto": "SMARTFOIL X 20 LT",
+              "dosis": 1.7,
+              "precio": 4.8,
+              "unidad": "L",
+              "formulacion": "",
+              "categoria": "Herbicidas",
+              "iva_pct": 0
+            }
+          ]
+        }
+      ],
+      "createdAt": "2025-01-18T12:00:00.000Z",
+      "updatedAt": "2025-01-18T12:00:00.000Z",
+      "campana": "2024/25"
+    },
+    {
+      "id": "ot_imported_25",
+      "aplicador": "",
+      "fecha": "",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "estado": "pendiente",
+      "notas": "",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "l_imported_PV1",
+              "hectareas": 0.0,
+              "cultivo": "Soja"
+            }
+          ],
+          "productos": []
+        }
+      ],
+      "createdAt": "",
+      "updatedAt": "",
+      "campana": "2024/25"
+    }
+  ],
+  "aplicadores": [
+    "gary",
+    "lucas",
+    "pueblas"
+  ],
+  "campana": "2024/25"
+}

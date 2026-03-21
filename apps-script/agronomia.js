@@ -71,9 +71,13 @@ function doGet(e) {
         result = getClientes();
         break;
 
-      // ── Acá irían las acciones de Nidera si las tenés ──
-      // case 'getPrecios': ...
-      // case 'getCatalogo': ...
+      // ── Acciones Seguimiento de Lotes (Campana) ──
+      case 'loadCampana':
+        result = loadCampana(e.parameter.productor);
+        break;
+      case 'listProductores':
+        result = listProductores();
+        break;
 
       default:
         result = { error: 'Acción no válida: ' + action };
@@ -95,6 +99,8 @@ function doPost(e) {
       result = registrarCotizacionAgro(data);
     } else if (data.action === 'addCliente') {
       result = addCliente(data);
+    } else if (data.action === 'saveCampana') {
+      result = saveCampana(data);
     } else {
       result = { error: 'Acción POST no válida' };
     }

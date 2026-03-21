@@ -137,7 +137,14 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .ot-tot-row.big span:first-child { opacity: 1; }
 .ot-tot-mono { font-family: var(--mono); }
 .lote-card { border-left: 4px solid var(--accent); }
-.ot-card { cursor: pointer; transition: border-color .15s; border: 1.5px solid transparent; }
+.badge { display:inline-block; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:.3px; }
+.badge-pendiente { background:#fff8e1; color:#856404; }
+.badge-en_curso { background:#e3f2fd; color:#1565c0; }
+.badge-completada { background:#e8f5e9; color:#2e7d32; }
+.ot-card { cursor: pointer; transition: border-color .15s; border: 1.5px solid transparent; border-left: 4px solid var(--text-mut); }
+.ot-card.estado-pendiente { border-left-color: #ffc107; }
+.ot-card.estado-en_curso { border-left-color: #1976d2; }
+.ot-card.estado-completada { border-left-color: #388e3c; }
 .ot-card:hover { border-color: var(--accent); }
 .ot-detail { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
 .bar-chart { margin: 12px 0; }
@@ -162,6 +169,9 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .backup-bar { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; justify-content: flex-end; }
 .backup-bar .btn { font-size: .62rem; padding: 5px 12px; }
 .backup-file-input { display: none; }
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:10px 22px; border-radius:99px; font-size:13px; font-weight:600; z-index:999; animation:toastIn .3s ease, toastOut .3s ease 2.2s forwards; pointer-events:none; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,.25); }
+@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+@keyframes toastOut { to { opacity:0; transform:translateX(-50%) translateY(-10px); } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 .fu { animation: fadeUp .26s ease both; }
@@ -172,7 +182,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
   .rows-header { display: none; }
   .row-item { display: flex; flex-wrap: wrap; gap: 4px 8px; min-width: 0; grid-template-columns: none; }
   .row-item .row-prod { width: calc(100% - 30px); }
-  .row-item .row-inp { width: 60px; }
+  .row-item .row-inp { width: 72px; font-size: 13px; padding: 5px 6px; }
   .row-item .row-val { font-size: 11px; }
   .row-item .row-rm { margin-left: auto; }
   .row-mob-line { display: flex; width: 100%; gap: 6px; align-items: center; justify-content: space-between; }
@@ -212,9 +222,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;">&larr; Menu</a>
     <span id="productor-label" style="font-weight:700;font-size:.62rem;color:var(--navy);cursor:pointer;" onclick="App.logoutProductor()"></span>
     <span>Campana: <select id="campana-select" style="border:none;background:none;color:var(--navy-sky);font-weight:700;font-size:.62rem;font-family:var(--font);cursor:pointer;">
-      <option value="2023/24">2023/24</option><option value="2024/25">2024/25</option><option value="2025/26" selected>2025/26</option><option value="2026/27">2026/27</option>
     </select></span>
-    <span id="status-text" style="font-size:.58rem;">Datos locales</span>
+    <span style="display:inline-flex;align-items:center;gap:3px;"><span id="status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mut);display:inline-block;"></span><span id="status-text" style="font-size:.62rem;font-weight:600;">Datos locales</span></span>
   </div>
 
   <nav class="tabs">
@@ -248,7 +257,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
           <input type="text" id="ot-tipo" class="inp inp-sm" value="Pulverizacion terrestre" placeholder="Ej: Pulverizacion..." autocomplete="off" oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
         </div>
         <div><div class="form-lbl">Costo labor USD/ha</div>
-          <input type="number" id="ot-costo-labor" class="inp inp-sm" value="" placeholder="0.00" step="0.01" min="0" style="font-family:var(--mono);">
+          <input type="number" inputmode="decimal" id="ot-costo-labor" class="inp inp-sm" value="" placeholder="0.00" step="0.01" min="0" style="font-family:var(--mono);">
         </div>
       </div>
     </div>
@@ -281,8 +290,15 @@ textarea.inp { resize: vertical; min-height: 60px; }
       <button class="chip green" data-filtro="en_curso" onclick="App.setFiltroOT(this)">En curso</button>
       <button class="chip" data-filtro="completada" onclick="App.setFiltroOT(this)">Completadas</button>
     </div>
-    <div style="margin-bottom:8px;"><select id="ord-lote" class="inp inp-sm" onchange="App.renderOrdenes()"><option value="">Todos los lotes</option></select></div>
+    <div class="form-row" style="margin-bottom:8px;">
+      <select id="ord-lote" class="inp inp-sm" onchange="App.renderOrdenes()"><option value="">Todos los lotes</option></select>
+      <div style="display:flex;gap:4px;">
+        <input type="date" id="ord-desde" class="inp inp-sm" onchange="App.renderOrdenes()" style="flex:1;" title="Desde">
+        <input type="date" id="ord-hasta" class="inp inp-sm" onchange="App.renderOrdenes()" style="flex:1;" title="Hasta">
+      </div>
+    </div>
     <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off" oninput="App.renderOrdenes()" style="margin-bottom:8px;">
+    <div id="ordenes-summary" style="font-size:12px;color:var(--text-sec);padding:4px 0 8px;font-weight:600;"></div>
     <div id="ordenes-list"></div>
   </section>
 
@@ -308,6 +324,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 </div> <!-- #app-main -->
 
 <div class="wa-bar" id="wa-bar">
+  <span id="wa-draft" style="display:none;font-size:10px;color:var(--orange);font-weight:700;position:absolute;top:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;">Borrador sin guardar</span>
   <button class="btn btn-green" onclick="App.compartirWA()">Enviar Orden</button>
   <button class="btn btn-outline" onclick="App.exportarPDF()">PDF</button>
 </div>
@@ -317,8 +334,9 @@ const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = n => Number(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
-const dateISO = () => new Date().toISOString().slice(0, 10);
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+const dateISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML.replace(/'/g, '&#39;'); }
+function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
 
 const Storage = {
   _counter: 0,
@@ -350,8 +368,14 @@ const Cloud = {
   _syncing: false,
 
   setStatus(msg, isError) {
-    const el = $('status-text');
+    const el = $('status-text'), dot = $('status-dot');
     if (el) { el.textContent = msg; el.style.color = isError ? 'var(--red)' : ''; }
+    if (dot) {
+      if (isError) dot.style.background = 'var(--red)';
+      else if (msg.startsWith('Guardado') || msg === 'Datos cargados') dot.style.background = 'var(--green)';
+      else if (msg.startsWith('Guardando') || msg.startsWith('Cargando')) dot.style.background = 'var(--orange)';
+      else dot.style.background = 'var(--text-mut)';
+    }
   },
 
   // Debounced sync — waits 3s after last change before syncing
@@ -525,6 +549,7 @@ const App = {
       if (!e.target.closest('#ot-aplicador') && !e.target.closest('#aplicador-dd')) App.hideAplicadorDD();
       if (!e.target.closest('#ot-tipo') && !e.target.closest('#tipo-dd')) App.hideTipoDD();
     });
+    window.addEventListener('scroll', () => { App.hideDropdown(); App.hideAplicadorDD(); App.hideTipoDD(); }, true);
     document.addEventListener('keydown', e => {
       const inp = e.target.closest('.app-search');
       if (!inp) return;
@@ -540,7 +565,11 @@ const App = {
       else if (e.key === 'Enter') { e.preventDefault(); App.selectAplicadorHighlight(); }
       else if (e.key === 'Escape') App.hideAplicadorDD();
     });
-    const cs = $('campana-select'); cs.value = data.campana; cs.addEventListener('change', function() { data.campana = this.value; Storage.save(data); });
+    const cs = $('campana-select');
+    const y = new Date().getFullYear();
+    for (let i = y - 3; i <= y + 1; i++) { const v = `${i}/${String(i+1).slice(2)}`; const o = document.createElement('option'); o.value = v; o.textContent = v; cs.appendChild(o); }
+    if (data.campana && !cs.querySelector(`option[value="${data.campana}"]`)) { const o = document.createElement('option'); o.value = data.campana; o.textContent = data.campana; cs.appendChild(o); }
+    cs.value = data.campana; cs.addEventListener('change', function() { data.campana = this.value; Storage.save(data); });
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
     App._initAplicaciones(); App.renderLotes(); App.refreshSelectors(); loadCatalog();
@@ -572,11 +601,19 @@ const App = {
     const nombre = $('m-lote-nombre').value.trim();
     if (!nombre) { $('m-lote-nombre').style.borderColor = 'var(--red)'; return; }
     const has = parseFloat($('m-lote-has').value) || 0, cultivo = $('m-lote-cultivo').value.trim();
+    if (has <= 0 && !confirm('Las hectareas estan en 0. Los calculos de volumen y monto no funcionaran.\n\nGuardar de todos modos?')) return;
     if (lid) { const l = data.lotes.find(x => x.id === lid); if (l) { l.nombre = nombre; l.hectareas = has; l.cultivo = cultivo; } }
     else data.lotes.push({ id: Storage.nextId('l'), nombre, hectareas: has, cultivo });
     Storage.save(data); closeModal(); App.renderLotes(); App.refreshSelectors();
   },
-  removeLote(lid) { if (!confirm('Eliminar este lote?')) return; data.lotes = data.lotes.filter(x => x.id !== lid); Storage.save(data); App.renderLotes(); App.refreshSelectors(); },
+  removeLote(lid) {
+    const linkedOrders = data.ordenes.filter(o => (o.aplicaciones || []).some(a => (a.lotes || []).some(l => l.loteId === lid)));
+    const msg = linkedOrders.length
+      ? `Este lote esta vinculado a ${linkedOrders.length} orden(es). Si lo eliminas, esas ordenes mostraran "?" en lugar del nombre.\n\nEliminar de todos modos?`
+      : 'Eliminar este lote?';
+    if (!confirm(msg)) return;
+    data.lotes = data.lotes.filter(x => x.id !== lid); Storage.save(data); App.renderLotes(); App.refreshSelectors();
+  },
 
   /* ── EXPORT/IMPORT ── */
   exportData() {
@@ -706,8 +743,8 @@ const App = {
         return `<div class="row-item" data-rowid="${r.id}" data-appidx="${i}">
           <div class="row-prod"><span class="row-prod-name">${esc(r.producto)}</span><span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span></div>
           <div class="row-mob-line">
-            <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0" onfocus="App.setActiveApp(${i})" oninput="App.updateRow(${r.id},'precio',this.value)">
-            <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0" onfocus="App.setActiveApp(${i})" oninput="App.updateRow(${r.id},'dosis',this.value)">
+            <input type="number" inputmode="decimal" class="row-inp" value="${r.precio}" step="0.01" min="0" onfocus="App.setActiveApp(${i})" oninput="App.updateRow(${r.id},'precio',this.value)">
+            <input type="number" inputmode="decimal" class="row-inp" value="${r.dosis}" step="0.1" min="0" onfocus="App.setActiveApp(${i})" oninput="App.updateRow(${r.id},'dosis',this.value)">
             <span class="row-val">${vol ? fmt(vol) : '--'}</span>
             <span class="row-val costo">${fmt(costoHa)}</span>
             <span class="row-val">${monto ? fmt(monto) : '--'}</span>
@@ -746,7 +783,9 @@ const App = {
 
     App._renderResumen(); App._renderTotales();
     currentOTRows = aplicaciones[currentAppIdx]?.productos || [];
-    $('wa-bar').style.display = aplicaciones.some(a => a.productos.length > 0) ? 'flex' : 'none';
+    const hasProds = aplicaciones.some(a => a.productos.length > 0);
+    $('wa-bar').style.display = hasProds ? 'flex' : 'none';
+    const draftEl = $('wa-draft'); if (draftEl) draftEl.style.display = (hasProds && !editingOrdenId && formDirty) ? '' : 'none';
   },
 
   showDropdownFor(idx, input) {
@@ -792,7 +831,7 @@ const App = {
       a.productos.forEach(p => { const ch = p.precio * p.dosis; totalInsumos += ch; totalMonto += ch * has; }); });
     const el = $('ot-totales');
     if (totalInsumos === 0 && costoLabor === 0) { el.style.display = 'none'; return; }
-    const insHa = aplicaciones.length > 0 ? totalInsumos / aplicaciones.length : 0;
+    const insHa = totalHas > 0 ? totalMonto / totalHas : (aplicaciones.length > 0 ? totalInsumos / aplicaciones.length : 0);
     const totHa = insHa + costoLabor, totGen = totalMonto + costoLabor * totalHas;
     el.style.display = 'block';
     el.innerHTML = `<div class="ot-tot-row"><span>Insumos</span><span class="ot-tot-mono">USD ${fmt(insHa)}/ha</span></div>
@@ -826,8 +865,8 @@ const App = {
     rc.insertAdjacentHTML('beforeend', `<div class="row-item" data-rowid="${r.id}" data-appidx="${appIdx}">
       <div class="row-prod"><span class="row-prod-name">${esc(r.producto)}</span><span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span></div>
       <div class="row-mob-line">
-        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0" onfocus="App.setActiveApp(${appIdx})" oninput="App.updateRow(${r.id},'precio',this.value)">
-        <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0" onfocus="App.setActiveApp(${appIdx})" oninput="App.updateRow(${r.id},'dosis',this.value)">
+        <input type="number" inputmode="decimal" class="row-inp" value="${r.precio}" step="0.01" min="0" onfocus="App.setActiveApp(${appIdx})" oninput="App.updateRow(${r.id},'precio',this.value)">
+        <input type="number" inputmode="decimal" class="row-inp" value="${r.dosis}" step="0.1" min="0" onfocus="App.setActiveApp(${appIdx})" oninput="App.updateRow(${r.id},'dosis',this.value)">
         <span class="row-val">${vol ? fmt(vol) : '--'}</span><span class="row-val costo">${fmt(ch)}</span><span class="row-val">${monto ? fmt(monto) : '--'}</span>
         <button class="row-rm" onclick="App.setActiveApp(${appIdx});App.removeOTRow(${r.id})">&times;</button>
       </div></div>`);
@@ -881,9 +920,14 @@ const App = {
   selectAplicadorHighlight() { if (aplicadorHighlight >= 0 && aplicadorMatches[aplicadorHighlight]) App.selectAplicador(aplicadorMatches[aplicadorHighlight]); },
 
   /* ── Save ── */
+  _saving: false,
   saveOrden() {
+    if (App._saving) return;
     const valid = aplicaciones.some(a => a.lotes.length && a.productos.length);
     if (!valid) { alert('Agrega al menos un lote con productos.'); return; }
+    App._saving = true;
+    const saveBtn = document.querySelector('#tab-nueva-ot .btn-accent[onclick="App.saveOrden()"]');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '.5'; }
     const tipo = App.getTipo(), costoLabor = App.getCostoLabor();
     const orden = {
       id: editingOrdenId || Storage.nextId('ot'),
@@ -894,21 +938,25 @@ const App = {
       updatedAt: new Date().toISOString(), campana: data.campana,
     };
     if (orden.aplicador && !data.aplicadores.includes(orden.aplicador)) data.aplicadores.push(orden.aplicador);
+    const isEdit = !!editingOrdenId;
     if (editingOrdenId) { const idx = data.ordenes.findIndex(o => o.id === editingOrdenId); if (idx >= 0) data.ordenes[idx] = orden; } else data.ordenes.push(orden);
     Storage.save(data); App.resetOTForm();
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelector('[data-tab="ordenes"]').classList.add('active');
     $('tab-ordenes').classList.add('active'); App.renderOrdenes();
+    App._saving = false; showToast(isEdit ? 'Orden actualizada' : 'Orden guardada');
   },
   resetOTForm() {
-    editingOrdenId = null; App._initAplicaciones();
+    editingOrdenId = null; App._initAplicaciones(); App._saving = false;
+    const saveBtn = document.querySelector('#tab-nueva-ot .btn-accent[onclick="App.saveOrden()"]');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
     $('ot-aplicador').value = ''; $('ot-fecha').value = dateISO(); $('ot-tipo').value = 'Pulverizacion terrestre'; $('ot-costo-labor').value = ''; $('ot-notas').value = '';
     document.querySelectorAll('#ot-estado-bar .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     $('ot-cancel-btn').style.display = 'none'; $('ot-totales').style.display = 'none'; formDirty = false;
   },
   cancelEdit() { App.resetOTForm(); },
-  cambiarEstadoOrden(oid, estado) { const o = data.ordenes.find(x => x.id === oid); if (!o) return; o.estado = estado; Storage.save(data); App.renderOrdenes(); },
+  cambiarEstadoOrden(oid, estado) { const o = data.ordenes.find(x => x.id === oid); if (!o) return; o.estado = estado; Storage.save(data); App.renderOrdenes(); const labels = { pendiente:'Pendiente', en_curso:'En curso', completada:'Completada' }; showToast('Estado: ' + (labels[estado] || estado)); },
 
   editOrden(oid) {
     const o = data.ordenes.find(x => x.id === oid); if (!o) return;
@@ -936,11 +984,23 @@ const App = {
     let ordenes = data.ordenes.filter(o => o.campana === data.campana).filter(o => filtroOT === 'todas' || o.estado === filtroOT);
     const filtLote = $('ord-lote')?.value || '';
     if (filtLote) ordenes = ordenes.filter(o => (o.aplicaciones || []).some(a => (a.lotes || []).some(l => l.loteId === filtLote)));
+    const filtDesde = $('ord-desde')?.value || '', filtHasta = $('ord-hasta')?.value || '';
+    if (filtDesde) ordenes = ordenes.filter(o => (o.fecha || '') >= filtDesde);
+    if (filtHasta) ordenes = ordenes.filter(o => (o.fecha || '') <= filtHasta);
     if (q) ordenes = ordenes.filter(o => {
       const parts = [o.aplicador]; (o.aplicaciones || []).forEach(a => { (a.lotes || []).forEach(al => { const l = data.lotes.find(x => x.id === al.loteId); parts.push(l?.nombre); }); parts.push(a.tipo, ...(a.productos || []).map(p => p.producto)); });
       return parts.join(' ').toLowerCase().includes(q);
     });
     ordenes.sort((a, b) => new Date(b.createdAt || b.fecha) - new Date(a.createdAt || a.fecha));
+
+    // Fix #15: Summary totals
+    const sumEl = $('ordenes-summary');
+    if (ordenes.length) {
+      let sumHas = 0, sumMonto = 0;
+      ordenes.forEach(o => { (o.aplicaciones || []).forEach(a => { const has = appTotalHas(a); sumHas += has; (a.productos || []).forEach(p => sumMonto += p.precio * p.dosis * has); sumMonto += (o.costoLabor || 0) * has; }); });
+      sumEl.textContent = `${ordenes.length} orden${ordenes.length > 1 ? 'es' : ''} · ${fmtInt(sumHas)} has · USD ${fmt(sumMonto)} total`;
+    } else { sumEl.textContent = ''; }
+
     if (!ordenes.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin ordenes de trabajo</p></div>'; return; }
 
     el.innerHTML = ordenes.map(o => {
@@ -995,9 +1055,9 @@ const App = {
       }); });
       const summaryRows = Object.values(allProds).map(p => `<tr><td>${esc(p.producto)}</td><td style="text-align:right;font-family:var(--mono);">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + esc(p.unidad) : '--'}</td><td style="text-align:right;font-family:var(--mono);color:var(--accent);">$${fmt(p.totalCost)}</td></tr>`).join('');
 
-      const grandTotalHa = (orderTotalHa / (apps.length || 1)) + (o.costoLabor || 0);
+      const grandTotalHa = (orderTotalHas > 0 ? orderTotalMonto / orderTotalHas : (orderTotalHa / (apps.length || 1))) + (o.costoLabor || 0);
 
-      return `<div class="card ot-card"><div class="ot-card-wrap"><div class="ot-card-main">
+      return `<div class="card ot-card estado-${o.estado || 'pendiente'}"><div class="ot-card-wrap"><div class="ot-card-main">
         <div class="ot-detail">${esc(o.aplicador || 'Sin aplicador')} · ${esc(o.tipo || '--')} · ${fecha}
           <span style="float:right;font-family:var(--mono);font-weight:700;color:var(--navy);font-size:13px;">$${fmt(grandTotalHa)}/ha</span></div>
         <div class="ot-productos-detail">
@@ -1014,6 +1074,7 @@ const App = {
           <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${esc(o.id)}')">WA</button>
           <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${esc(o.id)}')">PDF</button>
           <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')">Editar</button>
+          <button class="btn btn-sm" style="background:var(--navy-light);color:white;" onclick="App.duplicarOrden('${esc(o.id)}')">Duplicar</button>
           <button class="btn btn-sm btn-danger" onclick="App.deleteOrden('${esc(o.id)}')">Eliminar</button>
         </div></div>`;
     }).join('');
@@ -1050,9 +1111,11 @@ const App = {
         if (!aLotes.length) return;
         const has = aLotes.reduce((s, l) => s + (l.hectareas || 0), 0);
         aLotes.forEach(l => {
-          if (!lotesSeen.has(l.loteId)) { lotesSeen.add(l.loteId); totalHas += l.hectareas || 0; }
+          const currentLote = data.lotes.find(x => x.id === l.loteId);
+          const loteHas = currentLote ? currentLote.hectareas : (l.hectareas || 0);
+          if (!lotesSeen.has(l.loteId)) { lotesSeen.add(l.loteId); totalHas += loteHas; }
           // Per-lote aggregation
-          if (!byLote[l.loteId]) byLote[l.loteId] = { nombre: '', has: l.hectareas || 0, costoInsumos: 0, costoLabor: 0, apps: 0 };
+          if (!byLote[l.loteId]) byLote[l.loteId] = { nombre: '', has: loteHas, costoInsumos: 0, costoLabor: 0, apps: 0 };
           const lData = data.lotes.find(x => x.id === l.loteId);
           byLote[l.loteId].nombre = lData?.nombre || '?';
         });
@@ -1218,8 +1281,10 @@ const App = {
     }
 
     // ── Historial de aplicaciones ──
-    html += `<div class="card fu"><div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin-bottom:10px;">Historial de aplicaciones</div>`;
-    ordenes.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0)).forEach(o => {
+    const histTitle = filtLote ? 'Historial del lote' : 'Historial de aplicaciones';
+    html += `<div class="card fu"><div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin-bottom:10px;">${histTitle}</div>`;
+    let costoAcum = 0;
+    ordenes.sort((a, b) => new Date(a.fecha || 0) - new Date(b.fecha || 0)).forEach(o => {
       (o.aplicaciones || []).forEach(a => {
         const aLotes = (a.lotes || []).filter(l => !filtLote || l.loteId === filtLote);
         if (!aLotes.length) return;
@@ -1228,10 +1293,12 @@ const App = {
         const insumosHa = (a.productos || []).reduce((s, p) => s + p.precio * p.dosis, 0);
         const netoHa = insumosHa + (o.costoLabor || 0);
         const montoTotal = netoHa * has;
+        costoAcum += netoHa;
         const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '--';
         const estadoBadge = o.estado === 'completada' ? 'badge-completada' : o.estado === 'en_curso' ? 'badge-en_curso' : 'badge-pendiente';
         const estadoLabel = o.estado === 'completada' ? 'Comp.' : o.estado === 'en_curso' ? 'Curso' : 'Pend.';
         const nProds = (a.productos || []).length;
+        const prodsStr = (a.productos || []).map(p => esc(p.producto)).join(', ');
 
         html += `<div style="padding:8px 0;border-bottom:1px solid var(--bg);">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
@@ -1239,10 +1306,12 @@ const App = {
               <div style="font-size:12px;"><span style="font-weight:700;">${fecha}</span>
                 <span class="badge ${estadoBadge}" style="margin-left:4px;">${estadoLabel}</span></div>
               <div style="font-size:11px;color:var(--text-sec);margin-top:2px;">${esc(lotesStr)} · ${has} has · ${esc(o.tipo || '--')} · ${nProds} prod</div>
+              ${filtLote ? `<div style="font-size:10px;color:var(--text-mut);margin-top:2px;">${prodsStr}</div>` : ''}
             </div>
             <div style="text-align:right;flex-shrink:0;">
               <div style="font-family:var(--mono);font-weight:700;color:var(--accent);font-size:13px;">$${fmt(netoHa)}/ha</div>
               ${has > 0 ? `<div style="font-family:var(--mono);font-size:10px;color:var(--text-mut);">$${fmt(montoTotal)} total</div>` : ''}
+              ${filtLote ? `<div style="font-family:var(--mono);font-size:10px;color:var(--navy);font-weight:700;">Acum: $${fmt(costoAcum)}/ha</div>` : ''}
             </div>
           </div>
         </div>`;
@@ -1284,7 +1353,7 @@ const App = {
       apps.forEach(a => { const has = appTotalHas(a); (a.productos || []).forEach(p => { if (!allP[p.producto]) allP[p.producto] = { p: p.producto, u: p.unidad||'L', v: 0 }; allP[p.producto].v += has > 0 ? p.dosis * has : 0; }); });
       msg += '*RESUMEN RETIRO:*\n'; Object.values(allP).forEach(p => msg += `  ${p.p}: ${p.v > 0 ? fmt(p.v)+' '+p.u : '--'}\n`); msg += '\n';
     }
-    const avg = (grandTotalHa / (apps.length || 1)) + costoLabor;
+    const avg = (grandTotalHas > 0 ? grandTotalMonto / grandTotalHas : (grandTotalHa / (apps.length || 1))) + costoLabor;
     if (costoLabor > 0) msg += `Labor: USD ${fmt(costoLabor)}/ha\n`;
     msg += `*Total: USD ${fmt(avg)}/ha*`;
     if (grandTotalHas > 0) msg += ` -- *USD ${fmt(grandTotalMonto + costoLabor * grandTotalHas)} total*`;
@@ -1527,7 +1596,7 @@ const App = {
 
     // ═══ TOTAL GENERAL ═══
     checkPage(22);
-    const avgInsHa = apps.length > 0 ? pdfGrandInsHa / apps.length : 0;
+    const avgInsHa = pdfGrandHas > 0 ? pdfGrandMonto / pdfGrandHas : (apps.length > 0 ? pdfGrandInsHa / apps.length : 0);
     const grandTotalHa = avgInsHa + costoLabor;
     const grandTotalUSD = pdfGrandMonto + costoLabor * pdfGrandHas;
 
@@ -1592,7 +1661,14 @@ const App = {
     }
   },
 
-  deleteOrden(oid) { if (!confirm('Eliminar esta orden?')) return; data.ordenes = data.ordenes.filter(o => o.id !== oid); Storage.save(data); App.renderOrdenes(); },
+  duplicarOrden(oid) {
+    const o = data.ordenes.find(x => x.id === oid); if (!o) return;
+    const dup = JSON.parse(JSON.stringify(o));
+    dup.id = Storage.nextId('ot'); dup.fecha = dateISO(); dup.estado = 'pendiente';
+    dup.createdAt = new Date().toISOString(); dup.updatedAt = new Date().toISOString();
+    data.ordenes.push(dup); Storage.save(data); App.renderOrdenes(); showToast('Orden duplicada');
+  },
+  deleteOrden(oid) { if (!confirm('Eliminar esta orden?')) return; data.ordenes = data.ordenes.filter(o => o.id !== oid); Storage.save(data); App.renderOrdenes(); showToast('Orden eliminada'); },
 };
 
 document.addEventListener('DOMContentLoaded', () => {

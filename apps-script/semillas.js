@@ -1,7 +1,11 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * HENDERSEEDS — Apps Script UNIFICADO
- * Sirve tanto al Cotizador Nidera como al Cotizador Agro
+ * Sirve al Cotizador Nidera, Cotizador Agro Y Seguimiento Campaña
+ *
+ * ⚠️  ESTE ES EL ÚNICO ARCHIVO QUE VA EN EL EDITOR DE APPS SCRIPT.
+ *     No pegar agronomia.js ni campana.js por separado — ya están
+ *     integrados acá. Tener doGet/doPost duplicados rompe todo.
  *
  * HOJAS ESPERADAS EN EL SPREADSHEET:
  *
@@ -16,6 +20,9 @@
  *   "Financiacion"       → plazos y recargos
  *   "Historial Cotizaciones" → historial cotizaciones Agro
  *   "Clientes"           → lista de clientes (nombre, CUIT)
+ *
+ * ── Campaña ──
+ *   "Camp_<NombreProductor>" → una hoja por productor (auto-creada)
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -59,6 +66,10 @@ function doGet(e) {
       case 'getNextNumberAgro':   result = getNextNumberAgro(); break;
       case 'getClientes':         result = getClientes(); break;
 
+      // ── Campaña ──
+      case 'loadCampana':         result = loadCampana(e.parameter.productor); break;
+      case 'listProductores':     result = listProductores(); break;
+
       default:
         result = { error: 'Acción no reconocida: ' + action };
     }
@@ -88,6 +99,11 @@ function doPost(e) {
         break;
       case 'addCliente':
         result = addCliente(data);
+        break;
+
+      // ── Campaña ──
+      case 'saveCampana':
+        result = saveCampana(data);
         break;
 
       default:
@@ -468,4 +484,109 @@ function addCliente(data) {
   }
   sheet.appendRow([data.nombre || '', data.cuit || '']);
   return { ok: true };
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   ██  CAMPAÑA — seguimiento de lotes por productor
+   ═══════════════════════════════════════════════════════════
+   Cada productor tiene su hoja "Camp_NombreProductor".
+   Fila 1: headers | Fila 2: metadata | Fila 3+: lotes y órdenes
+*/
+
+function loadCampana(productor) {
+  if (!productor) return { ok: false, error: 'Falta nombre de productor' };
+
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheetName = 'Camp_' + productor.substring(0, 30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ _-]/g, '');
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    return { ok: true, data: null, isNew: true };
+  }
+
+  try {
+    var allData = sheet.getDataRange().getValues();
+    if (allData.length < 2) return { ok: true, data: null, isNew: true };
+
+    var meta = JSON.parse(allData[1][0] || '{}');
+    var lotes = [];
+    var ordenes = [];
+
+    for (var i = 2; i < allData.length; i++) {
+      var tipo = allData[i][0];
+      var json = allData[i][1];
+      if (!json) continue;
+      try {
+        var parsed = JSON.parse(json);
+        if (tipo === 'LOTE') lotes.push(parsed);
+        else if (tipo === 'ORDEN') ordenes.push(parsed);
+      } catch(e) { /* skip bad rows */ }
+    }
+
+    return {
+      ok: true,
+      data: {
+        lotes: lotes,
+        ordenes: ordenes,
+        aplicadores: meta.aplicadores || [],
+        campana: meta.campana || '2025/26',
+        tiposLabor: meta.tiposLabor || []
+      }
+    };
+  } catch(err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+function saveCampana(payload) {
+  if (!payload.productor) return { ok: false, error: 'Falta nombre de productor' };
+
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheetName = 'Camp_' + payload.productor.substring(0, 30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ _-]/g, '');
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  }
+
+  var campData = payload.data;
+  if (!campData) return { ok: false, error: 'Sin datos' };
+
+  sheet.clear();
+  sheet.appendRow(['tipo', 'json', 'updatedAt']);
+
+  var meta = {
+    campana: campData.campana || '2025/26',
+    aplicadores: campData.aplicadores || [],
+    tiposLabor: campData.tiposLabor || []
+  };
+  sheet.appendRow(['META', JSON.stringify(meta), new Date().toISOString()]);
+
+  var lotes = campData.lotes || [];
+  for (var i = 0; i < lotes.length; i++) {
+    sheet.appendRow(['LOTE', JSON.stringify(lotes[i]), '']);
+  }
+
+  var ordenes = campData.ordenes || [];
+  for (var j = 0; j < ordenes.length; j++) {
+    sheet.appendRow(['ORDEN', JSON.stringify(ordenes[j]), '']);
+  }
+
+  return { ok: true, updatedAt: new Date().toISOString(), sheetName: sheetName };
+}
+
+function listProductores() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheets = ss.getSheets();
+  var productores = [];
+
+  for (var i = 0; i < sheets.length; i++) {
+    var name = sheets[i].getName();
+    if (name.indexOf('Camp_') === 0) {
+      productores.push(name.substring(5));
+    }
+  }
+
+  return { ok: true, productores: productores };
 }

@@ -1065,59 +1065,68 @@ const Sheets = {
   },
   async _sendToSheets(payload) {
     const r = await fetch(CONFIG.APPS_SCRIPT_URL, {
-      method:'POST', headers:{'Content-Type':'text/plain'},
+      method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain'},
       body:JSON.stringify(payload)
     });
     if(!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
-    const d = await r.json();
+    const text = await r.text();
+    let d;
+    try { d = JSON.parse(text); }
+    catch(e) { throw new Error('Respuesta no es JSON: '+text.slice(0,100)); }
     if(d.error) throw new Error(d.error);
-    if(!d.numero) throw new Error('Respuesta sin número de cotización');
+    if(!d.numero && d.numero!==0) throw new Error('Respuesta sin número de cotización');
     return d.numero;
   },
   async register() {
-    // Build payload and save local backup immediately
-    const payload = this._buildPayload();
-    const localId = 'cot_'+Date.now();
-    const backup = {
-      localId,
-      fecha: new Date().toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}),
-      vendedor: payload.vendedor,
-      cliente: payload.cliente,
-      cuit: payload.cuit,
-      items: payload.items,
-      synced: false,
-      numero: null
-    };
-    LocalBackup.save(backup);
+    try {
+      // Build payload and save local backup immediately
+      const payload = this._buildPayload();
+      const localId = 'cot_'+Date.now();
+      const backup = {
+        localId,
+        fecha: new Date().toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}),
+        vendedor: payload.vendedor,
+        cliente: payload.cliente,
+        cuit: payload.cuit,
+        items: payload.items,
+        synced: false,
+        numero: null
+      };
+      LocalBackup.save(backup);
 
-    if(!CONFIG.APPS_SCRIPT_URL) {
-      Toast.warn('Modo local','Cotización guardada solo en este dispositivo.');
+      if(!CONFIG.APPS_SCRIPT_URL) {
+        Toast.warn('Modo local','Cotización guardada solo en este dispositivo.');
+        return null;
+      }
+
+      // Try to send to Sheets with 1 automatic retry
+      for(let attempt=1; attempt<=2; attempt++) {
+        try {
+          const numero = await this._sendToSheets(payload);
+          LocalBackup.markSynced(localId);
+          Toast.ok('Cotización registrada',`#${String(numero).padStart(4,'0')} guardada en Sheets.`);
+          return numero;
+        } catch(e) {
+          console.error(`Sheets.register intento ${attempt}:`, e);
+          if(attempt===1) await new Promise(r=>setTimeout(r,1500)); // wait before retry
+        }
+      }
+
+      // Both attempts failed — notify user with retry button
+      Toast.err(
+        'No se pudo guardar en Sheets',
+        'La cotización queda guardada en tu dispositivo. Verificá la conexión.',
+        {
+          action: () => this._retrySync(localId, payload),
+          actionLabel: 'Reintentar envío'
+        }
+      );
+      return null;
+    } catch(e) {
+      console.error('Sheets.register error fatal:', e);
+      Toast.err('Error al registrar','La cotización no se pudo guardar: '+e.message);
       return null;
     }
-
-    // Try to send to Sheets with 1 automatic retry
-    for(let attempt=1; attempt<=2; attempt++) {
-      try {
-        const numero = await this._sendToSheets(payload);
-        LocalBackup.markSynced(localId);
-        Toast.ok('Cotización registrada',`#${String(numero).padStart(4,'0')} guardada en Sheets.`);
-        return numero;
-      } catch(e) {
-        console.error(`Sheets.register intento ${attempt}:`, e);
-        if(attempt===1) await new Promise(r=>setTimeout(r,1500)); // wait before retry
-      }
-    }
-
-    // Both attempts failed — notify user with retry button
-    Toast.err(
-      'No se pudo guardar en Sheets',
-      'La cotización queda guardada en tu dispositivo. Verificá la conexión.',
-      {
-        action: () => this._retrySync(localId, payload),
-        actionLabel: 'Reintentar envío'
-      }
-    );
-    return null;
   },
   async _retrySync(localId, payload) {
     try {

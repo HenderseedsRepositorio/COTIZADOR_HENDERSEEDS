@@ -270,9 +270,28 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
   .tab-btn{font-size:.68rem;padding:10px 2px}
   .btn-share,.btn-dl{font-size:.76rem;padding:12px 14px}
 }
+/* Toast notifications */
+.toast-container{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:400px}
+.toast{pointer-events:auto;padding:12px 16px;border-radius:10px;font-family:var(--body);font-size:.78rem;font-weight:600;line-height:1.4;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:flex-start;gap:10px;animation:toastIn .3s ease-out;transition:opacity .3s,transform .3s}
+.toast.hiding{opacity:0;transform:translateY(-10px)}
+.toast-ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.toast-err{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5}
+.toast-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.toast-body{flex:1}
+.toast-title{display:block;font-weight:700;margin-bottom:2px}
+.toast-action{background:none;border:1px solid currentColor;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:inherit;cursor:pointer;white-space:nowrap;margin-top:4px}
+.toast-action:hover{opacity:.8}
+.toast-close{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:1rem;padding:0 0 0 4px;line-height:1}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+/* Connection indicator */
+.conn-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.conn-dot.online{background:#22c55e}
+.conn-dot.offline{background:#ef4444}
+.conn-dot.error{background:#f59e0b}
 </style>
 </head>
 <body>
+<div id="toastContainer" class="toast-container"></div>
 
 <!-- ══════════ VENDOR SELECTOR ══════════ -->
 <div id="vendor-overlay">
@@ -602,6 +621,58 @@ function makeToggle(id, name, sub, onChange, checked=false) {
   return `<div class="toggle-box"><div><p class="tname">${name}</p>${sub?`<p class="tsub">${sub}</p>`:''}</div><div class="toggle-wrap"><input type="checkbox" id="${id}" ${checked?'checked':''} onchange="${onChange}" class="toggle-cb"><label for="${id}" class="toggle-lb"></label></div></div>`;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   TOAST — user-visible notifications
+   ══════════════════════════════════════════════════════════════════ */
+const Toast = {
+  show(type, title, body, opts={}) {
+    const c=$('toastContainer');
+    const el=document.createElement('div');
+    el.className=`toast toast-${type}`;
+    let html=`<div class="toast-body"><span class="toast-title">${title}</span>${body||''}`;
+    if(opts.action) html+=`<br><button class="toast-action" id="toast-action-${Date.now()}">${opts.actionLabel||'Reintentar'}</button>`;
+    html+=`</div><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+    el.innerHTML=html;
+    c.appendChild(el);
+    if(opts.action) el.querySelector('.toast-action').onclick=()=>{ el.remove(); opts.action(); };
+    const dur=opts.duration||(type==='ok'?4000:8000);
+    setTimeout(()=>{ el.classList.add('hiding'); setTimeout(()=>el.remove(),300); },dur);
+  },
+  ok(title,body,opts){this.show('ok',title,body,opts)},
+  err(title,body,opts){this.show('err',title,body,opts)},
+  warn(title,body,opts){this.show('warn',title,body,opts)}
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   LOCAL BACKUP — localStorage fallback for quotes
+   ══════════════════════════════════════════════════════════════════ */
+const LocalBackup = {
+  KEY: 'hs_cotizaciones_backup',
+  save(cotizacion) {
+    try {
+      const all = this.getAll();
+      all.unshift(cotizacion);
+      // Keep last 50 quotes max
+      if(all.length>50) all.length=50;
+      localStorage.setItem(this.KEY, JSON.stringify(all));
+    } catch(e) { console.warn('LocalBackup save error:', e); }
+  },
+  getAll() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)||'[]'); }
+    catch(e) { return []; }
+  },
+  markSynced(localId) {
+    try {
+      const all = this.getAll();
+      const q = all.find(c=>c.localId===localId);
+      if(q) { q.synced=true; localStorage.setItem(this.KEY, JSON.stringify(all)); }
+    } catch(e) {}
+  },
+  getPending() {
+    return this.getAll().filter(c=>!c.synced);
+  }
+};
+
 // Shared html2canvas capture helper — supports PNG share, PNG download, and PDF download
 async function captureAndShare(el, filename, opts={}) {
   const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
@@ -664,23 +735,29 @@ const App = {
     if(id==='cond') Conditions.load();
   },
   async loadCatalog() {
-    if(!CONFIG.APPS_SCRIPT_URL){ $('catalogStatus').textContent='📦 Catálogo local'; return; }
-    $('catalogStatus').textContent='⏳ Cargando...';
+    if(!CONFIG.APPS_SCRIPT_URL){ $('catalogStatus').innerHTML='<span class="conn-dot offline"></span>Catálogo local'; return; }
+    $('catalogStatus').innerHTML='<span class="conn-dot" style="background:#94a3b8"></span>Cargando...';
     try {
       const r = await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCatalogo',{redirect:'follow'});
       const d = await r.json();
       if(d.maiz && d.maiz.length) {
         CATALOGO = d;
-        $('catalogStatus').textContent='☁️ Precios actualizados';
+        $('catalogStatus').innerHTML='<span class="conn-dot online"></span>Precios actualizados';
         if(lineas.length) Calc.renderLines();
-      } else { $('catalogStatus').textContent='⚠️ Sheets vacía, catálogo local'; }
+      } else { $('catalogStatus').innerHTML='<span class="conn-dot error"></span>Sheets vacía, catálogo local'; }
       // Load clients in parallel
       try {
         const cr = await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getClientes',{redirect:'follow'});
         const cd = await cr.json();
         if(cd.ok && cd.clientes) { clientes = cd.clientes; console.log('Clientes:',clientes.length); }
       } catch(e2) { console.warn('No se cargaron clientes'); }
-    } catch(e) { $('catalogStatus').textContent='⚠️ Sin conexión, catálogo local'; }
+      // Sync any pending quotes from failed previous saves
+      Sheets.syncPending();
+    } catch(e) {
+      console.error('loadCatalog error:', e);
+      $('catalogStatus').innerHTML='<span class="conn-dot offline"></span>Sin conexión, catálogo local';
+      Toast.warn('Sin conexión a Sheets','Las cotizaciones se guardarán localmente hasta que vuelva la conexión.');
+    }
   },
   initUI() {
     // Set all logo images from single source
@@ -968,24 +1045,105 @@ const Market = {
    SHEETS — registro de cotizaciones
    ══════════════════════════════════════════════════════════════════ */
 const Sheets = {
+  _buildPayload() {
+    const bandPct = (tipo,banda) => banda===1?0:tipo==='maiz'?(banda===2?4:8):(banda===2?5:0);
+    const rows = lastLC.map(l => ({
+      hibrido:l.hibrido, banda:l.banda, bandPct:bandPct(l.tipo,l.banda)+'%',
+      cant:+l.cant, precioNeto:Math.round(l.unitNeto*100)/100,
+      pPre:l.pPre+'%', pCont:l.pCont+'%', pCre:l.pCre+'%', pCro:l.pCro+'%',
+      pVol:l.pVol+'%', valZ:l.valZ+'%', valP:l.valP+'%',
+      totalSIVA:Math.round(l.totalSIVA*100)/100, totalCIVA:Math.round(l.totalCIVA*100)/100
+    }));
+    return {
+      action:'registrar',
+      vendedor:vendor,
+      cliente:$('cliente').value||'—',
+      cuit:$('cuit').value||'—',
+      establecimiento:$('establecimiento')?$('establecimiento').value||'—':'—',
+      items:rows
+    };
+  },
+  async _sendToSheets(payload) {
+    const r = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    if(!d.numero) throw new Error('Respuesta sin número de cotización');
+    return d.numero;
+  },
   async register() {
-    if(!CONFIG.APPS_SCRIPT_URL) return null;
+    // Build payload and save local backup immediately
+    const payload = this._buildPayload();
+    const localId = 'cot_'+Date.now();
+    const backup = {
+      localId,
+      fecha: new Date().toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}),
+      vendedor: payload.vendedor,
+      cliente: payload.cliente,
+      cuit: payload.cuit,
+      items: payload.items,
+      synced: false,
+      numero: null
+    };
+    LocalBackup.save(backup);
+
+    if(!CONFIG.APPS_SCRIPT_URL) {
+      Toast.warn('Modo local','Cotización guardada solo en este dispositivo.');
+      return null;
+    }
+
+    // Try to send to Sheets with 1 automatic retry
+    for(let attempt=1; attempt<=2; attempt++) {
+      try {
+        const numero = await this._sendToSheets(payload);
+        LocalBackup.markSynced(localId);
+        Toast.ok('Cotización registrada',`#${String(numero).padStart(4,'0')} guardada en Sheets.`);
+        return numero;
+      } catch(e) {
+        console.error(`Sheets.register intento ${attempt}:`, e);
+        if(attempt===1) await new Promise(r=>setTimeout(r,1500)); // wait before retry
+      }
+    }
+
+    // Both attempts failed — notify user with retry button
+    Toast.err(
+      'No se pudo guardar en Sheets',
+      'La cotización queda guardada en tu dispositivo. Verificá la conexión.',
+      {
+        action: () => this._retrySync(localId, payload),
+        actionLabel: 'Reintentar envío'
+      }
+    );
+    return null;
+  },
+  async _retrySync(localId, payload) {
     try {
-      const bandPct = (tipo,banda) => banda===1?0:tipo==='maiz'?(banda===2?4:8):(banda===2?5:0);
-      const rows = lastLC.map(l => ({
-        hibrido:l.hibrido, banda:l.banda, bandPct:bandPct(l.tipo,l.banda)+'%',
-        cant:+l.cant, precioNeto:Math.round(l.unitNeto*100)/100,
-        pPre:l.pPre+'%', pCont:l.pCont+'%', pCre:l.pCre+'%', pCro:l.pCro+'%',
-        pVol:l.pVol+'%', valZ:l.valZ+'%', valP:l.valP+'%',
-        totalSIVA:Math.round(l.totalSIVA*100)/100, totalCIVA:Math.round(l.totalCIVA*100)/100
-      }));
-      const r=await fetch(CONFIG.APPS_SCRIPT_URL,{
-        method:'POST', headers:{'Content-Type':'text/plain'},
-        body:JSON.stringify({action:'registrar',vendedor:vendor,cliente:$('cliente').value||'—',cuit:$('cuit').value||'—',items:rows})
+      const numero = await this._sendToSheets(payload);
+      LocalBackup.markSynced(localId);
+      Toast.ok('Sincronizado','Cotización #'+String(numero).padStart(4,'0')+' guardada en Sheets.');
+    } catch(e) {
+      console.error('Retry sync failed:', e);
+      Toast.err('Sigue sin conexión','Intentá de nuevo más tarde.',{
+        action:()=>this._retrySync(localId,payload), actionLabel:'Reintentar'
       });
-      const d=await r.json();
-      return d.numero||null;
-    } catch(e) { return null; }
+    }
+  },
+  async syncPending() {
+    const pending = LocalBackup.getPending();
+    if(!pending.length || !CONFIG.APPS_SCRIPT_URL) return;
+    let synced=0;
+    for(const cot of pending) {
+      try {
+        const payload = {action:'registrar', vendedor:cot.vendedor, cliente:cot.cliente, cuit:cot.cuit, items:cot.items};
+        await this._sendToSheets(payload);
+        LocalBackup.markSynced(cot.localId);
+        synced++;
+      } catch(e) { break; } // stop on first failure
+    }
+    if(synced) Toast.ok('Sincronización',`${synced} cotización(es) pendiente(s) enviada(s) a Sheets.`);
   }
 };
 
@@ -1015,9 +1173,9 @@ const Quote = {
     $('q-iva').innerText=`USD ${fmt(net*CONFIG.IVA)}`;
     $('q-final').innerText=`USD ${fmt(net*(1+CONFIG.IVA))}`;
 
-    $('q-numero').innerText='⏳';
+    $('q-numero').innerText='⏳ Registrando...';
     const num=await Sheets.register();
-    $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL';
+    $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL (sin sincronizar)';
 
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
@@ -1298,15 +1456,31 @@ const Historial = {
   _page: 0,
   _perPage: 10,
   async load() {
-    if(!CONFIG.APPS_SCRIPT_URL){ $('historialContent').innerHTML='<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
-    $('historialContent').innerHTML='<p style="color:var(--c-light);font-size:.72rem;">⏳ Cargando...</p>';
+    // Always show local pending first
+    const pending = LocalBackup.getPending();
+    let localHtml = '';
+    if(pending.length) {
+      localHtml = `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+        <p style="margin:0 0 6px;font-size:.72rem;font-weight:700;color:#92400e;">⚠️ ${pending.length} cotización(es) sin sincronizar</p>`;
+      pending.forEach(c => {
+        const total = c.items.reduce((s,i)=>s+(+i.totalSIVA||0),0);
+        localHtml += `<div style="background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:4px;font-size:.68rem;">
+          <strong>${c.cliente}</strong> · ${c.vendedor} · ${c.fecha}<br>
+          ${c.items.length} item(s) · USD ${fmt(total)} s/IVA</div>`;
+      });
+      localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load())" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.68rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
+    }
+
+    if(!CONFIG.APPS_SCRIPT_URL){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
+    $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">⏳ Cargando...</p>';
     try {
       const r=await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getHistorial',{redirect:'follow'});
       const data=await r.json();
-      if(!Array.isArray(data)||!data.length){ $('historialContent').innerHTML='<p style="color:var(--c-light);font-size:.72rem;">Sin cotizaciones registradas</p>'; return; }
+      if(!Array.isArray(data)||!data.length){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin cotizaciones registradas</p>'; return; }
       this._cache=data; this._page=0;
+      this._localHtml=localHtml;
       this.render();
-    } catch(e) { $('historialContent').innerHTML='<p style="color:#e74c3c;font-size:.72rem;">Error: '+e.message+'</p>'; }
+    } catch(e) { $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+e.message+'</p>'; }
   },
   goPage(delta) { this._page+=delta; this.render(); },
   render() {
@@ -1331,7 +1505,7 @@ const Historial = {
     if(totalPages>1) {
       h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.64rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
     }
-    $('historialContent').innerHTML=h;
+    $('historialContent').innerHTML=(this._localHtml||'')+h;
   }
 };
 

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe App Campana — Henderseeds</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d2d5e; --accent: #2d6fc4; --green: #16a34a; --orange: #d97706;
+  --red: #ef4444; --bg: #f0f4fb; --card: #fff; --border: #e2e8f0;
+  --text: #0d2033; --text-sec: #64748b; --text-mut: #94a3b8;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+.container { max-width: 860px; margin: 0 auto; }
+h1 { font-family: 'Archivo Black', sans-serif; color: var(--navy); font-size: 1.5rem; margin-bottom: 4px; }
+h2 { font-family: 'Archivo Black', sans-serif; color: var(--navy); font-size: 1.1rem; margin: 28px 0 12px; padding-top: 16px; border-top: 2px solid var(--border); }
+h3 { font-size: .9rem; color: var(--accent); margin: 16px 0 8px; font-weight: 700; }
+.subtitle { color: var(--text-sec); font-size: .85rem; margin-bottom: 20px; }
+.card { background: var(--card); border-radius: 14px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 14px rgba(13,45,94,.08); }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.badge-crit { background: #fee2e2; color: var(--red); }
+.badge-warn { background: #fef3c7; color: var(--orange); }
+.badge-info { background: #e0f2fe; color: var(--accent); }
+.badge-ok { background: #dcfce7; color: var(--green); }
+table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: 8px 0; }
+th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-mut); padding: 6px 8px; border-bottom: 2px solid var(--border); }
+td { padding: 8px; border-bottom: 1px solid var(--bg); vertical-align: top; }
+code { font-family: 'DM Mono', monospace; font-size: .8rem; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 12px 0; }
+.metric { background: var(--bg); border-radius: 9px; padding: 14px; text-align: center; }
+.metric-val { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 700; color: var(--navy); }
+.metric-lbl { font-size: .65rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; }
+.issue-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--bg); }
+.issue-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: var(--text-mut); min-width: 24px; }
+.issue-body { flex: 1; }
+.issue-title { font-weight: 700; font-size: .85rem; }
+.issue-desc { font-size: .8rem; color: var(--text-sec); margin-top: 2px; }
+.priority-bar { display: flex; gap: 4px; margin-top: 4px; }
+.fix-tag { font-size: .65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--bg); color: var(--accent); }
+ul { padding-left: 20px; font-size: .85rem; }
+li { margin-bottom: 4px; }
+.section-icon { font-size: 1.2rem; margin-right: 6px; }
+.flow-step { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; }
+.flow-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .75rem; flex-shrink: 0; }
+.flow-text { font-size: .85rem; }
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+.comparison > div { background: var(--bg); border-radius: 9px; padding: 14px; }
+.comparison h4 { font-size: .75rem; text-transform: uppercase; color: var(--text-mut); margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>INFORME: App Seguimiento de Campana</h1>
+<p class="subtitle">Analisis completo de <code>campana.html</code> — 1868 lineas, ~80KB<br>Fecha: 20 marzo 2026</p>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">📐</span> Arquitectura actual</h2>
+
+<div class="card">
+<h3>Stack</h3>
+<table>
+  <tr><th>Capa</th><th>Tecnologia</th><th>Estado</th></tr>
+  <tr><td>Frontend</td><td>HTML single-file, CSS vars, vanilla JS</td><td><span class="badge badge-ok">OK</span></td></tr>
+  <tr><td>Datos</td><td>localStorage (<code>sc_data</code>)</td><td><span class="badge badge-warn">RIESGO</span></td></tr>
+  <tr><td>Catalogo</td><td>Google Sheets via Apps Script API</td><td><span class="badge badge-ok">OK</span></td></tr>
+  <tr><td>PDF</td><td>jsPDF (CDN)</td><td><span class="badge badge-ok">OK</span></td></tr>
+  <tr><td>Compartir</td><td>WhatsApp deeplink + Web Share API</td><td><span class="badge badge-ok">OK</span></td></tr>
+</table>
+
+<h3>Modulos (tabs)</h3>
+<div class="metric-grid">
+  <div class="metric"><div class="metric-val">4</div><div class="metric-lbl">Tabs</div></div>
+  <div class="metric"><div class="metric-val">1868</div><div class="metric-lbl">Lineas</div></div>
+  <div class="metric"><div class="metric-val">~50</div><div class="metric-lbl">Metodos en App</div></div>
+  <div class="metric"><div class="metric-val">3</div><div class="metric-lbl">Dropdowns</div></div>
+</div>
+
+<table>
+  <tr><th>Tab</th><th>Funcion</th><th>Lineas ~</th><th>Complejidad</th></tr>
+  <tr><td><strong>Campos</strong></td><td>CRUD de campos y lotes</td><td>~120</td><td><span class="badge badge-ok">Baja</span></td></tr>
+  <tr><td><strong>Nueva OT</strong></td><td>Crear/editar ordenes con multi-aplicacion</td><td>~600</td><td><span class="badge badge-crit">Alta</span></td></tr>
+  <tr><td><strong>Ordenes</strong></td><td>Listar, filtrar, cambiar estado, compartir</td><td>~200</td><td><span class="badge badge-warn">Media</span></td></tr>
+  <tr><td><strong>Analisis</strong></td><td>Dashboard de costos por categoria</td><td>~150</td><td><span class="badge badge-warn">Media</span></td></tr>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">🔴</span> Problemas criticos</h2>
+
+<div class="card">
+<div class="issue-row">
+  <span class="issue-num">01</span>
+  <div class="issue-body">
+    <div class="issue-title">UX: Campos y lotes se crean con <code>prompt()</code></div>
+    <div class="issue-desc">El usuario necesita 3-4 prompts secuenciales para agregar un campo (nombre, cliente, localidad) y 3 mas para cada lote (nombre, hectareas, cultivo). En mobile esto es muy molesto: el teclado se abre/cierra por cada prompt, pierde contexto visual, no puede corregir campos previos. Lo mismo para editar.</div>
+    <div class="priority-bar"><span class="badge badge-crit">UX CRITICO</span> <span class="fix-tag">Reemplazar con modal inline</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">02</span>
+  <div class="issue-body">
+    <div class="issue-title">XSS: <code>innerHTML</code> con datos de usuario sin sanitizar</div>
+    <div class="issue-desc">Lineas 612-640 (renderCampos), 808-882 (renderAllApps), 1407-1471 (renderOrdenes) usan innerHTML con nombres de campos, lotes, productos y aplicadores directamente interpolados. Un nombre como <code>&lt;img src=x onerror=alert(1)&gt;</code> ejecutaria codigo.</div>
+    <div class="priority-bar"><span class="badge badge-crit">SEGURIDAD</span> <span class="fix-tag">Escapar o usar textContent/DOM API</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">03</span>
+  <div class="issue-body">
+    <div class="issue-title">Datos: localStorage como unica fuente = riesgo de perdida total</div>
+    <div class="issue-desc">Todo el trabajo del agronomo (campos, lotes, ordenes de toda la campana) esta en localStorage del navegador. Un borrado de cache, cambio de dispositivo o clear accidental pierde todo sin posibilidad de recuperacion.</div>
+    <div class="priority-bar"><span class="badge badge-crit">DATOS</span> <span class="fix-tag">Export/Import JSON + backup a Sheets</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">04</span>
+  <div class="issue-body">
+    <div class="issue-title">Analisis no usa multi-aplicacion</div>
+    <div class="issue-desc">El tab Analisis (lineas 1488-1588) filtra por <code>o.loteId</code> y <code>o.hectareas</code> (campos legacy de la primera aplicacion) en lugar de iterar <code>o.aplicaciones[]</code>. Ordenes con multiples lotes solo contabilizan el primer lote.</div>
+    <div class="priority-bar"><span class="badge badge-crit">BUG</span> <span class="fix-tag">Iterar o.aplicaciones en renderAnalisis</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">05</span>
+  <div class="issue-body">
+    <div class="issue-title">WA message no refleja multi-aplicacion</div>
+    <div class="issue-desc"><code>_buildWAMsg()</code> (linea 1595) usa <code>o.loteId</code>, <code>o.hectareas</code> y <code>o.productos</code> (flat). No muestra a que lote pertenece cada producto cuando hay multiples aplicaciones.</div>
+    <div class="priority-bar"><span class="badge badge-warn">BUG</span> <span class="fix-tag">Iterar o.aplicaciones en _buildWAMsg</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">🟡</span> Problemas de UX</h2>
+
+<div class="card">
+<div class="issue-row">
+  <span class="issue-num">06</span>
+  <div class="issue-body">
+    <div class="issue-title">Grid de productos fuerza scroll horizontal en mobile</div>
+    <div class="issue-desc">La grilla de 7 columnas tiene <code>min-width: 460px</code> (linea 299). En un celular de 375px el usuario debe scrollear para ver Vol, $/ha y Monto. Estos datos son criticos para el agronomo.</div>
+    <div class="priority-bar"><span class="badge badge-warn">MOBILE</span> <span class="fix-tag">Diseño card-stack o colapsar columnas</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">07</span>
+  <div class="issue-body">
+    <div class="issue-title">No hay boton "Eliminar" visible en ordenes</div>
+    <div class="issue-desc"><code>deleteOrden()</code> existe (linea 1844) pero ningun boton del UI lo invoca. El usuario no puede eliminar ordenes erroneas.</div>
+    <div class="priority-bar"><span class="badge badge-warn">UX</span> <span class="fix-tag">Agregar boton eliminar en card de orden</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">08</span>
+  <div class="issue-body">
+    <div class="issue-title">PDF de orden guardada: hack de swap de form values</div>
+    <div class="issue-desc"><code>exportarOrdenPDF()</code> (linea 1651) hace un swap temporal de los valores del formulario para reusar <code>exportarPDF()</code>. Fragil y propenso a bugs si el form esta en estado de edicion.</div>
+    <div class="priority-bar"><span class="badge badge-warn">TECH DEBT</span> <span class="fix-tag">exportarPDF deberia recibir un objeto orden</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">09</span>
+  <div class="issue-body">
+    <div class="issue-title">Campaña se edita con <code>prompt()</code></div>
+    <div class="issue-desc">Linea 596. Mismo problema que campos. Deberia ser un input inline o un select con opciones predefinidas (2024/25, 2025/26, 2026/27).</div>
+    <div class="priority-bar"><span class="badge badge-info">MENOR</span> <span class="fix-tag">Select inline</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">10</span>
+  <div class="issue-body">
+    <div class="issue-title">No hay confirmacion al salir con OT sin guardar</div>
+    <div class="issue-desc">Si el agronomo esta armando una OT con 5 productos y toca otro tab o cierra el browser, pierde todo sin aviso.</div>
+    <div class="priority-bar"><span class="badge badge-warn">UX</span> <span class="fix-tag">beforeunload + confirm en cambio de tab</span></div>
+  </div>
+</div>
+
+<div class="issue-row">
+  <span class="issue-num">11</span>
+  <div class="issue-body">
+    <div class="issue-title">No hay totales visibles en Nueva OT</div>
+    <div class="issue-desc">El "Resumen retiro" solo muestra volumenes, no costos. El usuario no ve cuanto va a costar la aplicacion hasta que guarda y va a Analisis.</div>
+    <div class="priority-bar"><span class="badge badge-warn">UX</span> <span class="fix-tag">Agregar footer de totales (como en cotizador agro)</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">🟢</span> Lo que funciona bien</h2>
+
+<div class="card">
+<ul>
+  <li><strong>Multi-aplicacion:</strong> El sistema de multiples lotes por OT esta bien implementado con la estructura <code>aplicaciones[]</code></li>
+  <li><strong>Dropdown de productos:</strong> Busqueda con keyboard nav (flechas + Enter), categorias, agregar manual. Bien resuelto.</li>
+  <li><strong>Status buttons:</strong> Cambiar estado (Pend/Curso/Comp) directo desde la card sin entrar a editar. Excelente para uso rapido en campo.</li>
+  <li><strong>Catalogo desde Sheets:</strong> Los precios y productos se actualizan sin redesplegar.</li>
+  <li><strong>Aplicadores memorizados:</strong> Se guardan y sugieren en futuras OTs.</li>
+  <li><strong>Tipos de labor personalizables:</strong> Con defaults sensatos + opcion de agregar.</li>
+  <li><strong>Design system coherente:</strong> Mismas variables CSS, tipografias y componentes que los cotizadores.</li>
+  <li><strong>PDF profesional:</strong> Buena estructura con header navy, tabla por lote, resumen retiro.</li>
+</ul>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">🔧</span> Plan de optimizacion propuesto</h2>
+
+<div class="card">
+<h3>Fase 1 — Fixes criticos (impacto inmediato)</h3>
+<div class="flow-step">
+  <div class="flow-num">1</div>
+  <div class="flow-text"><strong>Modal inline para Campos/Lotes</strong> — Reemplazar los 6-7 prompt() por un modal con form completo (nombre, cliente, localidad, lotes con has y cultivo). El usuario ve todo junto, puede corregir antes de guardar. Mobile-friendly.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">2</div>
+  <div class="flow-text"><strong>Sanitizar HTML</strong> — Crear funcion <code>esc(str)</code> y usarla en todo innerHTML. Previene XSS con datos de usuario.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">3</div>
+  <div class="flow-text"><strong>Export/Import JSON</strong> — Boton "Descargar backup" (JSON) y "Restaurar" (file input). Cero dependencia de servidor, el usuario tiene su archivo.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">4</div>
+  <div class="flow-text"><strong>Fix Analisis multi-app</strong> — Iterar <code>o.aplicaciones</code> en vez de usar campos legacy. Corrige conteo de hectareas y costos.</div>
+</div>
+
+<h3>Fase 2 — UX mobile</h3>
+<div class="flow-step">
+  <div class="flow-num">5</div>
+  <div class="flow-text"><strong>Grilla responsive de productos</strong> — En mobile: card-stack (producto + dosis + costo apilados) en vez de tabla con scroll horizontal. Mantener tabla en desktop.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">6</div>
+  <div class="flow-text"><strong>Footer de totales en Nueva OT</strong> — Barra sticky con: insumos USD/ha, labor USD/ha, total USD/ha, total USD. Mismo estilo navy gradient que los cotizadores.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">7</div>
+  <div class="flow-text"><strong>Boton eliminar en ordenes</strong> + confirmacion.</div>
+</div>
+
+<h3>Fase 3 — Robustez</h3>
+<div class="flow-step">
+  <div class="flow-num">8</div>
+  <div class="flow-text"><strong>Fix WA multi-app</strong> — Mensaje que liste cada lote con sus productos y volumenes.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">9</div>
+  <div class="flow-text"><strong>Refactor exportarPDF</strong> — Que reciba un objeto orden en vez de leer del form.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">10</div>
+  <div class="flow-text"><strong>Proteccion de datos</strong> — <code>beforeunload</code> si hay OT en progreso. Selector de campana inline.</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">📊</span> Comparativa: Antes vs Despues</h2>
+
+<div class="comparison">
+<div>
+  <h4>Ahora</h4>
+  <ul>
+    <li>Campos con prompt() (3-4 por campo)</li>
+    <li>Grid de productos con scroll horizontal</li>
+    <li>Sin totales de costo en formulario</li>
+    <li>Sin backup de datos</li>
+    <li>Sin boton eliminar orden</li>
+    <li>Analisis solo cuenta primer lote</li>
+    <li>WA no muestra multi-lote</li>
+  </ul>
+</div>
+<div>
+  <h4>Propuesto</h4>
+  <ul>
+    <li>Modal inline con todos los campos juntos</li>
+    <li>Cards responsivas en mobile, tabla en desktop</li>
+    <li>Footer sticky con totales USD/ha</li>
+    <li>Export/Import JSON con un click</li>
+    <li>Eliminar con confirmacion</li>
+    <li>Analisis iterando todas las aplicaciones</li>
+    <li>WA con detalle por lote</li>
+  </ul>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2><span class="section-icon">📋</span> Resumen ejecutivo</h2>
+
+<div class="card" style="border-left: 4px solid var(--accent);">
+<p>La app tiene una <strong>base solida</strong> (multi-aplicacion, catalogo Sheets, PDF, WA) pero la UX esta lastrada por el uso de <code>prompt()</code> para CRUD, la falta de responsividad en mobile, y bugs en Analisis/WA que no contemplan ordenes multi-lote.</p>
+
+<p style="margin-top:10px;">Las <strong>3 mejoras de mayor impacto</strong> son:</p>
+<ol style="margin-top:8px;">
+  <li><strong>Modal inline para campos/lotes</strong> — cambia drasticamente la experiencia en celular</li>
+  <li><strong>Footer de totales + grilla responsive</strong> — el agronomo necesita ver costos al armar la OT</li>
+  <li><strong>Export/Import JSON</strong> — protege los datos del usuario sin necesidad de backend</li>
+</ol>
+</div>
+
+<p style="text-align:center;color:var(--text-mut);font-size:.7rem;margin-top:20px;">
+  Generado por Claude Code — Henderseeds SRL — 20 marzo 2026
+</p>
+
+</div>
+</body>
+</html>

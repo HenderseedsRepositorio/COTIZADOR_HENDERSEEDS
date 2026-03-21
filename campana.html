@@ -183,7 +183,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .dd-item:hover, .dd-item.highlighted { background: var(--accent-bg); }
 .dd-item-price { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; }
 
-/* ── Product rows ── */
+/* ── Product rows (desktop) ── */
 .rows-scroll { overflow-x: auto; margin: 0 -12px; padding: 0 12px; }
 .rows-header {
   display: grid; grid-template-columns: 1fr 68px 62px 58px 62px 68px 24px;
@@ -227,16 +227,16 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .row-rm { background: none; border: none; color: var(--text-mut); font-size: 16px; cursor: pointer; padding: 2px; line-height: 1; text-align: center; }
 .row-rm:hover { color: var(--red); }
 
-/* ── Totales ── */
-.totales {
+/* ── Totales OT (sticky footer) ── */
+.ot-totales {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--navy-sky) 100%);
   color: white; border-radius: var(--radius); padding: 14px 18px; margin-top: 8px;
 }
-.tot-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .78rem; }
-.tot-row span:first-child { opacity: .7; font-size: .72rem; }
-.tot-row.big { border-top: 1px solid rgba(255,255,255,.15); margin-top: 6px; padding-top: 10px; font-size: 1.1rem; font-weight: 700; }
-.tot-row.big span:first-child { opacity: 1; }
-.tot-row .mono { font-family: var(--mono); color: var(--accent-light); }
+.ot-tot-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: .78rem; }
+.ot-tot-row span:first-child { opacity: .7; font-size: .72rem; }
+.ot-tot-row.big { border-top: 1px solid rgba(255,255,255,.15); margin-top: 6px; padding-top: 8px; font-size: 1.05rem; font-weight: 700; }
+.ot-tot-row.big span:first-child { opacity: 1; }
+.ot-tot-mono { font-family: var(--mono); }
 
 /* ── Campo/Lote cards ── */
 .campo-card { border-left: 4px solid var(--accent); }
@@ -283,6 +283,33 @@ textarea.inp { resize: vertical; min-height: 60px; }
 }
 .wa-bar .btn { flex: 1; }
 
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(13,45,94,.5);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200; padding: 16px; backdrop-filter: blur(2px);
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--card); border-radius: var(--radius); padding: 20px;
+  width: 100%; max-width: 420px; box-shadow: 0 16px 48px rgba(0,0,0,.25);
+  animation: fadeUp .2s ease both; max-height: 90vh; overflow-y: auto;
+}
+.modal-title {
+  font-family: var(--title); font-size: 14px; color: var(--navy);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; }
+
+/* ── Backup bar ── */
+.backup-bar {
+  display: flex; gap: 6px; margin-bottom: 10px; align-items: center;
+  justify-content: flex-end;
+}
+.backup-bar .btn { font-size: .62rem; padding: 5px 12px; }
+.backup-file-input { display: none; }
+
 /* ── Animations ── */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -296,14 +323,27 @@ textarea.inp { resize: vertical; min-height: 60px; }
 @media (max-width: 639px) {
   .status-bar { flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
   .rows-scroll { margin: 0 -14px; padding: 0 14px; -webkit-overflow-scrolling: touch; }
-  .rows-header, .row-item { min-width: 460px; }
-  .row-new { display: flex; gap: 6px; min-width: 0; }
+  /* Mobile: stack product rows as cards */
+  .rows-header { display: none; }
+  .row-item {
+    display: flex; flex-wrap: wrap; gap: 4px 8px; min-width: 0;
+    grid-template-columns: none;
+  }
+  .row-item .row-prod { width: calc(100% - 30px); }
+  .row-item .row-inp { width: 60px; }
+  .row-item .row-val { font-size: 11px; }
+  .row-item .row-rm { margin-left: auto; }
+  .row-mob-line { display: flex; width: 100%; gap: 6px; align-items: center; justify-content: space-between; }
+  .row-new { display: flex; gap: 6px; min-width: 0; grid-template-columns: none; }
   .row-new .row-new-search { flex: 1; }
   .row-new .row-val, .row-new > span:last-child { display: none; }
   .wa-bar { padding: 8px 6px; gap: 6px; }
   .wa-bar .btn { font-size: .72rem; padding: 10px 8px; }
   .bar-label { width: 70px; font-size: 11px; }
   .bar-amount { width: 65px; font-size: 11px; }
+}
+@media (min-width: 640px) {
+  .row-mob-line { display: contents; }
 }
 @media (max-width: 380px) {
   body { font-size: 14px; }
@@ -314,33 +354,49 @@ textarea.inp { resize: vertical; min-height: 60px; }
 </head>
 <body>
 
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-body"></div>
+</div>
+
 <div class="main">
 
   <!-- HEADER -->
   <div class="card fu" style="padding:8px 16px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;">
-    <span style="font-family:var(--title);font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;">Seguimiento Campaña</span>
+    <span style="font-family:var(--title);font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;">Seguimiento Campana</span>
     <img src="assets/logo-henderseeds.png" alt="Henderseeds" style="height:30px;width:auto;object-fit:contain;">
   </div>
 
   <!-- STATUS BAR -->
   <div class="status-bar">
-    <a href="../index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;">&larr; Menú</a>
-    <span>Campaña: <strong id="campana-display" style="color:var(--navy-sky);cursor:pointer;" onclick="App.editCampana()">2025/26</strong></span>
+    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;">&larr; Menu</a>
+    <span>Campana:
+      <select id="campana-select" style="border:none;background:none;color:var(--navy-sky);font-weight:700;font-size:.62rem;font-family:var(--font);cursor:pointer;">
+        <option value="2024/25">2024/25</option>
+        <option value="2025/26" selected>2025/26</option>
+        <option value="2026/27">2026/27</option>
+      </select>
+    </span>
     <span id="status-text" style="font-size:.58rem;">Datos locales</span>
   </div>
 
   <!-- TABS -->
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="campos">🌾 Campos</button>
-    <button class="tab-btn" data-tab="nueva-ot">📋 Nueva OT</button>
-    <button class="tab-btn" data-tab="ordenes">📑 Ordenes</button>
-    <button class="tab-btn" data-tab="analisis">📊 Análisis</button>
+    <button class="tab-btn active" data-tab="campos">Campos</button>
+    <button class="tab-btn" data-tab="nueva-ot">Nueva OT</button>
+    <button class="tab-btn" data-tab="ordenes">Ordenes</button>
+    <button class="tab-btn" data-tab="analisis">Analisis</button>
   </nav>
 
   <!-- ═══ TAB CAMPOS ═══ -->
   <section id="tab-campos" class="tab-content active">
+    <div class="backup-bar">
+      <button class="btn btn-sm btn-outline" onclick="App.exportData()">Descargar backup</button>
+      <button class="btn btn-sm btn-accent" onclick="document.getElementById('import-file').click()">Restaurar</button>
+      <input type="file" id="import-file" class="backup-file-input" accept=".json" onchange="App.importData(this)">
+    </div>
     <div id="campos-list"></div>
-    <button class="btn-add" onclick="App.addCampo()">+ Agregar Campo</button>
+    <button class="btn-add" onclick="App.openCampoModal()">+ Agregar Campo</button>
   </section>
 
   <!-- ═══ TAB NUEVA OT ═══ -->
@@ -349,7 +405,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <div class="card fu" style="margin-bottom:6px;position:relative;z-index:30;">
       <div class="form-row" style="margin-bottom:8px;">
         <div>
-          <div class="form-lbl">Fecha aplicación</div>
+          <div class="form-lbl">Fecha aplicacion</div>
           <input type="date" id="ot-fecha" class="inp inp-sm">
         </div>
         <div style="position:relative;">
@@ -362,8 +418,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
       <div class="form-row">
         <div style="position:relative;">
           <div class="form-lbl">Tipo de labor</div>
-          <input type="text" id="ot-tipo" class="inp inp-sm" value="Pulverización terrestre"
-            placeholder="Ej: Pulverización..." autocomplete="off"
+          <input type="text" id="ot-tipo" class="inp inp-sm" value="Pulverizacion terrestre"
+            placeholder="Ej: Pulverizacion..." autocomplete="off"
             oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
         </div>
         <div>
@@ -377,16 +433,19 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <!-- Aplicaciones (rendered dynamically) -->
     <div id="ot-apps-container"></div>
 
-    <!-- Add aplicación button -->
-    <button class="btn btn-outline" style="width:100%;margin:8px 0;border-style:dashed;" onclick="App.addAplicacion()">+ Agregar Aplicación</button>
+    <!-- Add aplicacion button -->
+    <button class="btn btn-outline" style="width:100%;margin:8px 0;border-style:dashed;" onclick="App.addAplicacion()">+ Agregar Aplicacion</button>
 
     <!-- Resumen retiro -->
     <div id="ot-resumen" class="card fu" style="display:none;"></div>
 
+    <!-- Totales -->
+    <div id="ot-totales" class="ot-totales" style="display:none;"></div>
+
     <!-- Notas + Estado + Save -->
     <div class="card fu" style="margin-top:6px;">
       <div class="form-lbl">Notas</div>
-      <textarea id="ot-notas" class="inp inp-sm" placeholder="Instrucciones, condiciones climáticas..." rows="2"></textarea>
+      <textarea id="ot-notas" class="inp inp-sm" placeholder="Instrucciones, condiciones climaticas..." rows="2"></textarea>
 
       <div class="form-lbl" style="margin-top:10px;">Estado</div>
       <div class="chip-bar" id="ot-estado-bar">
@@ -427,20 +486,20 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <div id="ordenes-list"></div>
   </section>
 
-  <!-- ═══ TAB ANÁLISIS ═══ -->
+  <!-- ═══ TAB ANALISIS ═══ -->
   <section id="tab-analisis" class="tab-content">
     <div class="card">
       <div class="form-row" style="margin-bottom:10px;">
         <div>
           <div class="form-lbl">Campo</div>
           <select id="an-campo" class="inp inp-sm" onchange="App.onAnCampoChange()">
-            <option value="">— Todos —</option>
+            <option value="">-- Todos --</option>
           </select>
         </div>
         <div>
           <div class="form-lbl">Lote</div>
           <select id="an-lote" class="inp inp-sm" onchange="App.renderAnalisis()">
-            <option value="">— Todos —</option>
+            <option value="">-- Todos --</option>
           </select>
         </div>
       </div>
@@ -452,8 +511,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
 
 <!-- WA bar -->
 <div class="wa-bar" id="wa-bar">
-  <button class="btn btn-green" onclick="App.compartirWA()">📲 Enviar Orden</button>
-  <button class="btn btn-outline" onclick="App.exportarPDF()">📄 PDF</button>
+  <button class="btn btn-green" onclick="App.compartirWA()">Enviar Orden</button>
+  <button class="btn btn-outline" onclick="App.exportarPDF()">PDF</button>
 </div>
 
 <script>
@@ -462,6 +521,13 @@ const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, m
 const fmtInt = n => Number(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const dateISO = () => new Date().toISOString().slice(0, 10);
+
+// XSS prevention
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
 
 /* ══════════════════════════════════════
    STORAGE
@@ -493,14 +559,14 @@ async function loadCatalog() {
   if (!API_URL) return;
   try {
     const res = await fetch(API_URL + '?action=getCatalogoAgro&_t=' + Date.now(), { cache: 'no-store' });
-    const data = await res.json();
-    if (data.ok && data.catalogo) {
-      catalogo = data.catalogo;
+    const d = await res.json();
+    if (d.ok && d.catalogo) {
+      catalogo = d.catalogo;
       const total = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
-      $('status-text').textContent = 'Sheets — ' + total + ' productos';
+      $('status-text').textContent = 'Sheets -- ' + total + ' productos';
     }
   } catch(e) {
-    $('status-text').textContent = 'Offline — datos locales';
+    $('status-text').textContent = 'Offline -- datos locales';
   }
 }
 
@@ -521,15 +587,34 @@ data.ordenes.forEach(o => {
 Storage.save(data);
 
 let editingOrdenId = null;
-let aplicaciones = []; // array of {loteId, hectareas, cultivo, tipo, costoLabor, productos:[]}
-let currentAppIdx = 0; // which aplicación is currently being edited
-let currentOTRows = []; // shortcut to aplicaciones[currentAppIdx].productos
+let aplicaciones = [];
+let currentAppIdx = 0;
+let currentOTRows = [];
 let rowIdCounter = 0;
 let filtroOT = 'todas';
 let highlightIdx = -1;
 let ddItems = [];
 let aplicadorHighlight = -1;
 let aplicadorMatches = [];
+let formDirty = false;
+
+/* ══════════════════════════════════════
+   MODAL SYSTEM
+   ══════════════════════════════════════ */
+function openModal(html) {
+  $('modal-body').innerHTML = html;
+  $('modal-overlay').classList.add('show');
+  const first = $('modal-body').querySelector('input,select,textarea');
+  if (first) setTimeout(() => first.focus(), 50);
+}
+function closeModal() {
+  $('modal-overlay').classList.remove('show');
+  $('modal-body').innerHTML = '';
+}
+// Close on overlay click
+document.addEventListener('click', e => {
+  if (e.target.id === 'modal-overlay') closeModal();
+});
 
 /* ══════════════════════════════════════
    APP
@@ -539,6 +624,9 @@ const App = {
     // Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (formDirty && btn.dataset.tab !== 'nueva-ot') {
+          if (!confirm('Hay una OT sin guardar. Salir de todos modos?')) return;
+        }
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
@@ -580,9 +668,21 @@ const App = {
       else if (e.key === 'Escape') App.hideAplicadorDD();
     });
 
+    // Campaign selector
+    const campSel = $('campana-select');
+    campSel.value = data.campana;
+    campSel.addEventListener('change', function() {
+      data.campana = this.value;
+      Storage.save(data);
+    });
+
     // Set today's date
     $('ot-fecha').value = dateISO();
-    $('campana-display').textContent = data.campana;
+
+    // beforeunload protection
+    window.addEventListener('beforeunload', e => {
+      if (formDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
 
     App._initAplicaciones();
     App.renderCampos();
@@ -590,35 +690,25 @@ const App = {
     loadCatalog();
   },
 
-  /* ── Campaign ── */
-  editCampana() {
-    const c = prompt('Campaña:', data.campana);
-    if (c && c.trim()) {
-      data.campana = c.trim();
-      Storage.save(data);
-      $('campana-display').textContent = data.campana;
-    }
-  },
-
   /* ══════════════════════════════════════
-     CAMPOS & LOTES
+     CAMPOS & LOTES (modal-based)
      ══════════════════════════════════════ */
   renderCampos() {
     const el = $('campos-list');
     if (!data.campos.length) {
-      el.innerHTML = '<div class="empty"><div class="empty-icon">🌾</div><p>Sin campos registrados</p><p style="font-size:12px;margin-top:4px;">Agregá tu primer campo para empezar</p></div>';
+      el.innerHTML = '<div class="empty"><div class="empty-icon">🌾</div><p>Sin campos registrados</p><p style="font-size:12px;margin-top:4px;">Agrega tu primer campo para empezar</p></div>';
       return;
     }
     el.innerHTML = data.campos.map(c => {
       const lotesHtml = c.lotes.map(l => `
         <div class="lote-row">
           <div class="lote-info">
-            <div class="lote-name">${l.nombre}</div>
-            <div class="lote-meta">${l.hectareas} has · ${l.cultivo || '—'}</div>
+            <div class="lote-name">${esc(l.nombre)}</div>
+            <div class="lote-meta">${esc(String(l.hectareas))} has · ${esc(l.cultivo || '--')}</div>
           </div>
           <div class="lote-actions">
-            <button onclick="App.editLote('${c.id}','${l.id}')" title="Editar">✏️</button>
-            <button onclick="App.removeLote('${c.id}','${l.id}')" title="Eliminar">&times;</button>
+            <button onclick="App.openLoteModal('${esc(c.id)}','${esc(l.id)}')" title="Editar">✏️</button>
+            <button onclick="App.removeLote('${esc(c.id)}','${esc(l.id)}')" title="Eliminar">&times;</button>
           </div>
         </div>
       `).join('');
@@ -626,93 +716,122 @@ const App = {
       return `<div class="card campo-card fu">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
           <div>
-            <div style="font-family:var(--title);font-size:13px;color:var(--navy);text-transform:uppercase;">${c.nombre}</div>
-            <div style="font-size:11px;color:var(--text-sec);">${c.cliente ? 'Cliente: ' + c.cliente + ' · ' : ''}${c.localidad || ''}</div>
+            <div style="font-family:var(--title);font-size:13px;color:var(--navy);text-transform:uppercase;">${esc(c.nombre)}</div>
+            <div style="font-size:11px;color:var(--text-sec);">${c.cliente ? 'Cliente: ' + esc(c.cliente) + ' · ' : ''}${esc(c.localidad || '')}</div>
           </div>
           <div style="display:flex;gap:4px;">
-            <button class="btn btn-sm btn-accent" style="font-size:10px;padding:4px 8px;" onclick="App.editCampo('${c.id}')">✏️</button>
-            <button class="btn btn-sm btn-danger" style="font-size:10px;padding:4px 8px;" onclick="App.removeCampo('${c.id}')">&times;</button>
+            <button class="btn btn-sm btn-accent" style="font-size:10px;padding:4px 8px;" onclick="App.openCampoModal('${esc(c.id)}')">✏️</button>
+            <button class="btn btn-sm btn-danger" style="font-size:10px;padding:4px 8px;" onclick="App.removeCampo('${esc(c.id)}')">&times;</button>
           </div>
         </div>
         ${lotesHtml}
-        <button style="width:100%;padding:6px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;" onclick="App.addLote('${c.id}')">+ Agregar Lote</button>
+        <button style="width:100%;padding:6px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;" onclick="App.openLoteModal('${esc(c.id)}')">+ Agregar Lote</button>
       </div>`;
     }).join('');
   },
 
-  addCampo() {
-    const nombre = prompt('Nombre del campo:');
-    if (!nombre || !nombre.trim()) return;
-    const cliente = prompt('Cliente / Productor (opcional):') || '';
-    const localidad = prompt('Localidad (opcional):') || '';
-    data.campos.push({
-      id: Storage.nextId('c'),
-      nombre: nombre.trim(),
-      cliente: cliente.trim(),
-      localidad: localidad.trim(),
-      lotes: []
-    });
-    Storage.save(data);
-    App.renderCampos();
-    App.refreshSelectors();
+  openCampoModal(cid) {
+    const c = cid ? data.campos.find(x => x.id === cid) : null;
+    const title = c ? 'Editar Campo' : 'Nuevo Campo';
+    openModal(`
+      <div class="modal-title">${title}</div>
+      <div style="margin-bottom:10px;">
+        <div class="form-lbl">Nombre del campo *</div>
+        <input type="text" id="m-campo-nombre" class="inp inp-sm" value="${esc(c?.nombre || '')}" placeholder="Ej: Don Pedro">
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Cliente / Productor</div>
+          <input type="text" id="m-campo-cliente" class="inp inp-sm" value="${esc(c?.cliente || '')}" placeholder="Opcional">
+        </div>
+        <div>
+          <div class="form-lbl">Localidad</div>
+          <input type="text" id="m-campo-localidad" class="inp inp-sm" value="${esc(c?.localidad || '')}" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-accent" onclick="App.saveCampo('${cid || ''}')">Guardar</button>
+      </div>
+    `);
   },
 
-  editCampo(cid) {
-    const c = data.campos.find(x => x.id === cid);
-    if (!c) return;
-    const nombre = prompt('Nombre del campo:', c.nombre);
-    if (!nombre || !nombre.trim()) return;
-    c.nombre = nombre.trim();
-    c.cliente = (prompt('Cliente / Productor:', c.cliente) || '').trim();
-    c.localidad = (prompt('Localidad:', c.localidad) || '').trim();
+  saveCampo(cid) {
+    const nombre = $('m-campo-nombre').value.trim();
+    if (!nombre) { $('m-campo-nombre').style.borderColor = 'var(--red)'; return; }
+    const cliente = $('m-campo-cliente').value.trim();
+    const localidad = $('m-campo-localidad').value.trim();
+
+    if (cid) {
+      const c = data.campos.find(x => x.id === cid);
+      if (c) { c.nombre = nombre; c.cliente = cliente; c.localidad = localidad; }
+    } else {
+      data.campos.push({ id: Storage.nextId('c'), nombre, cliente, localidad, lotes: [] });
+    }
     Storage.save(data);
+    closeModal();
     App.renderCampos();
     App.refreshSelectors();
   },
 
   removeCampo(cid) {
-    if (!confirm('¿Eliminar este campo y todos sus lotes?')) return;
+    if (!confirm('Eliminar este campo y todos sus lotes?')) return;
     data.campos = data.campos.filter(x => x.id !== cid);
     Storage.save(data);
     App.renderCampos();
     App.refreshSelectors();
   },
 
-  addLote(cid) {
+  openLoteModal(cid, lid) {
     const c = data.campos.find(x => x.id === cid);
     if (!c) return;
-    const nombre = prompt('Nombre del lote:');
-    if (!nombre || !nombre.trim()) return;
-    const has = parseFloat(prompt('Hectáreas:') || '0') || 0;
-    const cultivo = (prompt('Cultivo (ej: Soja 1ra, Maíz):') || '').trim();
-    c.lotes.push({
-      id: Storage.nextId('l'),
-      nombre: nombre.trim(),
-      hectareas: has,
-      cultivo: cultivo
-    });
-    Storage.save(data);
-    App.renderCampos();
-    App.refreshSelectors();
+    const l = lid ? c.lotes.find(x => x.id === lid) : null;
+    const title = l ? 'Editar Lote' : 'Nuevo Lote en ' + esc(c.nombre);
+    openModal(`
+      <div class="modal-title">${title}</div>
+      <div style="margin-bottom:10px;">
+        <div class="form-lbl">Nombre del lote *</div>
+        <input type="text" id="m-lote-nombre" class="inp inp-sm" value="${esc(l?.nombre || '')}" placeholder="Ej: Lote 3">
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div>
+          <div class="form-lbl">Hectareas *</div>
+          <input type="number" id="m-lote-has" class="inp inp-sm" value="${l?.hectareas || ''}" placeholder="0" min="0" step="1" style="font-family:var(--mono);">
+        </div>
+        <div>
+          <div class="form-lbl">Cultivo</div>
+          <input type="text" id="m-lote-cultivo" class="inp inp-sm" value="${esc(l?.cultivo || '')}" placeholder="Ej: Soja 1ra">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-accent" onclick="App.saveLote('${esc(cid)}','${lid || ''}')">Guardar</button>
+      </div>
+    `);
   },
 
-  editLote(cid, lid) {
+  saveLote(cid, lid) {
+    const nombre = $('m-lote-nombre').value.trim();
+    if (!nombre) { $('m-lote-nombre').style.borderColor = 'var(--red)'; return; }
+    const has = parseFloat($('m-lote-has').value) || 0;
+    const cultivo = $('m-lote-cultivo').value.trim();
     const c = data.campos.find(x => x.id === cid);
     if (!c) return;
-    const l = c.lotes.find(x => x.id === lid);
-    if (!l) return;
-    const nombre = prompt('Nombre del lote:', l.nombre);
-    if (!nombre || !nombre.trim()) return;
-    l.nombre = nombre.trim();
-    l.hectareas = parseFloat(prompt('Hectáreas:', l.hectareas) || l.hectareas) || l.hectareas;
-    l.cultivo = (prompt('Cultivo:', l.cultivo) || '').trim();
+
+    if (lid) {
+      const l = c.lotes.find(x => x.id === lid);
+      if (l) { l.nombre = nombre; l.hectareas = has; l.cultivo = cultivo; }
+    } else {
+      c.lotes.push({ id: Storage.nextId('l'), nombre, hectareas: has, cultivo });
+    }
     Storage.save(data);
+    closeModal();
     App.renderCampos();
     App.refreshSelectors();
   },
 
   removeLote(cid, lid) {
-    if (!confirm('¿Eliminar este lote?')) return;
+    if (!confirm('Eliminar este lote?')) return;
     const c = data.campos.find(x => x.id === cid);
     if (!c) return;
     c.lotes = c.lotes.filter(x => x.id !== lid);
@@ -722,21 +841,54 @@ const App = {
   },
 
   /* ══════════════════════════════════════
+     EXPORT / IMPORT
+     ══════════════════════════════════════ */
+  exportData() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'henderseeds-campana-backup-' + dateISO() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (!imported.campos || !imported.ordenes) { alert('Archivo no valido.'); return; }
+        if (!confirm('Esto reemplazara todos los datos actuales. Continuar?')) return;
+        data = imported;
+        Storage.save(data);
+        $('campana-select').value = data.campana;
+        App.renderCampos();
+        App.refreshSelectors();
+        alert('Datos restaurados correctamente.');
+      } catch(err) {
+        alert('Error al leer el archivo.');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  },
+
+  /* ══════════════════════════════════════
      NUEVA ORDEN DE TRABAJO
      ══════════════════════════════════════ */
   refreshSelectors() {
-    // Analytics selectors
-    const allCampoOpts = '<option value="">— Todos —</option>' +
-      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    const allCampoOpts = '<option value="">-- Todos --</option>' +
+      data.campos.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
     $('an-campo').innerHTML = allCampoOpts;
 
-    // Ordenes selectors
     const ordCampoOpts = '<option value="">Todos los campos</option>' +
-      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+      data.campos.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
     $('ord-campo').innerHTML = ordCampoOpts;
     $('ord-lote').innerHTML = '<option value="">Todos los lotes</option>';
 
-    // Re-render app blocks (campo options may have changed)
     App.renderAllApps();
   },
 
@@ -744,7 +896,7 @@ const App = {
     const cid = $('ord-campo').value;
     const c = data.campos.find(x => x.id === cid);
     const loteOpts = '<option value="">Todos los lotes</option>' +
-      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('') : '');
+      (c ? c.lotes.map(l => `<option value="${esc(l.id)}">${esc(l.nombre)}</option>`).join('') : '');
     $('ord-lote').innerHTML = loteOpts;
     App.renderOrdenes();
   },
@@ -754,12 +906,14 @@ const App = {
     aplicaciones = [{ campoId: '', loteId: '', hectareas: 0, cultivo: '', productos: [] }];
     currentAppIdx = 0;
     currentOTRows = aplicaciones[0].productos;
+    formDirty = false;
     App.renderAllApps();
   },
 
   addAplicacion() {
     App._readAllAppsFromDOM();
     aplicaciones.push({ campoId: '', loteId: '', hectareas: 0, cultivo: '', productos: [] });
+    formDirty = true;
     App.renderAllApps();
   },
 
@@ -786,7 +940,6 @@ const App = {
       a.loteId = block.querySelector('.app-lote')?.value || '';
       a.hectareas = parseFloat(block.querySelector('.app-has')?.value) || 0;
       a.cultivo = block.querySelector('.app-cultivo')?.value || '';
-      // productos already updated via updateRow/addProduct
     });
   },
 
@@ -796,47 +949,47 @@ const App = {
 
   renderAllApps() {
     const container = $('ot-apps-container');
-    // Rescue shared dropdowns before clearing innerHTML (they may have been moved inside)
     const dd = $('ot-dropdown');
     const tdd = $('tipo-dd');
     if (dd && dd.parentElement && dd.parentElement.closest('#ot-apps-container')) $('tab-nueva-ot').appendChild(dd);
     if (tdd && tdd.parentElement && tdd.parentElement.closest('#ot-apps-container')) $('tab-nueva-ot').appendChild(tdd);
 
-    const campoOpts = '<option value="">— Campo —</option>' +
-      data.campos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    const campoOpts = '<option value="">-- Campo --</option>' +
+      data.campos.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
 
     container.innerHTML = aplicaciones.map((a, i) => {
       const campo = data.campos.find(c => c.id === a.campoId);
-      const loteOpts = '<option value="">— Lote —</option>' +
-        (campo ? campo.lotes.map(l => `<option value="${l.id}"${l.id === a.loteId ? ' selected' : ''}>${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
+      const loteOpts = '<option value="">-- Lote --</option>' +
+        (campo ? campo.lotes.map(l => `<option value="${esc(l.id)}"${l.id === a.loteId ? ' selected' : ''}>${esc(l.nombre)} (${l.hectareas} has)</option>`).join('') : '');
 
-      const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
       const has = a.hectareas || 0;
       const prodRows = a.productos.map(r => {
         const costoHa = r.precio * r.dosis;
         const vol = has > 0 ? r.dosis * has : null;
         const monto = has > 0 ? costoHa * has : null;
-        return `<div class="row-item" data-rowid="${r.id}" data-appidx="${i}" style="grid-template-columns:${gridCols}">
+        return `<div class="row-item" data-rowid="${r.id}" data-appidx="${i}">
           <div class="row-prod">
-            <span class="row-prod-name">${r.producto}</span>
-            <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+            <span class="row-prod-name">${esc(r.producto)}</span>
+            <span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span>
           </div>
-          <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
-            onfocus="App.setActiveApp(${i})"
-            oninput="App.updateRow(${r.id},'precio',this.value)">
-          <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
-            onfocus="App.setActiveApp(${i})"
-            oninput="App.updateRow(${r.id},'dosis',this.value)">
-          <span class="row-val">${vol ? fmt(vol) : '—'}</span>
-          <span class="row-val costo">${fmt(costoHa)}</span>
-          <span class="row-val">${monto ? fmt(monto) : '—'}</span>
-          <button class="row-rm" onclick="App.setActiveApp(${i});App.removeOTRow(${r.id})">&times;</button>
+          <div class="row-mob-line">
+            <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+              onfocus="App.setActiveApp(${i})"
+              oninput="App.updateRow(${r.id},'precio',this.value)">
+            <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+              onfocus="App.setActiveApp(${i})"
+              oninput="App.updateRow(${r.id},'dosis',this.value)">
+            <span class="row-val">${vol ? fmt(vol) : '--'}</span>
+            <span class="row-val costo">${fmt(costoHa)}</span>
+            <span class="row-val">${monto ? fmt(monto) : '--'}</span>
+            <button class="row-rm" onclick="App.setActiveApp(${i});App.removeOTRow(${r.id})">&times;</button>
+          </div>
         </div>`;
       }).join('');
 
       return `<div class="app-block card fu" data-appidx="${i}" onclick="App.setActiveApp(${i})">
         <div class="app-block-header">
-          <span class="app-block-title">Aplicación ${i + 1}</span>
+          <span class="app-block-title">Aplicacion ${i + 1}</span>
           ${aplicaciones.length > 1 ? `<button class="app-block-rm" onclick="event.stopPropagation();App.removeAplicacion(${i})">&times;</button>` : ''}
         </div>
         <div class="form-row" style="margin-bottom:6px;">
@@ -855,13 +1008,13 @@ const App = {
         </div>
         <div class="form-row" style="margin-bottom:6px;">
           <div>
-            <div class="form-lbl">Hectáreas</div>
+            <div class="form-lbl">Hectareas</div>
             <input type="number" class="inp inp-sm app-has" value="${a.hectareas || ''}" placeholder="Has"
               onfocus="App.setActiveApp(${i})" oninput="App.onAppHasChange(${i})">
           </div>
           <div>
             <div class="form-lbl">Cultivo</div>
-            <input type="text" class="inp inp-sm app-cultivo" value="${a.cultivo || ''}" placeholder="Cultivo" readonly style="background:var(--bg);">
+            <input type="text" class="inp inp-sm app-cultivo" value="${esc(a.cultivo || '')}" placeholder="Cultivo" readonly style="background:var(--bg);">
           </div>
         </div>
         <div class="form-lbl" style="margin-top:4px;">Productos</div>
@@ -882,8 +1035,8 @@ const App = {
     }).join('');
 
     App._renderResumen();
+    App._renderTotales();
     currentOTRows = aplicaciones[currentAppIdx]?.productos || [];
-    // Show WA bar if there are products
     const hasProds = aplicaciones.some(a => a.productos.length > 0);
     $('wa-bar').style.display = hasProds ? 'flex' : 'none';
   },
@@ -894,13 +1047,14 @@ const App = {
     const block = document.querySelectorAll('.app-block')[idx];
     if (!block) return;
     const loteSelect = block.querySelector('.app-lote');
-    loteSelect.innerHTML = '<option value="">— Lote —</option>' +
-      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre} (${l.hectareas} has)</option>`).join('') : '');
+    loteSelect.innerHTML = '<option value="">-- Lote --</option>' +
+      (c ? c.lotes.map(l => `<option value="${esc(l.id)}">${esc(l.nombre)} (${l.hectareas} has)</option>`).join('') : '');
     aplicaciones[idx].loteId = '';
     block.querySelector('.app-has').value = '';
     block.querySelector('.app-cultivo').value = '';
     aplicaciones[idx].hectareas = 0;
     aplicaciones[idx].cultivo = '';
+    formDirty = true;
   },
 
   onAppLoteChange(idx, sel) {
@@ -915,10 +1069,10 @@ const App = {
       a.hectareas = l.hectareas;
       a.cultivo = l.cultivo || '';
     }
+    formDirty = true;
   },
 
   onAppHasChange(idx) {
-    // Update computed values in-place without re-rendering (preserves focus)
     App._readAllAppsFromDOM();
     const a = aplicaciones[idx];
     const has = a.hectareas || 0;
@@ -932,19 +1086,19 @@ const App = {
         const vol = has > 0 ? r.dosis * has : null;
         const monto = has > 0 ? costoHa * has : null;
         const vals = row.querySelectorAll('.row-val');
-        if (vals[0]) vals[0].textContent = vol ? fmt(vol) : '—';
+        if (vals[0]) vals[0].textContent = vol ? fmt(vol) : '--';
         if (vals[1]) vals[1].textContent = fmt(costoHa);
-        if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '—';
+        if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '--';
       });
     }
     App._renderResumen();
+    App._renderTotales();
+    formDirty = true;
   },
 
   showDropdownFor(idx, input) {
     App.setActiveApp(idx);
-    // Position dropdown as fixed overlay below the input
     const dd = $('ot-dropdown');
-    // Keep dropdown as direct child of the section (not inside app block)
     $('tab-nueva-ot').appendChild(dd);
     const rect = input.getBoundingClientRect();
     dd.style.display = '';
@@ -968,16 +1122,16 @@ const App = {
     for (const [cat, items] of Object.entries(catalogo)) {
       const matches = q ? items.filter(p => p.producto.toLowerCase().includes(q) || (p.formulacion || '').toLowerCase().includes(q)) : items;
       if (!matches.length) continue;
-      html += `<div class="dd-cat">${cat}</div>`;
+      html += `<div class="dd-cat">${esc(cat)}</div>`;
       matches.forEach(p => {
         const gi = ddItems.length;
         ddItems.push(p);
-        html += `<div class="dd-item" data-idx="${gi}" onclick="App.selectFromDropdown(${gi})">${p.producto}<br><small style="color:var(--text-mut);">${p.formulacion || ''}</small></div>`;
+        html += `<div class="dd-item" data-idx="${gi}" onclick="App.selectFromDropdown(${gi})">${esc(p.producto)}<br><small style="color:var(--text-mut);">${esc(p.formulacion || '')}</small></div>`;
       });
     }
 
     if (q && !ddItems.some(p => p.producto.toLowerCase() === q)) {
-      html += `<div class="dd-item" onclick="App.addManual('${q.replace(/'/g, "\\'")}')""><span style="color:var(--accent);font-weight:600;">+ Agregar "${input.value.trim()}"</span></div>`;
+      html += `<div class="dd-item" onclick="App.addManual(this.dataset.name)" data-name="${esc(input.value.trim())}"><span style="color:var(--accent);font-weight:600;">+ Agregar "${esc(input.value.trim())}"</span></div>`;
     }
 
     dd.innerHTML = html;
@@ -1002,15 +1156,48 @@ const App = {
     el.innerHTML = `<div class="form-lbl" style="font-size:13px;margin-bottom:6px;">RESUMEN RETIRO</div>
       <table class="resumen-table" style="width:100%;font-size:12px;border-collapse:collapse;">
         <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px 0;">Producto</th><th style="text-align:right;padding:4px 0;">Vol. total</th></tr>
-        ${prods.map(p => `<tr><td style="padding:3px 0;font-weight:500;">${p.producto}</td><td style="text-align:right;font-family:var(--mono);padding:3px 0;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`).join('')}
+        ${prods.map(p => `<tr><td style="padding:3px 0;font-weight:500;">${esc(p.producto)}</td><td style="text-align:right;font-family:var(--mono);padding:3px 0;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + esc(p.unidad) : '--'}</td></tr>`).join('')}
       </table>`;
+  },
+
+  _renderTotales() {
+    App._readAllAppsFromDOM();
+    const costoLabor = parseFloat($('ot-costo-labor')?.value) || 0;
+    let totalInsumos = 0;
+    let totalHas = 0;
+    let totalMonto = 0;
+
+    aplicaciones.forEach(a => {
+      const has = a.hectareas || 0;
+      totalHas += has;
+      a.productos.forEach(p => {
+        const costoHa = p.precio * p.dosis;
+        totalInsumos += costoHa;
+        totalMonto += costoHa * has;
+      });
+    });
+
+    const el = $('ot-totales');
+    if (totalInsumos === 0 && costoLabor === 0) { el.style.display = 'none'; return; }
+
+    const insumosHa = aplicaciones.length > 0 ? totalInsumos / aplicaciones.length : 0;
+    const totalHa = insumosHa + costoLabor;
+    const totalGeneral = totalMonto + (costoLabor * totalHas);
+
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div class="ot-tot-row"><span>Insumos</span><span class="ot-tot-mono">USD ${fmt(insumosHa)}/ha</span></div>
+      ${costoLabor > 0 ? `<div class="ot-tot-row"><span>Labor</span><span class="ot-tot-mono">USD ${fmt(costoLabor)}/ha</span></div>` : ''}
+      <div class="ot-tot-row big"><span>Total</span><span class="ot-tot-mono">USD ${fmt(totalHa)}/ha</span></div>
+      ${totalHas > 0 ? `<div class="ot-tot-row"><span>${fmtInt(totalHas)} has</span><span class="ot-tot-mono" style="font-size:1rem;font-weight:700;">USD ${fmt(totalGeneral)}</span></div>` : ''}
+    `;
   },
 
   onAnCampoChange() {
     const cid = $('an-campo').value;
     const c = data.campos.find(x => x.id === cid);
-    const loteOpts = '<option value="">— Todos —</option>' +
-      (c ? c.lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('') : '');
+    const loteOpts = '<option value="">-- Todos --</option>' +
+      (c ? c.lotes.map(l => `<option value="${esc(l.id)}">${esc(l.nombre)}</option>`).join('') : '');
     $('an-lote').innerHTML = loteOpts;
     App.renderAnalisis();
   },
@@ -1035,14 +1222,20 @@ const App = {
       dosis: p.dosis_sug || 0,
       iva_pct: p.iva_pct || 0,
     });
-    const newId = currentOTRows[currentOTRows.length - 1].id;
+    formDirty = true;
     App.hideDropdown();
     App._appendProductRow(currentAppIdx, currentOTRows[currentOTRows.length - 1]);
     App._renderResumen();
-    App._focusDosis(newId);
+    App._renderTotales();
+    App._focusDosis(currentOTRows[currentOTRows.length - 1].id);
   },
 
   addManual(name) {
+    if (typeof name !== 'string') {
+      const el = name; // DOM element passed
+      name = el.dataset?.name || '';
+    }
+    if (!name) return;
     currentOTRows.push({
       id: ++rowIdCounter,
       producto: name,
@@ -1053,11 +1246,12 @@ const App = {
       dosis: 0,
       iva_pct: 0,
     });
-    const newId = currentOTRows[currentOTRows.length - 1].id;
+    formDirty = true;
     App.hideDropdown();
     App._appendProductRow(currentAppIdx, currentOTRows[currentOTRows.length - 1]);
     App._renderResumen();
-    App._focusDosis(newId);
+    App._renderTotales();
+    App._focusDosis(currentOTRows[currentOTRows.length - 1].id);
   },
 
   _appendProductRow(appIdx, r) {
@@ -1067,28 +1261,28 @@ const App = {
     if (!rowsContainer) return;
     const a = aplicaciones[appIdx];
     const has = a.hectareas || 0;
-    const gridCols = '1fr 68px 62px 58px 62px 68px 24px';
     const costoHa = r.precio * r.dosis;
     const vol = has > 0 ? r.dosis * has : null;
     const monto = has > 0 ? costoHa * has : null;
-    const html = `<div class="row-item" data-rowid="${r.id}" data-appidx="${appIdx}" style="grid-template-columns:${gridCols}">
+    const html = `<div class="row-item" data-rowid="${r.id}" data-appidx="${appIdx}">
       <div class="row-prod">
-        <span class="row-prod-name">${r.producto}</span>
-        <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+        <span class="row-prod-name">${esc(r.producto)}</span>
+        <span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span>
       </div>
-      <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
-        onfocus="App.setActiveApp(${appIdx})"
-        oninput="App.updateRow(${r.id},'precio',this.value)">
-      <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
-        onfocus="App.setActiveApp(${appIdx})"
-        oninput="App.updateRow(${r.id},'dosis',this.value)">
-      <span class="row-val">${vol ? fmt(vol) : '—'}</span>
-      <span class="row-val costo">${fmt(costoHa)}</span>
-      <span class="row-val">${monto ? fmt(monto) : '—'}</span>
-      <button class="row-rm" onclick="App.setActiveApp(${appIdx});App.removeOTRow(${r.id})">&times;</button>
+      <div class="row-mob-line">
+        <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+          onfocus="App.setActiveApp(${appIdx})"
+          oninput="App.updateRow(${r.id},'precio',this.value)">
+        <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+          onfocus="App.setActiveApp(${appIdx})"
+          oninput="App.updateRow(${r.id},'dosis',this.value)">
+        <span class="row-val">${vol ? fmt(vol) : '--'}</span>
+        <span class="row-val costo">${fmt(costoHa)}</span>
+        <span class="row-val">${monto ? fmt(monto) : '--'}</span>
+        <button class="row-rm" onclick="App.setActiveApp(${appIdx});App.removeOTRow(${r.id})">&times;</button>
+      </div>
     </div>`;
     rowsContainer.insertAdjacentHTML('beforeend', html);
-    // Show WA bar
     $('wa-bar').style.display = 'flex';
   },
 
@@ -1115,7 +1309,6 @@ const App = {
   },
 
   updateRow(rid, field, val) {
-    // Find which app this row belongs to
     let r = null, appIdx = currentAppIdx;
     for (let i = 0; i < aplicaciones.length; i++) {
       const found = aplicaciones[i].productos.find(x => x.id === rid);
@@ -1123,21 +1316,21 @@ const App = {
     }
     if (!r) return;
     r[field] = parseFloat(val) || 0;
-    // Get has from the correct app block
+    formDirty = true;
     const block = document.querySelectorAll('.app-block')[appIdx];
     const has = block ? (parseFloat(block.querySelector('.app-has')?.value) || 0) : (aplicaciones[appIdx].hectareas || 0);
-    // Update computed values in-place without re-rendering (preserves focus)
     const row = document.querySelector(`.row-item[data-rowid="${rid}"]`);
     if (row) {
       const costoHa = r.precio * r.dosis;
       const volumen = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? costoHa * has : null;
       const vals = row.querySelectorAll('.row-val');
-      if (vals[0]) vals[0].textContent = volumen ? fmt(volumen) : '—';
+      if (vals[0]) vals[0].textContent = volumen ? fmt(volumen) : '--';
       if (vals[1]) vals[1].textContent = fmt(costoHa);
-      if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '—';
+      if (vals[2]) vals[2].textContent = monto ? fmt(monto) : '--';
     }
     App._renderResumen();
+    App._renderTotales();
   },
 
   removeOTRow(rid) {
@@ -1158,13 +1351,13 @@ const App = {
       return;
     }
 
-    let html = aplicadorMatches.map((a, i) =>
-      `<div class="dd-item" onclick="App.selectAplicador('${a.replace(/'/g, "\\'")}')">${a}</div>`
+    let html = aplicadorMatches.map(a =>
+      `<div class="dd-item" onclick="App.selectAplicador(this.dataset.name)" data-name="${esc(a)}">${esc(a)}</div>`
     ).join('');
 
-    if (q && !aplicadorMatches.includes(q)) {
-      html += `<div class="dd-item" onclick="App.selectAplicador('${q.replace(/'/g, "\\'")}')">
-        <span style="color:var(--accent);font-weight:600;">+ "${q}"</span>
+    if (q && !aplicadorMatches.some(a => a.toLowerCase() === q)) {
+      html += `<div class="dd-item" onclick="App.selectAplicador(this.dataset.name)" data-name="${esc($('ot-aplicador').value.trim())}">
+        <span style="color:var(--accent);font-weight:600;">+ "${esc($('ot-aplicador').value.trim())}"</span>
       </div>`;
     }
 
@@ -1175,7 +1368,6 @@ const App = {
   selectAplicador(name) {
     $('ot-aplicador').value = name;
     App.hideAplicadorDD();
-    // Save to list if new
     if (!data.aplicadores.includes(name)) {
       data.aplicadores.push(name);
       Storage.save(data);
@@ -1184,7 +1376,7 @@ const App = {
 
   hideAplicadorDD() { $('aplicador-dd').classList.remove('show'); },
 
-  getTipo() { return $('ot-tipo')?.value || 'Pulverización terrestre'; },
+  getTipo() { return $('ot-tipo')?.value || 'Pulverizacion terrestre'; },
   getCostoLabor() { return parseFloat($('ot-costo-labor')?.value) || 0; },
 
   filterTipos(showAll) {
@@ -1199,16 +1391,16 @@ const App = {
     dd.style.left = '0';
     dd.style.right = '0';
 
-    const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
+    const defaults = ['Siembra', 'Pulverizacion terrestre', 'Pulverizacion aerea', 'Fertilizacion', 'Disco', 'Cosecha'];
     const allTipos = [...new Set([...defaults, ...(data.tiposLabor || [])])];
     const matches = allTipos.filter(t => showAll || !q || t.toLowerCase().includes(q));
 
     let html = matches.map(t =>
-      `<div class="dd-item" onclick="App.selectTipo('${t.replace(/'/g, "\\'")}')">${t}</div>`
+      `<div class="dd-item" onclick="App.selectTipo(this.dataset.name)" data-name="${esc(t)}">${esc(t)}</div>`
     ).join('');
 
     if (q && !matches.some(t => t.toLowerCase() === q)) {
-      html += `<div class="dd-item" onclick="App.selectTipo('${q.replace(/'/g, "\\'")}')"><span style="color:var(--accent);font-weight:600;">+ Agregar "${$('ot-tipo').value.trim()}"</span></div>`;
+      html += `<div class="dd-item" onclick="App.selectTipo(this.dataset.name)" data-name="${esc($('ot-tipo').value.trim())}"><span style="color:var(--accent);font-weight:600;">+ Agregar "${esc($('ot-tipo').value.trim())}"</span></div>`;
     }
 
     dd.innerHTML = html;
@@ -1218,7 +1410,7 @@ const App = {
   selectTipo(name) {
     $('ot-tipo').value = name;
     App.hideTipoDD();
-    const defaults = ['Siembra', 'Pulverización terrestre', 'Pulverización aérea', 'Fertilización', 'Disco', 'Cosecha'];
+    const defaults = ['Siembra', 'Pulverizacion terrestre', 'Pulverizacion aerea', 'Fertilizacion', 'Disco', 'Cosecha'];
     if (!defaults.includes(name)) {
       if (!data.tiposLabor) data.tiposLabor = [];
       if (!data.tiposLabor.includes(name)) { data.tiposLabor.push(name); Storage.save(data); }
@@ -1245,9 +1437,8 @@ const App = {
   saveOrden() {
     App._readAllAppsFromDOM();
 
-    // Validate: at least one aplicacion with campo, lote and products
     const valid = aplicaciones.some(a => a.campoId && a.loteId && a.productos.length);
-    if (!valid) { alert('Agregá al menos un campo/lote con productos.'); return; }
+    if (!valid) { alert('Agrega al menos un campo/lote con productos.'); return; }
 
     const tipo = App.getTipo();
     const costoLabor = App.getCostoLabor();
@@ -1262,11 +1453,6 @@ const App = {
       estado: App.getEstado(),
       notas: $('ot-notas').value.trim(),
       aplicaciones: aplicaciones.map(a => ({ ...a, tipo, costoLabor, productos: a.productos.map(p => ({ ...p })) })),
-      // Legacy compat
-      loteId: aplicaciones[0].loteId,
-      hectareas: aplicaciones[0].hectareas,
-      cultivo: aplicaciones[0].cultivo,
-      productos: aplicaciones.flatMap(a => a.productos.map(p => ({ ...p }))),
       createdAt: editingOrdenId
         ? (data.ordenes.find(o => o.id === editingOrdenId)?.createdAt || new Date().toISOString())
         : new Date().toISOString(),
@@ -1274,7 +1460,6 @@ const App = {
       campana: data.campana,
     };
 
-    // Save aplicador
     if (orden.aplicador && !data.aplicadores.includes(orden.aplicador)) {
       data.aplicadores.push(orden.aplicador);
     }
@@ -1288,7 +1473,6 @@ const App = {
 
     Storage.save(data);
     App.resetOTForm();
-    // Switch to ordenes tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelector('[data-tab="ordenes"]').classList.add('active');
@@ -1301,11 +1485,13 @@ const App = {
     App._initAplicaciones();
     $('ot-aplicador').value = '';
     $('ot-fecha').value = dateISO();
-    $('ot-tipo').value = 'Pulverización terrestre';
+    $('ot-tipo').value = 'Pulverizacion terrestre';
     $('ot-costo-labor').value = '';
     $('ot-notas').value = '';
     document.querySelectorAll('#ot-estado-bar .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     $('ot-cancel-btn').style.display = 'none';
+    $('ot-totales').style.display = 'none';
+    formDirty = false;
   },
 
   cancelEdit() { App.resetOTForm(); },
@@ -1325,7 +1511,6 @@ const App = {
 
     editingOrdenId = o.id;
 
-    // Load aplicaciones
     if (o.aplicaciones && o.aplicaciones.length) {
       aplicaciones = o.aplicaciones.map(a => ({
         campoId: a.campoId || o.campoId, loteId: a.loteId, hectareas: a.hectareas, cultivo: a.cultivo,
@@ -1341,18 +1526,17 @@ const App = {
     currentOTRows = aplicaciones[0].productos;
     rowIdCounter = Math.max(rowIdCounter, ...aplicaciones.flatMap(a => a.productos.map(r => r.id || 0))) + 1;
 
-    // Set shared fields
     document.querySelectorAll('#ot-estado-bar .chip').forEach(c => c.classList.toggle('active', c.dataset.estado === o.estado));
     $('ot-aplicador').value = o.aplicador || '';
     $('ot-fecha').value = o.fecha || dateISO();
-    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
+    $('ot-tipo').value = o.tipo || 'Pulverizacion terrestre';
     $('ot-costo-labor').value = o.costoLabor || '';
     $('ot-notas').value = o.notas || '';
     $('ot-cancel-btn').style.display = 'block';
+    formDirty = true;
 
     App.renderAllApps();
 
-    // Switch tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelector('[data-tab="nueva-ot"]').classList.add('active');
@@ -1378,20 +1562,23 @@ const App = {
 
     const filtCampo = $('ord-campo')?.value || '';
     const filtLote = $('ord-lote')?.value || '';
-    if (filtCampo) ordenes = ordenes.filter(o => o.campoId === filtCampo);
+    if (filtCampo) ordenes = ordenes.filter(o => {
+      const apps = o.aplicaciones || [];
+      return apps.some(a => (a.campoId || o.campoId) === filtCampo);
+    });
     if (filtLote) ordenes = ordenes.filter(o => {
-      const apps = o.aplicaciones || [{ loteId: o.loteId }];
+      const apps = o.aplicaciones || [];
       return apps.some(a => a.loteId === filtLote);
     });
 
     if (q) {
       ordenes = ordenes.filter(o => {
-        const campo = data.campos.find(c => c.id === o.campoId);
-        const apps = o.aplicaciones || [{ loteId: o.loteId, tipo: o.tipo, productos: o.productos || [] }];
-        const parts = [campo?.nombre, o.aplicador];
+        const apps = o.aplicaciones || [];
+        const parts = [o.aplicador];
         apps.forEach(a => {
+          const campo = data.campos.find(c => c.id === (a.campoId || o.campoId));
           const lote = campo?.lotes.find(l => l.id === a.loteId);
-          parts.push(lote?.nombre, a.tipo, ...(a.productos || []).map(p => p.producto));
+          parts.push(campo?.nombre, lote?.nombre, a.tipo, ...(a.productos || []).map(p => p.producto));
         });
         return parts.join(' ').toLowerCase().includes(q);
       });
@@ -1400,54 +1587,51 @@ const App = {
     ordenes.sort((a, b) => new Date(b.createdAt || b.fecha) - new Date(a.createdAt || a.fecha));
 
     if (!ordenes.length) {
-      el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin órdenes de trabajo</p><p style="font-size:12px;margin-top:4px;">Creá tu primera orden en la pestaña "Nueva OT"</p></div>';
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin ordenes de trabajo</p><p style="font-size:12px;margin-top:4px;">Crea tu primera orden en la pestana "Nueva OT"</p></div>';
       return;
     }
 
     el.innerHTML = ordenes.map(o => {
-      const campo = data.campos.find(c => c.id === o.campoId);
-      const apps = o.aplicaciones || [{ loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo, tipo: o.tipo, costoLabor: o.costoLabor || 0, productos: o.productos || [] }];
-      const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
+      const apps = o.aplicaciones || [];
+      const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '--';
+      const tipoLabel = o.tipo || 'Pulverizacion terrestre';
 
-      const tipoLabel = o.tipo || 'Pulverización terrestre';
-
-      // Build per-application blocks
       const appBlocks = apps.map((a, ai) => {
         const appCampo = data.campos.find(c => c.id === (a.campoId || o.campoId));
         const lote = appCampo?.lotes.find(l => l.id === a.loteId);
         const has = a.hectareas || 0;
-        const prodRows = a.productos.map(p => {
-          const vol = has > 0 ? fmt(p.dosis * has) + ' ' + (p.unidad || 'L') : '—';
-          return `<tr><td>${p.producto}</td><td style="text-align:right;">${p.dosis} ${p.unidad || 'L'}/ha</td><td style="text-align:right;">${vol}</td></tr>`;
+        const prodRows = (a.productos || []).map(p => {
+          const vol = has > 0 ? fmt(p.dosis * has) + ' ' + esc(p.unidad || 'L') : '--';
+          return `<tr><td>${esc(p.producto)}</td><td style="text-align:right;">${p.dosis} ${esc(p.unidad || 'L')}/ha</td><td style="text-align:right;">${vol}</td></tr>`;
         }).join('');
 
         return `<div style="${ai > 0 ? 'margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);' : ''}">
-          <div style="font-weight:700;font-size:12px;color:var(--navy);">${appCampo?.nombre || '?'}, ${lote?.nombre || '?'} · ${has} has${a.cultivo ? ' · ' + a.cultivo : ''}</div>
-          ${a.productos.length ? `<table class="ot-prod-table" style="margin-top:4px;width:100%;border-collapse:collapse;">
+          <div style="font-weight:700;font-size:12px;color:var(--navy);">${esc(appCampo?.nombre || '?')}, ${esc(lote?.nombre || '?')} · ${has} has${a.cultivo ? ' · ' + esc(a.cultivo) : ''}</div>
+          ${(a.productos || []).length ? `<table class="ot-prod-table" style="margin-top:4px;width:100%;border-collapse:collapse;">
             <tr><th style="text-align:left;width:auto;">Producto</th><th style="text-align:right;width:90px;">Dosis</th><th style="text-align:right;width:90px;">Vol.</th></tr>
             ${prodRows}</table>` : ''}
         </div>`;
       }).join('');
 
-      // Combined withdrawal summary (all products across all apps merged)
+      // Combined withdrawal summary
       const allProds = {};
       apps.forEach(a => {
         const has = a.hectareas || 0;
-        a.productos.forEach(p => {
+        (a.productos || []).forEach(p => {
           const key = p.producto;
           if (!allProds[key]) allProds[key] = { producto: p.producto, unidad: p.unidad || 'L', totalVol: 0 };
           allProds[key].totalVol += has > 0 ? p.dosis * has : 0;
         });
       });
       const summaryRows = Object.values(allProds).map(p =>
-        `<tr><td>${p.producto}</td><td style="text-align:right;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</td></tr>`
+        `<tr><td>${esc(p.producto)}</td><td style="text-align:right;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + esc(p.unidad) : '--'}</td></tr>`
       ).join('');
 
       return `<div class="card ot-card">
         <div class="ot-card-wrap">
           <div class="ot-card-main">
             <div class="ot-detail" style="color:var(--text-sec);font-size:12px;">
-              ${o.aplicador || 'Sin aplicador'} · ${tipoLabel} · ${fecha}
+              ${esc(o.aplicador || 'Sin aplicador')} · ${esc(tipoLabel)} · ${fecha}
             </div>
             <div class="ot-productos-detail">
               ${apps.length > 1 ? '<div class="ot-section-label">Aplicaciones</div>' : ''}
@@ -1457,20 +1641,21 @@ const App = {
             </div>
           </div>
           <div class="ot-status-col">
-            <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" data-oid="${o.id}" data-estado="pendiente">Pend.</button>
-            <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" data-oid="${o.id}" data-estado="en_curso">Curso</button>
-            <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" data-oid="${o.id}" data-estado="completada">Comp.</button>
+            <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="pendiente">Pend.</button>
+            <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="en_curso">Curso</button>
+            <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="completada">Comp.</button>
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${o.id}')">📲 WA</button>
-          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${o.id}')">📄 PDF</button>
-          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${o.id}')">✏️ Editar</button>
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${esc(o.id)}')">WA</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${esc(o.id)}')">PDF</button>
+          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="App.deleteOrden('${esc(o.id)}')">Eliminar</button>
         </div>
       </div>`;
     }).join('');
 
-    // Bind status buttons directly after render
+    // Bind status buttons
     el.querySelectorAll('.ot-status-col button').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -1483,68 +1668,78 @@ const App = {
   },
 
   /* ══════════════════════════════════════
-     ANÁLISIS
+     ANALISIS (fixed for multi-app)
      ══════════════════════════════════════ */
   renderAnalisis() {
     const el = $('analisis-body');
     const campoId = $('an-campo').value;
     const loteId = $('an-lote').value;
 
-    // Filter completed orders for current campaign
-    let ordenes = data.ordenes.filter(o =>
-      o.campana === data.campana && o.estado === 'completada'
-    );
-
-    if (campoId) ordenes = ordenes.filter(o => o.campoId === campoId);
-    if (loteId) ordenes = ordenes.filter(o => o.loteId === loteId);
+    let ordenes = data.ordenes.filter(o => o.campana === data.campana && o.estado === 'completada');
+    if (campoId) ordenes = ordenes.filter(o => {
+      const apps = o.aplicaciones || [];
+      return apps.some(a => (a.campoId || o.campoId) === campoId);
+    });
+    if (loteId) ordenes = ordenes.filter(o => {
+      const apps = o.aplicaciones || [];
+      return apps.some(a => a.loteId === loteId);
+    });
 
     if (!ordenes.length) {
-      el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>Sin datos de análisis</p><p style="font-size:12px;margin-top:4px;">Completá órdenes de trabajo para ver el análisis</p></div>';
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>Sin datos de analisis</p><p style="font-size:12px;margin-top:4px;">Completa ordenes de trabajo para ver el analisis</p></div>';
       return;
     }
 
-    // Aggregate
+    // Aggregate using aplicaciones (not legacy flat fields)
     let totalHas = 0;
     let totalCost = 0;
     const byCategory = {};
-    const byTipo = {};
     const lotesSeen = new Set();
+    let totalApps = 0;
 
     ordenes.forEach(o => {
-      const key = o.campoId + ':' + o.loteId;
-      if (!lotesSeen.has(key)) {
-        lotesSeen.add(key);
-        totalHas += o.hectareas || 0;
-      }
-      const tipoLabel = o.tipo || 'Pulverización terrestre';
-      let ordenCost = 0;
-      o.productos.forEach(p => {
-        const cost = p.precio * p.dosis * (o.hectareas || 0);
-        ordenCost += cost;
-        const cat = p.categoria || 'Otros';
-        byCategory[cat] = (byCategory[cat] || 0) + cost;
+      const apps = o.aplicaciones || [];
+      const costoLabor = o.costoLabor || 0;
+
+      apps.forEach(a => {
+        // Filter by lote if specified
+        if (loteId && a.loteId !== loteId) return;
+        if (campoId && (a.campoId || o.campoId) !== campoId) return;
+
+        const has = a.hectareas || 0;
+        const key = (a.campoId || o.campoId) + ':' + a.loteId;
+        if (!lotesSeen.has(key)) {
+          lotesSeen.add(key);
+          totalHas += has;
+        }
+        totalApps++;
+
+        let appCost = 0;
+        (a.productos || []).forEach(p => {
+          const cost = p.precio * p.dosis * has;
+          appCost += cost;
+          const cat = p.categoria || 'Otros';
+          byCategory[cat] = (byCategory[cat] || 0) + cost;
+        });
+
+        const laborCost = costoLabor * has;
+        if (laborCost > 0) {
+          appCost += laborCost;
+          byCategory['Labor'] = (byCategory['Labor'] || 0) + laborCost;
+        }
+        totalCost += appCost;
       });
-      // Labor cost
-      const laborCost = (o.costoLabor || 0) * (o.hectareas || 0);
-      if (laborCost > 0) {
-        ordenCost += laborCost;
-        byCategory['Labor'] = (byCategory['Labor'] || 0) + laborCost;
-      }
-      totalCost += ordenCost;
-      byTipo[tipoLabel] = (byTipo[tipoLabel] || 0) + ordenCost;
     });
 
     const costoHa = totalHas > 0 ? totalCost / totalHas : 0;
 
-    // Stats
     let html = `<div class="stat-grid">
       <div class="stat-box"><div class="stat-val">USD ${fmt(totalCost)}</div><div class="stat-lbl">Total aplicado</div></div>
       <div class="stat-box"><div class="stat-val">USD ${fmt(costoHa)}</div><div class="stat-lbl">Costo / ha</div></div>
-      <div class="stat-box"><div class="stat-val">${fmtInt(totalHas)}</div><div class="stat-lbl">Hectáreas</div></div>
-      <div class="stat-box"><div class="stat-val">${ordenes.length}</div><div class="stat-lbl">Aplicaciones</div></div>
+      <div class="stat-box"><div class="stat-val">${fmtInt(totalHas)}</div><div class="stat-lbl">Hectareas</div></div>
+      <div class="stat-box"><div class="stat-val">${totalApps}</div><div class="stat-lbl">Aplicaciones</div></div>
     </div>`;
 
-    // Bar chart by category
     const catColors = {
       'Herbicidas': '#16a34a', 'Fungicidas': '#2d6fc4', 'Insecticidas': '#d97706',
       'Fertilizantes': '#8b5cf6', 'Coadyuvantes': '#ec4899', 'Otros': '#94a3b8',
@@ -1552,14 +1747,14 @@ const App = {
     };
     const maxCat = Math.max(...Object.values(byCategory), 1);
 
-    html += '<div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin:12px 0 8px;">Desglose por categoría</div>';
+    html += '<div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin:12px 0 8px;">Desglose por categoria</div>';
     html += '<div class="bar-chart">';
     Object.entries(byCategory).sort((a, b) => b[1] - a[1]).forEach(([cat, val]) => {
       const pct = (val / totalCost * 100).toFixed(1);
       const w = (val / maxCat * 100).toFixed(0);
       const color = catColors[cat] || '#94a3b8';
       html += `<div class="bar-row">
-        <span class="bar-label">${cat}</span>
+        <span class="bar-label">${esc(cat)}</span>
         <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${color};"><span>${pct}%</span></div></div>
         <span class="bar-amount">$${fmt(val)}</span>
       </div>`;
@@ -1569,150 +1764,154 @@ const App = {
     // Orders table
     html += '<div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin:16px 0 8px;">Aplicaciones completadas</div>';
     ordenes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
-      const campo = data.campos.find(c => c.id === o.campoId);
-      const lote = campo?.lotes.find(l => l.id === o.loteId);
-      const netoHa = o.productos.reduce((s, p) => s + (p.precio * p.dosis), 0) + (o.costoLabor || 0);
-      const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '—';
-      const tipoLabel = o.tipo || '—';
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg);font-size:12px;">
-        <div>
-          <span style="font-weight:600;">${fecha}</span>
-          <span style="color:var(--text-sec);">· ${tipoLabel} · ${o.productos.length} prod</span>
-          ${!campoId ? `<span style="color:var(--text-mut);font-size:10px;"> · ${campo?.nombre} › ${lote?.nombre}</span>` : ''}
-        </div>
-        <span style="font-family:var(--mono);font-weight:600;color:var(--accent);">$${fmt(netoHa)}/ha</span>
-      </div>`;
+      const apps = o.aplicaciones || [];
+      apps.forEach(a => {
+        if (loteId && a.loteId !== loteId) return;
+        if (campoId && (a.campoId || o.campoId) !== campoId) return;
+        const campo = data.campos.find(c => c.id === (a.campoId || o.campoId));
+        const lote = campo?.lotes.find(l => l.id === a.loteId);
+        const netoHa = (a.productos || []).reduce((s, p) => s + (p.precio * p.dosis), 0) + (o.costoLabor || 0);
+        const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '--';
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg);font-size:12px;">
+          <div>
+            <span style="font-weight:600;">${fecha}</span>
+            <span style="color:var(--text-sec);">· ${esc(o.tipo || '--')} · ${(a.productos || []).length} prod</span>
+            <span style="color:var(--text-mut);font-size:10px;"> · ${esc(campo?.nombre || '?')} > ${esc(lote?.nombre || '?')}</span>
+          </div>
+          <span style="font-family:var(--mono);font-weight:600;color:var(--accent);">$${fmt(netoHa)}/ha</span>
+        </div>`;
+      });
     });
 
     el.innerHTML = html;
   },
 
   /* ══════════════════════════════════════
-     COMPARTIR
+     COMPARTIR (fixed for multi-app)
      ══════════════════════════════════════ */
 
-  /* ── Build WA message from an order object ── */
   _buildWAMsg(o) {
-    const campo = data.campos.find(c => c.id === o.campoId);
-    const lote = campo?.lotes.find(l => l.id === o.loteId);
-    const has = o.hectareas || 0;
+    const apps = o.aplicaciones || [];
     const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
-    const cliente = campo?.cliente || '';
-
-    let msg = `📋 *ORDEN DE TRABAJO*\n`;
-    msg += `━━━━━━━━━━━━━━━━━━\n`;
-    msg += `📅 *Fecha:* ${fecha}\n`;
-    msg += `🌾 *Campo:* ${campo?.nombre || '—'}${cliente ? ' (' + cliente + ')' : ''}\n`;
-    msg += `📍 *Lote:* ${lote?.nombre || '—'} — *${has} has*\n`;
-    if (o.cultivo) msg += `🌱 *Cultivo:* ${o.cultivo}\n`;
-    msg += `⚙️ *Labor:* ${o.tipo || '—'}\n`;
-    msg += `👤 *Aplicador:* ${o.aplicador || '—'}\n`;
-    msg += `━━━━━━━━━━━━━━━━━━\n\n`;
-
-    msg += `*PRODUCTOS A CARGAR:*\n`;
-    (o.productos || []).forEach((r, i) => {
-      const vol = has > 0 ? fmt(r.dosis * has) : '—';
-      msg += `${i + 1}. *${r.producto}*\n`;
-      msg += `    Dosis: ${r.dosis} ${r.unidad}/ha\n`;
-      msg += `    Total: *${vol} ${r.unidad}*\n`;
-    });
-
     const costoLabor = o.costoLabor || 0;
-    let insumosHa = 0;
-    (o.productos || []).forEach(r => { insumosHa += r.precio * r.dosis; });
-    const totalHa = insumosHa + costoLabor;
 
-    msg += `\n━━━━━━━━━━━━━━━━━━\n`;
-    if (costoLabor > 0) msg += `💰 Labor: USD ${fmt(costoLabor)}/ha\n`;
-    msg += `💵 *Total: USD ${fmt(totalHa)}/ha*`;
-    if (has > 0) msg += ` — *USD ${fmt(totalHa * has)} total*`;
+    let msg = `*ORDEN DE TRABAJO*\n`;
+    msg += `Fecha: ${fecha}\n`;
+    msg += `Labor: ${o.tipo || '--'}\n`;
+    if (o.aplicador) msg += `Aplicador: ${o.aplicador}\n`;
     msg += `\n`;
 
-    if (o.notas) msg += `\n📝 *Notas:* ${o.notas}\n`;
-    msg += `\n_Henderseeds SRL — Campaña ${o.campana || data.campana}_`;
+    let grandTotalHa = 0;
+    let grandTotalMonto = 0;
+    let grandTotalHas = 0;
+
+    apps.forEach((a, ai) => {
+      const campo = data.campos.find(c => c.id === (a.campoId || o.campoId));
+      const lote = campo?.lotes.find(l => l.id === a.loteId);
+      const has = a.hectareas || 0;
+      grandTotalHas += has;
+
+      msg += `*${campo?.nombre || '?'} - ${lote?.nombre || '?'}*\n`;
+      msg += `${has} has${a.cultivo ? ' · ' + a.cultivo : ''}\n`;
+
+      let appInsumosHa = 0;
+      (a.productos || []).forEach((r, i) => {
+        const vol = has > 0 ? fmt(r.dosis * has) : '--';
+        const costoHa = r.precio * r.dosis;
+        appInsumosHa += costoHa;
+        msg += `  ${i + 1}. ${r.producto} - ${r.dosis} ${r.unidad || 'L'}/ha - Total: ${vol} ${r.unidad || 'L'}\n`;
+      });
+
+      const appTotalHa = appInsumosHa + costoLabor;
+      grandTotalHa += appInsumosHa;
+      grandTotalMonto += appInsumosHa * has;
+      msg += `  Subtotal: USD ${fmt(appTotalHa)}/ha\n\n`;
+    });
+
+    // Combined summary for multi-app
+    if (apps.length > 1) {
+      const allProds = {};
+      apps.forEach(a => {
+        const has = a.hectareas || 0;
+        (a.productos || []).forEach(p => {
+          const key = p.producto;
+          if (!allProds[key]) allProds[key] = { producto: p.producto, unidad: p.unidad || 'L', totalVol: 0 };
+          allProds[key].totalVol += has > 0 ? p.dosis * has : 0;
+        });
+      });
+      msg += `*RESUMEN RETIRO:*\n`;
+      Object.values(allProds).forEach(p => {
+        msg += `  ${p.producto}: ${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '--'}\n`;
+      });
+      msg += `\n`;
+    }
+
+    const avgTotalHa = (grandTotalHa / (apps.length || 1)) + costoLabor;
+    if (costoLabor > 0) msg += `Labor: USD ${fmt(costoLabor)}/ha\n`;
+    msg += `*Total: USD ${fmt(avgTotalHa)}/ha*`;
+    if (grandTotalHas > 0) msg += ` -- *USD ${fmt(grandTotalMonto + costoLabor * grandTotalHas)} total*`;
+    msg += `\n`;
+
+    if (o.notas) msg += `\nNotas: ${o.notas}\n`;
+    msg += `\n_Henderseeds SRL -- Campana ${o.campana || data.campana}_`;
     return msg;
   },
 
-  _getPhone(o) {
-    const tel = (o.telAplicador || '').replace(/[^0-9]/g, '');
-    return tel ? '54' + tel : '';
-  },
-
-  /* ── Share saved order via WA ── */
   compartirOrdenWA(oid) {
     const o = data.ordenes.find(x => x.id === oid);
     if (!o) return;
     const msg = App._buildWAMsg(o);
-    const phone = App._getPhone(o);
-    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   },
 
-  /* ── Export saved order as PDF ── */
-  exportarOrdenPDF(oid) {
-    const o = data.ordenes.find(x => x.id === oid);
-    if (!o) return;
-    // Temporarily load aplicaciones from saved order and export
-    const prevApps = aplicaciones;
-    const prevIdx = currentAppIdx;
-    const prevRows = currentOTRows;
-    const apps = o.aplicaciones || [{ campoId: o.campoId, loteId: o.loteId, hectareas: o.hectareas, cultivo: o.cultivo, tipo: o.tipo, costoLabor: o.costoLabor || 0, productos: o.productos || [] }];
-    aplicaciones = apps;
-    currentAppIdx = 0;
-    currentOTRows = aplicaciones[0].productos;
-    // Temporarily set form fields needed by exportarPDF
-    const prevAplicador = $('ot-aplicador').value;
-    const prevFecha = $('ot-fecha').value;
-    const prevTipo = $('ot-tipo').value;
-    const prevCosto = $('ot-costo-labor').value;
-    const prevNotas = $('ot-notas').value;
-    $('ot-aplicador').value = o.aplicador || '';
-    $('ot-fecha').value = o.fecha || '';
-    $('ot-tipo').value = o.tipo || 'Pulverización terrestre';
-    $('ot-costo-labor').value = o.costoLabor || '';
-    $('ot-notas').value = o.notas || '';
-    App.exportarPDF();
-    // Restore
-    $('ot-aplicador').value = prevAplicador;
-    $('ot-fecha').value = prevFecha;
-    $('ot-tipo').value = prevTipo;
-    $('ot-costo-labor').value = prevCosto;
-    $('ot-notas').value = prevNotas;
-    aplicaciones = prevApps;
-    currentAppIdx = prevIdx;
-    currentOTRows = prevRows;
-  },
-
-  /* ── Share from form (Nueva OT) ── */
   compartirWA() {
     App._readAllAppsFromDOM();
     const formOrder = {
-      campoId: aplicaciones[0]?.campoId || '',
-      loteId: aplicaciones[0]?.loteId || '',
-      hectareas: aplicaciones[0]?.hectareas || 0,
-      cultivo: aplicaciones[0]?.cultivo || '',
-      tipo: App.getTipo(),
       aplicador: $('ot-aplicador').value.trim(),
       fecha: $('ot-fecha').value,
+      tipo: App.getTipo(),
       costoLabor: App.getCostoLabor(),
       notas: $('ot-notas').value.trim(),
-      productos: aplicaciones.flatMap(a => a.productos),
       aplicaciones: aplicaciones,
       campana: data.campana,
     };
     const msg = App._buildWAMsg(formOrder);
-    const phone = App._getPhone(formOrder);
-    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  },
+
+  /* ── PDF (refactored to accept order object) ── */
+  _buildPDFOrder() {
+    App.saveCurrentApp();
+    return {
+      aplicador: $('ot-aplicador').value.trim(),
+      fecha: $('ot-fecha').value,
+      tipo: App.getTipo(),
+      costoLabor: App.getCostoLabor(),
+      notas: $('ot-notas').value.trim(),
+      aplicaciones: aplicaciones,
+      campana: data.campana,
+    };
   },
 
   exportarPDF() {
-    App.saveCurrentApp(); // ensure current app state is saved
+    App._generatePDF(App._buildPDFOrder());
+  },
+
+  exportarOrdenPDF(oid) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+    App._generatePDF(o);
+  },
+
+  _generatePDF(o) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, margin = 14, contentW = W - margin * 2;
 
-    const cid = aplicaciones[0]?.campoId || '';
+    const apps = o.aplicaciones || [];
+    const cid = apps[0]?.campoId || '';
     const campo = data.campos.find(c => c.id === cid);
-    const fecha = $('ot-fecha').value ? new Date($('ot-fecha').value + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
+    const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : dateStr();
 
     const navy = [13, 45, 94];
     const accent = [45, 111, 196];
@@ -1732,35 +1931,31 @@ const App = {
     doc.setFont('helvetica', 'normal');
     doc.text(fecha, margin, 22);
     doc.text('Henderseeds SRL', W - margin, 14, { align: 'right' });
-    doc.text('Campaña ' + data.campana, W - margin, 22, { align: 'right' });
+    doc.text('Campana ' + (o.campana || data.campana), W - margin, 22, { align: 'right' });
 
     y = 40;
 
-    // Info
     doc.setTextColor(...navy); doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text('Campo:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(campo?.nombre || '—', margin + 20, y);
-    doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text($('ot-aplicador').value || '—', W / 2 + 24, y);
+    doc.text('Campo:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(campo?.nombre || '--', margin + 20, y);
+    doc.setFont('helvetica', 'bold'); doc.text('Aplicador:', W / 2, y); doc.setFont('helvetica', 'normal'); doc.text(o.aplicador || '--', W / 2 + 24, y);
     y += 6;
-    const tipoLabel = $('ot-tipo')?.value || 'Pulverización terrestre';
-    doc.setFont('helvetica', 'bold'); doc.text('Labor:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(tipoLabel, margin + 20, y);
+    doc.setFont('helvetica', 'bold'); doc.text('Labor:', margin, y); doc.setFont('helvetica', 'normal'); doc.text(o.tipo || '--', margin + 20, y);
     y += 10;
 
-    // Each aplicación
     const allProds = {};
-    aplicaciones.forEach((app, ai) => {
+    apps.forEach((app, ai) => {
       if (y > 250) { doc.addPage(); y = 15; }
-      const lote = campo?.lotes.find(l => l.id === app.loteId);
+      const appCampo = data.campos.find(c => c.id === (app.campoId || cid));
+      const lote = appCampo?.lotes.find(l => l.id === app.loteId);
       const has = app.hectareas || 0;
 
-      // App header
       doc.setFillColor(...accent);
       doc.rect(margin, y, contentW, 7, 'F');
       doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
       doc.text((lote?.nombre || 'Lote ?') + ' · ' + has + ' has' + (app.cultivo ? ' · ' + app.cultivo : ''), margin + 3, y + 5);
       y += 9;
 
-      // Table header
       doc.setFillColor(240, 244, 251); doc.rect(margin, y, contentW, 7, 'F');
       doc.setTextColor(...navy); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
       doc.text('PRODUCTO', cols[0] + 3, y + 4.5);
@@ -1768,10 +1963,10 @@ const App = {
       doc.text('VOL. TOTAL', cols[2] + 2, y + 4.5);
       y += 7;
 
-      app.productos.forEach((r, i) => {
+      (app.productos || []).forEach((r, i) => {
         if (y > 265) { doc.addPage(); y = 15; }
         if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y, contentW, 7, 'F'); }
-        const vol = has > 0 ? fmt(r.dosis * has) + ' ' + (r.unidad || 'L') : '—';
+        const vol = has > 0 ? fmt(r.dosis * has) + ' ' + (r.unidad || 'L') : '--';
 
         doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
         const nombre = r.producto.length > 40 ? r.producto.substring(0, 38) + '...' : r.producto;
@@ -1781,7 +1976,6 @@ const App = {
         doc.text(vol, cols[2] + 2, y + 4.5);
         y += 7;
 
-        // Accumulate for combined summary
         const key = r.producto;
         if (!allProds[key]) allProds[key] = { producto: r.producto, unidad: r.unidad || 'L', totalVol: 0 };
         allProds[key].totalVol += has > 0 ? r.dosis * has : 0;
@@ -1789,8 +1983,7 @@ const App = {
       y += 4;
     });
 
-    // Combined withdrawal summary (only if multiple apps)
-    if (aplicaciones.length > 1 && Object.keys(allProds).length) {
+    if (apps.length > 1 && Object.keys(allProds).length) {
       if (y > 240) { doc.addPage(); y = 15; }
       y += 2;
       doc.setFillColor(...navy); doc.rect(margin, y, contentW, 8, 'F');
@@ -1805,26 +1998,24 @@ const App = {
         doc.setTextColor(...navy); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
         doc.text(p.producto, cols[0] + 3, y + 4.5);
         doc.setFont('helvetica', 'bold');
-        doc.text(p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—', cols[2] + 2, y + 4.5);
+        doc.text(p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '--', cols[2] + 2, y + 4.5);
         y += 7;
       });
       y += 4;
     }
 
-    // Notes
-    if ($('ot-notas').value.trim()) {
+    if (o.notas) {
       if (y > 260) { doc.addPage(); y = 15; }
       doc.setFontSize(8); doc.setTextColor(...navy); doc.setFont('helvetica', 'bold');
       doc.text('Notas:', margin, y + 4);
       doc.setFont('helvetica', 'normal'); doc.setTextColor(...gris);
-      const lines = doc.splitTextToSize($('ot-notas').value.trim(), contentW - 20);
+      const lines = doc.splitTextToSize(o.notas, contentW - 20);
       doc.text(lines, margin + 16, y + 4);
       y += 4 + lines.length * 4;
     }
 
-    // Footer
     doc.setFontSize(7); doc.setTextColor(...gris); doc.setFont('helvetica', 'italic');
-    doc.text('Henderseeds SRL — ' + fecha, margin, y + 6);
+    doc.text('Henderseeds SRL -- ' + fecha, margin, y + 6);
 
     const fileName = 'OT_' + (campo?.nombre || 'orden').replace(/\s+/g, '_') + '.pdf';
     try {
@@ -1842,7 +2033,7 @@ const App = {
 
   /* ── Delete order ── */
   deleteOrden(oid) {
-    if (!confirm('¿Eliminar esta orden?')) return;
+    if (!confirm('Eliminar esta orden?')) return;
     data.ordenes = data.ordenes.filter(o => o.id !== oid);
     Storage.save(data);
     App.renderOrdenes();
@@ -1853,7 +2044,6 @@ const App = {
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 
-  // Event delegation for status buttons in Ordenes
   $('ordenes-list').addEventListener('click', e => {
     const btn = e.target.closest('[data-oid][data-estado]');
     if (btn) {
@@ -1861,6 +2051,9 @@ document.addEventListener('DOMContentLoaded', () => {
       App.cambiarEstadoOrden(btn.dataset.oid, btn.dataset.estado);
     }
   });
+
+  // Update totals when labor cost changes
+  $('ot-costo-labor').addEventListener('input', () => App._renderTotales());
 });
 </script>
 </body>

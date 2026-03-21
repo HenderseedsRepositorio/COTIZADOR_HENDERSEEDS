@@ -337,7 +337,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;position:relative;z-index:20;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
+        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
       </div>
       <div style="margin-top:6px;"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Establecimiento</label><input type="text" id="establecimiento" placeholder="Nombre del campo (opcional)" class="inp" style="font-size:.82rem;padding:7px 9px;width:100%;box-sizing:border-box;"></div>
@@ -804,17 +804,26 @@ const App = {
   filterClientes(showAll) {
     const q = $('cliente').value.trim().toLowerCase();
     const dd = $('cliente-dd');
-    if(!clientes.length){ dd.classList.remove('show'); return; }
+    if(!clientes.length) {
+      dd.innerHTML = '<div style="padding:10px 12px;font-size:.72rem;color:var(--c-light);text-align:center;">Cargando clientes...</div>';
+      dd.classList.add('show');
+      return;
+    }
     const matches = q
       ? clientes.filter(c => c.nombre.toLowerCase().includes(q)).slice(0,30)
       : (showAll ? clientes.slice(0,30) : []);
-    if(!matches.length && !q){ dd.classList.remove('show'); return; }
     let html = matches.map(c =>
       `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g,"\\'")}')">`+
       `<span>${c.nombre}</span></div>`
     ).join('');
     if(q && (!matches.length || !matches.some(c => c.nombre.toLowerCase()===q))) {
       html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+    }
+    if(!html && !q) {
+      dd.classList.remove('show'); return;
+    }
+    if(!html && q) {
+      html = `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
     }
     dd.innerHTML = html;
     dd.classList.add('show');

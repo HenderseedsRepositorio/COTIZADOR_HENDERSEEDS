@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seguimiento de Campaña — Henderseeds</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .main { max-width: 920px; margin: 0 auto; padding: 8px 8px 52px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-.status-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0 6px; font-size: .62rem; color: var(--text-mut); }
+.status-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0 6px; font-size: .7rem; color: var(--text-mut); }
 .tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 8px; }
 .tab-btn { flex: 1; background: none; border: none; border-bottom: 3px solid transparent; color: var(--text-mut); font-size: .72rem; font-weight: 500; padding: 10px 2px; cursor: pointer; transition: all .2s; font-family: var(--font); margin-bottom: -2px; white-space: nowrap; }
 .tab-btn.active { border-bottom-color: var(--accent); color: var(--navy); font-weight: 700; }
@@ -49,7 +49,7 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,111,196,.12); }
 .inp-sm { padding: 6px 8px; font-size: 13px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.form-lbl { font-size: .62rem; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+.form-lbl { font-size: .7rem; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
 textarea.inp { resize: vertical; min-height: 60px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 13px 18px; border: none; border-radius: 99px; font-size: .82rem; font-weight: 700; cursor: pointer; font-family: var(--font); transition: opacity .15s; }
 .btn:hover { opacity: .87; }
@@ -57,7 +57,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .btn-green { background: #25d366; color: white; }
 .btn-outline { background: var(--navy-light); color: #fff; }
 .btn-danger { background: var(--red); color: white; }
-.btn-sm { font-size: .68rem; padding: 6px 14px; }
+.btn-sm { font-size: .7rem; padding: 6px 14px; }
 .btn-add { width: 100%; padding: 12px; border: 2px dashed var(--accent); border-radius: var(--radius); background: var(--accent-bg); color: var(--accent-dark); font-weight: 700; font-size: .8rem; cursor: pointer; margin-bottom: 10px; transition: all .15s; }
 .btn-add:hover { background: var(--accent); color: white; }
 .chip-bar { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -157,7 +157,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 .stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
 .stat-val { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; color: var(--navy); }
-.stat-lbl { font-size: .62rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; margin-top: 2px; }
+.stat-lbl { font-size: .7rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; margin-top: 2px; }
 .wa-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 936px; background: white; border-top: 1px solid var(--border); padding: 10px 8px; display: none; gap: 8px; z-index: 90; }
 .wa-bar .btn { flex: 1; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
@@ -167,7 +167,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
 .modal-actions .btn { flex: 1; }
 .backup-bar { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; justify-content: flex-end; }
-.backup-bar .btn { font-size: .62rem; padding: 5px 12px; }
+.backup-bar .btn { font-size: .7rem; padding: 5px 12px; }
 .backup-file-input { display: none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:10px 22px; border-radius:99px; font-size:13px; font-weight:600; z-index:999; animation:toastIn .3s ease, toastOut .3s ease 2.2s forwards; pointer-events:none; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,.25); }
 @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
@@ -193,9 +193,12 @@ textarea.inp { resize: vertical; min-height: 60px; }
   .wa-bar .btn { font-size: .72rem; padding: 10px 8px; }
   .bar-label { width: 70px; font-size: 11px; }
   .bar-amount { width: 65px; font-size: 11px; }
+  .ot-actions { flex-wrap: wrap; }
+  .ot-actions .btn { min-height: 40px; }
+  .ot-actions .btn-danger { margin-left: auto; }
 }
 @media (min-width: 640px) { .row-mob-line { display: contents; } }
-@media (max-width: 380px) { body { font-size: 14px; } .tab-btn { font-size: .64rem; padding: 9px 2px; } .card { padding: 10px; } }
+@media (max-width: 380px) { body { font-size: 14px; } .tab-btn { font-size: .7rem; padding: 9px 2px; } .card { padding: 10px; } }
 </style>
 </head>
 <body>
@@ -219,11 +222,11 @@ textarea.inp { resize: vertical; min-height: 60px; }
 
   <div id="app-main" style="display:none;">
   <div class="status-bar">
-    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;">&larr; Menu</a>
-    <span id="productor-label" style="font-weight:700;font-size:.62rem;color:var(--navy);cursor:pointer;" onclick="App.logoutProductor()"></span>
-    <span>Campana: <select id="campana-select" style="border:none;background:none;color:var(--navy-sky);font-weight:700;font-size:.62rem;font-family:var(--font);cursor:pointer;">
+    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.7rem;">&larr; Menu</a>
+    <span id="productor-label" style="font-weight:700;font-size:.7rem;color:var(--navy);cursor:pointer;" onclick="App.logoutProductor()"></span>
+    <span>Campana: <select id="campana-select" style="border:none;background:none;color:var(--navy-sky);font-weight:700;font-size:.7rem;font-family:var(--font);cursor:pointer;">
     </select></span>
-    <span style="display:inline-flex;align-items:center;gap:3px;"><span id="status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mut);display:inline-block;"></span><span id="status-text" style="font-size:.62rem;font-weight:600;">Datos locales</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;"><span id="status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mut);display:inline-block;"></span><span id="status-text" style="font-size:.7rem;font-weight:600;">Datos locales</span></span>
   </div>
 
   <nav class="tabs">
@@ -246,17 +249,17 @@ textarea.inp { resize: vertical; min-height: 60px; }
   <section id="tab-nueva-ot" class="tab-content">
     <div class="card fu" style="margin-bottom:6px;position:relative;z-index:30;">
       <div class="form-row" style="margin-bottom:8px;">
-        <div><div class="form-lbl">Fecha aplicacion</div><input type="date" id="ot-fecha" class="inp inp-sm"></div>
-        <div style="position:relative;"><div class="form-lbl">Aplicador</div>
+        <div><label class="form-lbl" for="ot-fecha">Fecha aplicacion</label><input type="date" id="ot-fecha" class="inp inp-sm"></div>
+        <div style="position:relative;"><label class="form-lbl" for="ot-aplicador">Aplicador</label>
           <input type="text" id="ot-aplicador" class="inp inp-sm" placeholder="Nombre..." autocomplete="off" oninput="App.filterAplicadores()" onfocus="App.filterAplicadores(true)">
           <div class="dropdown" id="aplicador-dd" style="z-index:60;"></div>
         </div>
       </div>
       <div class="form-row">
-        <div style="position:relative;"><div class="form-lbl">Tipo de labor</div>
+        <div style="position:relative;"><label class="form-lbl" for="ot-tipo">Tipo de labor</label>
           <input type="text" id="ot-tipo" class="inp inp-sm" value="Pulverizacion terrestre" placeholder="Ej: Pulverizacion..." autocomplete="off" oninput="App.filterTipos()" onfocus="App.filterTipos(true)">
         </div>
-        <div><div class="form-lbl">Costo labor USD/ha</div>
+        <div><label class="form-lbl" for="ot-costo-labor">Costo labor USD/ha</label>
           <input type="number" inputmode="decimal" id="ot-costo-labor" class="inp inp-sm" value="" placeholder="0.00" step="0.01" min="0" style="font-family:var(--mono);">
         </div>
       </div>
@@ -266,9 +269,9 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <div id="ot-resumen" class="card fu" style="display:none;"></div>
     <div id="ot-totales" class="ot-totales" style="display:none;"></div>
     <div class="card fu" style="margin-top:6px;">
-      <div class="form-lbl">Notas</div>
+      <label class="form-lbl" for="ot-notas">Notas</label>
       <textarea id="ot-notas" class="inp inp-sm" placeholder="Instrucciones, condiciones climaticas..." rows="2"></textarea>
-      <div class="form-lbl" style="margin-top:10px;">Estado</div>
+      <label class="form-lbl" style="margin-top:10px;">Estado</label>
       <div class="chip-bar" id="ot-estado-bar">
         <button class="chip orange active" data-estado="pendiente" onclick="App.setEstado(this)">Pendiente</button>
         <button class="chip green" data-estado="en_curso" onclick="App.setEstado(this)">En curso</button>
@@ -305,10 +308,10 @@ textarea.inp { resize: vertical; min-height: 60px; }
   <section id="tab-analisis" class="tab-content">
     <div class="card" style="padding:10px 14px;">
       <div class="form-row" style="margin-bottom:8px;">
-        <div><div class="form-lbl">Lote</div>
+        <div><label class="form-lbl" for="an-lote">Lote</label>
           <select id="an-lote" class="inp inp-sm" onchange="App.renderAnalisis()"><option value="">-- Todos --</option></select>
         </div>
-        <div><div class="form-lbl">Estado</div>
+        <div><label class="form-lbl" for="an-estado">Estado</label>
           <select id="an-estado" class="inp inp-sm" onchange="App.renderAnalisis()">
             <option value="">Todos</option>
             <option value="completada">Completadas</option>
@@ -491,25 +494,33 @@ const App = {
     const nombre = name || inp.value.trim();
     if (!nombre) { inp.style.borderColor = 'var(--red)'; return; }
 
-    currentProductor = nombre;
-    localStorage.setItem('sc_productor', nombre);
+    const loginBtn = document.querySelector('#productor-gate .btn-accent');
+    const originalText = loginBtn ? loginBtn.textContent : '';
+    if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Cargando...'; }
 
-    // Try to load from cloud first
-    const cloudData = await Cloud.loadFromCloud();
-    if (cloudData) {
-      data = migrateData(cloudData);
-      Storage.save(data); // cache locally (won't re-trigger cloud sync because we clear timer)
-      if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
-    } else {
-      // Load from localStorage
-      data = migrateData(Storage.load());
+    try {
+      currentProductor = nombre;
+      localStorage.setItem('sc_productor', nombre);
+
+      // Try to load from cloud first
+      const cloudData = await Cloud.loadFromCloud();
+      if (cloudData) {
+        data = migrateData(cloudData);
+        Storage.save(data); // cache locally (won't re-trigger cloud sync because we clear timer)
+        if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
+      } else {
+        // Load from localStorage
+        data = migrateData(Storage.load());
+      }
+
+      $('productor-gate').style.display = 'none';
+      $('app-main').style.display = '';
+      $('productor-label').textContent = nombre + ' ▾';
+
+      App.init();
+    } finally {
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = originalText; }
     }
-
-    $('productor-gate').style.display = 'none';
-    $('app-main').style.display = '';
-    $('productor-label').textContent = nombre + ' ▾';
-
-    App.init();
   },
 
   logoutProductor() {
@@ -549,7 +560,26 @@ const App = {
       if (!e.target.closest('#ot-aplicador') && !e.target.closest('#aplicador-dd')) App.hideAplicadorDD();
       if (!e.target.closest('#ot-tipo') && !e.target.closest('#tipo-dd')) App.hideTipoDD();
     });
-    window.addEventListener('scroll', () => { App.hideDropdown(); App.hideAplicadorDD(); App.hideTipoDD(); }, true);
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const dd = $('ot-dropdown');
+      if (dd.classList.contains('show')) {
+        const activeInput = document.querySelector('.app-block.active-app .app-search');
+        if (activeInput) {
+          const rect = activeInput.getBoundingClientRect();
+          dd.style.top = rect.bottom + 'px';
+          dd.style.left = rect.left + 'px';
+          dd.style.width = rect.width + 'px';
+        }
+        if (Math.abs(window.scrollY - lastScrollY) > 50) {
+          App.hideDropdown();
+        }
+      }
+      if (Math.abs(window.scrollY - lastScrollY) > 50) {
+        App.hideAplicadorDD(); App.hideTipoDD();
+        lastScrollY = window.scrollY;
+      }
+    }, true);
     document.addEventListener('keydown', e => {
       const inp = e.target.closest('.app-search');
       if (!inp) return;
@@ -590,10 +620,10 @@ const App = {
   openLoteModal(lid) {
     const l = lid ? data.lotes.find(x => x.id === lid) : null;
     openModal(`<div class="modal-title">${l ? 'Editar Lote' : 'Nuevo Lote'}</div>
-      <div style="margin-bottom:10px;"><div class="form-lbl">Nombre *</div><input type="text" id="m-lote-nombre" class="inp inp-sm" value="${esc(l?.nombre || '')}" placeholder="Ej: LT1, DP3..."></div>
+      <div style="margin-bottom:10px;"><label class="form-lbl" for="m-lote-nombre">Nombre *</label><input type="text" id="m-lote-nombre" class="inp inp-sm" value="${esc(l?.nombre || '')}" placeholder="Ej: LT1, DP3..."></div>
       <div class="form-row" style="margin-bottom:10px;">
-        <div><div class="form-lbl">Hectareas *</div><input type="number" id="m-lote-has" class="inp inp-sm" value="${l?.hectareas || ''}" placeholder="0" min="0" step="1" style="font-family:var(--mono);"></div>
-        <div><div class="form-lbl">Cultivo</div><input type="text" id="m-lote-cultivo" class="inp inp-sm" value="${esc(l?.cultivo || '')}" placeholder="Ej: Soja 1ra"></div>
+        <div><label class="form-lbl" for="m-lote-has">Hectareas *</label><input type="number" id="m-lote-has" class="inp inp-sm" value="${l?.hectareas || ''}" placeholder="0" min="0" step="1" style="font-family:var(--mono);"></div>
+        <div><label class="form-lbl" for="m-lote-cultivo">Cultivo</label><input type="text" id="m-lote-cultivo" class="inp inp-sm" value="${esc(l?.cultivo || '')}" placeholder="Ej: Soja 1ra"></div>
       </div>
       <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-accent" onclick="App.saveLote('${lid || ''}')">Guardar</button></div>`);
   },
@@ -759,12 +789,12 @@ const App = {
           ${aplicaciones.length > 1 ? `<button class="app-block-rm" onclick="event.stopPropagation();App.removeAplicacion(${i})">&times;</button>` : ''}
         </div>
         <div style="margin-bottom:6px;">
-          <div class="form-lbl">Lotes</div>
+          <label class="form-lbl">Lotes</label>
           <select class="inp inp-sm" onchange="App.addAppLote(${i},this.value);this.value='';">${selectOpts}</select>
           ${a.lotes.length ? `<div class="app-lotes-list">${loteChips}</div>
             <div class="app-total-has">Total: ${fmtInt(totalHas)} has</div>` : ''}
         </div>
-        <div class="form-lbl" style="margin-top:4px;">Productos</div>
+        <label class="form-lbl" style="margin-top:4px;">Productos</label>
         <div class="rows-scroll" style="margin:0 -12px;padding:0 12px;">
           <div class="rows-header">
             <span>Producto</span><span style="text-align:right">Precio</span><span style="text-align:right">Dosis</span>
@@ -817,7 +847,7 @@ const App = {
     const el = $('ot-resumen'), prods = Object.values(allProds);
     if (!prods.length) { el.style.display = 'none'; return; }
     el.style.display = 'block';
-    el.innerHTML = `<div class="form-lbl" style="font-size:13px;margin-bottom:6px;">RESUMEN RETIRO</div>
+    el.innerHTML = `<label class="form-lbl" style="font-size:13px;margin-bottom:6px;">RESUMEN RETIRO</label>
       <table style="width:100%;font-size:12px;border-collapse:collapse;">
         <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px 0;">Producto</th><th style="text-align:right;padding:4px 0;">Vol. total</th><th style="text-align:right;padding:4px 0;">USD</th></tr>
         ${prods.map(p => `<tr><td style="padding:3px 0;font-weight:500;">${esc(p.producto)}</td><td style="text-align:right;font-family:var(--mono);padding:3px 0;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + esc(p.unidad) : '--'}</td><td style="text-align:right;font-family:var(--mono);padding:3px 0;color:var(--accent);font-weight:600;">${p.totalCost > 0 ? '$' + fmt(p.totalCost) : '--'}</td></tr>`).join('')}
@@ -1029,7 +1059,7 @@ const App = {
         orderTotalMonto += appInsHa * totalHas;
         return `<div style="${ai > 0 ? 'margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);' : ''}">
           <div style="font-weight:700;font-size:12px;color:var(--navy);">${lotesStr} · ${totalHas} has</div>
-          ${(a.productos || []).length ? `<table class="ot-prod-table" style="margin-top:4px;width:100%;border-collapse:collapse;">
+          ${(a.productos || []).length ? `<div style="overflow-x:auto"><table class="ot-prod-table" style="margin-top:4px;width:100%;border-collapse:collapse;">
             <tr><th style="text-align:left;">Producto</th><th style="text-align:right;width:55px;">Precio</th><th style="text-align:right;width:75px;">Dosis</th><th style="text-align:right;width:60px;">$/ha</th><th style="text-align:right;width:75px;">Vol.</th></tr>
             ${prodRows}
             <tr style="border-top:1.5px solid var(--border);font-weight:700;">
@@ -1043,7 +1073,7 @@ const App = {
               <td style="text-align:right;color:var(--navy);font-family:var(--mono);">$${fmt(appTotalHa)}/ha</td>
               <td style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-sec);">${totalHas > 0 ? '$' + fmt(appTotalHa * totalHas) : ''}</td>
             </tr>
-          </table>` : ''}
+          </table></div>` : ''}
         </div>`;
       }).join('');
 
@@ -1063,14 +1093,14 @@ const App = {
         <div class="ot-productos-detail">
           ${apps.length > 1 ? '<div class="ot-section-label">Aplicaciones</div>' : ''}${appBlocks}
           ${apps.length > 1 && Object.keys(allProds).length ? `<div class="ot-section-label" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--accent);">Resumen retiro total</div>
-          <table class="ot-prod-table" style="width:100%;border-collapse:collapse;"><tr><th style="text-align:left;">Producto</th><th style="text-align:right;width:80px;">Vol. total</th><th style="text-align:right;width:70px;">USD</th></tr>${summaryRows}</table>` : ''}
+          <div style="overflow-x:auto"><table class="ot-prod-table" style="width:100%;border-collapse:collapse;"><tr><th style="text-align:left;">Producto</th><th style="text-align:right;width:80px;">Vol. total</th><th style="text-align:right;width:70px;">USD</th></tr>${summaryRows}</table></div>` : ''}
         </div></div>
         <div class="ot-status-col">
           <button class="st-pend${o.estado === 'pendiente' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="pendiente">Pend.</button>
           <button class="st-curso${o.estado === 'en_curso' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="en_curso">Curso</button>
           <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="completada">Comp.</button>
         </div></div>
-        <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
+        <div class="ot-actions" style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
           <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${esc(o.id)}')">WA</button>
           <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${esc(o.id)}')">PDF</button>
           <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')">Editar</button>
@@ -1293,7 +1323,7 @@ const App = {
         const insumosHa = (a.productos || []).reduce((s, p) => s + p.precio * p.dosis, 0);
         const netoHa = insumosHa + (o.costoLabor || 0);
         const montoTotal = netoHa * has;
-        costoAcum += netoHa;
+        if (filtLote) costoAcum += netoHa;
         const fecha = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-AR') : '--';
         const estadoBadge = o.estado === 'completada' ? 'badge-completada' : o.estado === 'en_curso' ? 'badge-en_curso' : 'badge-pendiente';
         const estadoLabel = o.estado === 'completada' ? 'Comp.' : o.estado === 'en_curso' ? 'Curso' : 'Pend.';

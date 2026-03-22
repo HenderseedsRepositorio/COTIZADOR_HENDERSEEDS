@@ -49,7 +49,7 @@ function loadCampana(productor) {
     if (allData.length < 2) return { ok: true, data: null, isNew: true };
 
     // Fila 2: metadata
-    const meta = JSON.parse(allData[1][0] || '{}');
+    const meta = JSON.parse(allData[1][1] || '{}');
 
     // Lotes: filas donde col B = "LOTE"
     const lotes = [];

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Henderseeds — Cotizador Nidera</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -21,11 +21,11 @@ body{background:var(--c-bg);font-family:var(--font);color:var(--c-dark);margin:0
 
 /* ══════ COMMON ══════ */
 .hcard{background:var(--c-card);border-radius:14px;box-shadow:0 2px 14px rgba(13,45,94,.08),0 1px 3px rgba(13,45,94,.04)}
-.slabel{margin:0 0 10px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue)}
+.slabel{margin:0 0 10px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue)}
 .inp{width:100%;border:1.5px solid var(--c-border);border-radius:9px;padding:8px 10px;font-size:.84rem;font-family:var(--font);transition:border-color .15s,box-shadow .15s;background:var(--c-card);color:var(--c-dark)}
 .inp:focus{outline:none;border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
 select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%230d2d5e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;appearance:none;-webkit-appearance:none}
-.badge{display:inline-block;font-size:.57rem;font-weight:700;padding:2px 6px;border-radius:99px}
+.badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 6px;border-radius:99px}
 .ba{background:#dcfce7;color:#15803d}.bb{background:#dbeafe;color:#1e40af}.bc{background:#fef9c3;color:#854d0e}
 .print-only{display:none}
 
@@ -52,18 +52,18 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 /* ══════ TABLES ══════ */
 .htable{width:100%;border-collapse:collapse}
-.htable th{text-align:left;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);padding-right:4px;white-space:nowrap}
+.htable th{text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);padding-right:4px;white-space:nowrap}
 .htable td{padding:4px 3px 4px 0;border-bottom:1px solid var(--c-row);vertical-align:middle;font-size:.74rem}
 .htable tbody tr:last-child td{border-bottom:none}
 .htable tbody tr:hover td{background:#f8faff}
 
 /* ══════ INLINE ROWS (hybrid selection) ══════ */
-.rows-header{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;padding:6px 10px;font-size:.58rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
+.rows-header{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;padding:6px 10px;font-size:.7rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
 .row-item{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
 @keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .row-prod{display:flex;flex-direction:column;min-width:0}
 .row-prod-name{font-size:.76rem;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row-prod-meta{font-size:.54rem;color:var(--c-light)}
+.row-prod-meta{font-size:.7rem;color:var(--c-light)}
 .row-inp{width:100%;padding:4px 5px;border:1.5px solid var(--c-border);border-radius:7px;font-family:var(--mono);font-size:.72rem;font-weight:600;text-align:right;color:var(--c-navy);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;-moz-appearance:textfield}
 .row-inp::-webkit-inner-spin-button,.row-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .row-inp:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
@@ -85,29 +85,29 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .dd-cat{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--c-navy);padding:10px 12px 5px;background:var(--c-bg);border-top:1.5px solid var(--c-border)}
 .dd-item{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;border-bottom:1px solid var(--c-bg);transition:background .1s}
 .dd-item:hover,.dd-item.highlighted{background:#eef3fb}
-.dd-item-price{font-family:var(--mono);font-size:.64rem;color:var(--c-blue);white-space:nowrap;font-weight:600}
+.dd-item-price{font-family:var(--mono);font-size:.7rem;color:var(--c-blue);white-space:nowrap;font-weight:600}
 
 /* Cliente dropdown */
 .cliente-wrap{position:relative}
 .cliente-dd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--c-border);border-top:none;border-radius:0 0 10px 10px;max-height:60vh;overflow-y:auto;z-index:60;box-shadow:0 8px 24px rgba(13,45,94,.12);display:none}
 .cliente-dd.show{display:block}
 .cliente-dd .dd-item{padding:6px 12px;font-size:.76rem}
-.cliente-dd .dd-add{color:var(--c-green);font-weight:700;font-size:.68rem}
+.cliente-dd .dd-add{color:var(--c-green);font-weight:700;font-size:.7rem}
 
 .mkt-table{width:100%;border-collapse:collapse}
-.mkt-table th{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:6px}
+.mkt-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:7px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:6px}
 .mkt-table th:first-child{text-align:left;padding-left:0}
 .mkt-table td{padding:6px;border-bottom:1px solid var(--c-row);font-size:.76rem;text-align:right}
 .mkt-table td:first-child{text-align:left;padding-left:0;font-weight:600;color:var(--c-dark);font-size:.74rem}
 
 .tech-table{width:100%;border-collapse:collapse;font-size:.76rem}
-.tech-table th{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding:6px 7px;border-bottom:2px solid var(--c-accent);text-align:center;white-space:nowrap}
+.tech-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding:6px 7px;border-bottom:2px solid var(--c-accent);text-align:center;white-space:nowrap}
 .tech-table th:first-child{text-align:left;padding-left:0}
 .tech-table td{padding:7px;border-bottom:1px solid var(--c-row);text-align:center;vertical-align:middle}
 .tech-table td:first-child{text-align:left;padding-left:0;font-weight:600}
 
 .rdesc-table{width:100%;border-collapse:collapse}
-.rdesc-table th{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:6px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:5px;white-space:nowrap}
+.rdesc-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:6px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:5px;white-space:nowrap}
 .rdesc-table th:first-child{text-align:left;padding-left:0}
 .rdesc-table td{padding:5px 5px 5px 0;border-bottom:1px solid var(--c-row);text-align:right;padding-left:5px;font-size:.7rem}
 .rdesc-table td:first-child{text-align:left;padding-left:0;font-weight:600;font-size:.71rem}
@@ -115,7 +115,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
 /* ══════ DISCOUNT GROUPS ══════ */
 .dto-group{background:#eef3fb;border-radius:9px;padding:7px 10px}
-.dto-title{font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--c-blue);margin:0 0 8px}
+.dto-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--c-blue);margin:0 0 8px}
 .dto-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .dto-row:last-child{margin-bottom:0}
 .dto-emoji{font-size:.85rem;flex-shrink:0;width:18px}
@@ -124,7 +124,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .btn-share{display:flex;align-items:center;justify-content:center;gap:7px;background:#25d366;color:#fff;font-weight:700;padding:13px 18px;border-radius:99px;border:none;cursor:pointer;font-size:.82rem;font-family:var(--font);box-shadow:0 3px 12px rgba(37,211,102,.26);transition:opacity .15s;flex:1;min-width:0}
 .btn-share:hover,.btn-dl:hover{opacity:.87}
 .btn-dl{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--c-blue);color:#fff;font-weight:700;padding:13px 18px;border-radius:99px;border:none;cursor:pointer;font-size:.82rem;font-family:var(--font);box-shadow:0 3px 12px rgba(26,74,138,.22);transition:opacity .15s;flex:1;min-width:0}
-.btn-sm{font-size:.68rem;font-weight:700;padding:6px 14px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px}
+.btn-sm{font-size:.7rem;font-weight:700;padding:6px 14px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px}
 
 /* ══════ QUOTE OVERLAY ══════ */
 #quote-overlay{display:none;position:fixed;inset:0;z-index:1000;background:var(--c-navy);overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -142,17 +142,17 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .vendor-btn:last-child{margin-bottom:0}
 
 /* ══════ STATUS BAR ══════ */
-.status-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 16px;font-size:.62rem;color:var(--c-light)}
+.status-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 16px;font-size:.7rem;color:var(--c-light)}
 .status-bar .vname{font-weight:700;color:var(--c-green);cursor:pointer}
 .status-bar .vname:hover{text-decoration:underline}
 
 /* ══════ TOGGLE BOX ══════ */
 .toggle-box{background:#eef3fb;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
-.toggle-box p{margin:0}.toggle-box .tname{font-size:.69rem;font-weight:700;color:var(--c-navy)}.toggle-box .tsub{margin:1px 0 0;font-size:.58rem;color:var(--c-gray)}
+.toggle-box p{margin:0}.toggle-box .tname{font-size:.7rem;font-weight:700;color:var(--c-navy)}.toggle-box .tsub{margin:1px 0 0;font-size:.7rem;color:var(--c-gray)}
 
 /* ══════ CONDITIONS TABLE (inline) ══════ */
 .cond-table{width:100%;border-collapse:collapse;font-size:.72rem;table-layout:fixed}
-.cond-table th{font-size:.56rem;font-weight:600;color:var(--c-gray);padding:5px 8px;border-bottom:1px solid var(--c-border)}
+.cond-table th{font-size:.7rem;font-weight:600;color:var(--c-gray);padding:5px 8px;border-bottom:1px solid var(--c-border)}
 .cond-table th:first-child{text-align:left;width:40%}
 .cond-table th:nth-child(2),.cond-table th:nth-child(3),.cond-table th:nth-child(4){text-align:right;width:20%}
 .cond-table td{padding:6px 8px;border-bottom:1px solid var(--c-row)}
@@ -162,7 +162,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .cond-table td:nth-child(3){color:var(--c-gray)}
 
 /* ══════ QUOTE TABLE ROWS ══════ */
-.q-row td{border-bottom:1px solid var(--c-row);font-size:.68rem}
+.q-row td{border-bottom:1px solid var(--c-row);font-size:.7rem}
 .q-row .q-name{padding:5px 8px;font-weight:600;color:var(--c-dark)}
 .q-row .q-center{padding:5px 4px;text-align:center;color:#475569}
 .q-row .q-mono{font-family:var(--mono)}
@@ -173,16 +173,16 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .hist-card{border:1px solid var(--c-border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .hist-num{font-size:.72rem;font-weight:700;color:var(--c-navy)}
-.hist-date{font-size:.64rem;color:var(--c-gray);margin-left:8px}
-.hist-vendor{font-size:.62rem;font-weight:600;color:var(--c-green)}
+.hist-date{font-size:.7rem;color:var(--c-gray);margin-left:8px}
+.hist-vendor{font-size:.7rem;font-weight:600;color:var(--c-green)}
 .hist-client{margin:0 0 6px;font-size:.78rem;font-weight:600;color:var(--c-navy)}
 .hist-total{text-align:right;margin-top:4px;padding-top:4px;border-top:1px solid var(--c-border)}
-.hist-total span{font-size:.68rem;font-weight:700;color:var(--c-navy);font-family:var(--mono)}
-.hist-table{width:100%;border-collapse:collapse;font-size:.64rem}
+.hist-total span{font-size:.7rem;font-weight:700;color:var(--c-navy);font-family:var(--mono)}
+.hist-table{width:100%;border-collapse:collapse;font-size:.7rem}
 .hist-table th{padding:3px 4px;color:var(--c-gray);font-weight:600}
 .hist-table td{padding:3px 4px;border-bottom:1px solid var(--c-row)}
 .hist-pager{display:flex;justify-content:center;gap:8px;margin-top:10px}
-.hist-pager button{background:#eef3fb;color:var(--c-blue);font-size:.64rem;font-weight:700;padding:5px 14px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font)}
+.hist-pager button{background:#eef3fb;color:var(--c-blue);font-size:.7rem;font-weight:700;padding:5px 14px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font)}
 .hist-pager button:disabled{opacity:.4;cursor:default}
 
 /* ══════ ANIMATIONS ══════ */
@@ -201,11 +201,11 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .tcard-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;gap:8px}
 .tcard-left{flex:1;min-width:0}
 .tcard-name{font-family:var(--display);font-size:.82rem;color:var(--c-navy);margin:0;line-height:1.2}
-.tcard-tec{display:inline-block;font-size:.54rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:3px}
+.tcard-tec{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:3px}
 .tec-vt3p{background:#dcfce7;color:#15803d}.tec-vip3{background:#dbeafe;color:#1e40af}.tec-cl{background:#fef3c7;color:#92400e}.tec-cltg{background:#f3e8ff;color:#6b21a8}
 .tcard-mr{text-align:right;flex-shrink:0}
 .tcard-mr-val{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--c-navy);line-height:1}
-.tcard-mr-label{font-size:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--c-light);margin-top:1px}
+.tcard-mr-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--c-light);margin-top:1px}
 .tcard-arrow{font-size:.7rem;color:var(--c-light);transition:transform .2s;flex-shrink:0;margin-left:4px}
 .tcard.open .tcard-arrow{transform:rotate(180deg)}
 .tcard-body{display:none;padding:0 14px 14px}
@@ -215,9 +215,9 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
 .tstat{background:var(--c-bg);border-radius:8px;padding:7px 6px;text-align:center}
 .tstat-val{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--c-navy)}
-.tstat-label{font-size:.48rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--c-light);margin-top:2px}
+.tstat-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--c-light);margin-top:2px}
 .sanit-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
-.sanit-name{font-size:.65rem;font-weight:600;color:var(--c-dark);width:85px;flex-shrink:0;text-align:right}
+.sanit-name{font-size:.7rem;font-weight:600;color:var(--c-dark);width:85px;flex-shrink:0;text-align:right}
 .sanit-bar-wrap{flex:1;height:16px;background:#eef3fb;border-radius:8px;overflow:hidden}
 .sanit-bar{height:100%;border-radius:8px;transition:width .4s ease}
 .sanit-bar.s-exc{background:linear-gradient(90deg,#22c55e,#16a34a)}
@@ -226,17 +226,17 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .sanit-bar.s-fair{background:linear-gradient(90deg,#fb923c,#ea580c)}
 .sanit-bar.s-poor{background:linear-gradient(90deg,#f87171,#dc2626)}
 .sanit-bar.s-res{background:linear-gradient(90deg,#2d6fc4,#1a4a8a)}
-.sanit-val{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--c-navy);width:22px;text-align:center;flex-shrink:0}
+.sanit-val{font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--c-navy);width:22px;text-align:center;flex-shrink:0}
 .ensayo-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--c-row)}
 .ensayo-row:last-child{border-bottom:none}
-.ensayo-epoca{font-size:.62rem;font-weight:600;color:var(--c-dark);width:90px;flex-shrink:0}
+.ensayo-epoca{font-size:.7rem;font-weight:600;color:var(--c-dark);width:90px;flex-shrink:0}
 .ensayo-exito{font-family:var(--mono);font-size:.72rem;font-weight:700;width:42px;text-align:center;flex-shrink:0}
 .ensayo-exito.e-hi{color:#15803d}.ensayo-exito.e-mid{color:var(--c-orange)}.ensayo-exito.e-lo{color:#dc2626}
-.ensayo-n{font-size:.58rem;color:var(--c-light);width:36px;text-align:center;flex-shrink:0}
+.ensayo-n{font-size:.7rem;color:var(--c-light);width:36px;text-align:center;flex-shrink:0}
 .ensayo-dif{font-family:var(--mono);font-size:.7rem;font-weight:700;flex:1;text-align:right}
 .ensayo-dif.d-pos{color:#15803d}.ensayo-dif.d-neg{color:#dc2626}.ensayo-dif.d-dns{color:var(--c-gray)}
 .tambientes{display:flex;gap:4px;margin-bottom:12px}
-.tamb{font-size:.56rem;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em}
+.tamb{font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em}
 .tamb.on{background:#dcfce7;color:#15803d}.tamb.off{background:var(--c-row);color:#cbd5e1}
 .btn-marbete{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--c-navy);background:transparent;color:var(--c-navy);font-family:var(--font);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;text-decoration:none}
 .btn-marbete:hover{background:var(--c-navy);color:#fff}
@@ -261,13 +261,17 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
   .mob-wrap tr{border:1px solid #dbeafe;margin-bottom:8px;border-radius:10px;background:#fff;overflow:hidden}
   .mob-wrap td{border:none;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-size:.78rem;border-bottom:1px solid var(--c-row)}
   .mob-wrap td:last-child{border-bottom:none}
-  .mob-wrap td::before{content:attr(data-label);font-weight:700;color:var(--c-blue);font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;margin-right:8px}
+  .mob-wrap td::before{content:attr(data-label);font-weight:700;color:var(--c-blue);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;margin-right:8px}
   .mob-wrap td.no-print{display:none}
   .mkt-dtos{grid-template-columns:1fr 1fr!important}
   .mkt-vol{grid-column:span 2}
+  .mob-hide{display:none}
+  .scroll-hint{display:block;text-align:center;color:#94a3b8;font-size:.7rem;padding:4px}
 }
+.scroll-hint{display:none}
+.input-err{border-color:#ef4444!important}
 @media(max-width:480px){
-  .tab-btn{font-size:.68rem;padding:10px 2px}
+  .tab-btn{font-size:.7rem;padding:10px 2px}
   .btn-share,.btn-dl{font-size:.76rem;padding:12px 14px}
 }
 /* Toast notifications */
@@ -318,7 +322,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
   <!-- STATUS BAR -->
   <div class="status-bar">
-    <a href="index.html" style="color:var(--c-light);text-decoration:none;font-weight:600;font-size:.58rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
+    <a href="index.html" style="color:var(--c-light);text-decoration:none;font-weight:600;font-size:.7rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
     <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
     <span id="catalogStatus">⏳ Cargando...</span>
   </div>
@@ -337,8 +341,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;position:relative;z-index:20;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
-        <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
+        <div class="cliente-wrap"><label style="display:block;font-size:.7rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
+        <div><label style="display:block;font-size:.7rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" inputmode="numeric" class="inp" style="font-size:.82rem;padding:7px 9px;" onblur="this.classList.toggle('input-err', this.value && !/^\d{2}-\d{8}-\d$/.test(this.value))"></div>
       </div>
     </div>
 
@@ -360,9 +364,9 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
             onfocus="Calc.showDropdown()" oninput="Calc._debouncedFilterDropdown()">
           <div class="h-dropdown" id="hybridDD"></div>
         </div>
-        <span style="font-size:.66rem;color:var(--c-light);text-align:center;">—</span>
-        <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
-        <span style="font-size:.66rem;color:var(--c-light);text-align:right;">—</span>
+        <span style="font-size:.7rem;color:var(--c-light);text-align:center;">—</span>
+        <span style="font-size:.7rem;color:var(--c-light);text-align:right;">—</span>
+        <span style="font-size:.7rem;color:var(--c-light);text-align:right;">—</span>
         <span></span>
       </div>
     </div>
@@ -382,7 +386,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <label style="font-size:.63rem;font-weight:600;color:var(--c-gray);white-space:nowrap;">Volumen:</label>
+        <label style="font-size:.7rem;font-weight:600;color:var(--c-gray);white-space:nowrap;">Volumen:</label>
         <select id="selVol" onchange="Calc.toggleVolManual()" class="inp" style="flex:1;min-width:130px;padding:6px 22px 6px 8px;font-size:.76rem;"><option value="auto">Auto (tabla Nidera)</option><option value="manual">Manual %</option></select>
         <input type="number" id="valVolManual" style="display:none;width:70px;padding:6px 8px;font-size:.76rem;" value="0" onblur="Calc.run()" placeholder="%" class="inp">
       </div>
@@ -391,9 +395,9 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <!-- TOTALES -->
     <div class="sum-grad fu fu2" style="padding:11px 18px;margin-bottom:8px;">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;">
-        <div><p style="margin:0;font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Total Neto</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumNeto">USD 0</p></div>
-        <div style="border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);"><p style="margin:0;font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">IVA (21%)</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumIVA">USD 0</p></div>
-        <div><p style="margin:0;font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Total Final</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumFinal">USD 0</p></div>
+        <div><p style="margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Total Neto</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumNeto">USD 0</p></div>
+        <div style="border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);"><p style="margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">IVA (21%)</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumIVA">USD 0</p></div>
+        <div><p style="margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Total Final</p><p style="margin:3px 0 0;font-size:1.15rem;font-weight:700;color:var(--c-green);font-family:var(--mono);" id="sumFinal">USD 0</p></div>
       </div>
     </div>
 
@@ -401,6 +405,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard no-print fu fu3" style="padding:12px 15px;margin-bottom:10px;">
       <p class="slabel">Verificación de descuentos por ítem</p>
       <div id="resumenLineas" style="overflow-x:auto;"><p style="color:var(--c-light);font-size:.75rem;margin:0;">Sin híbridos cargados.</p></div>
+      <div class="scroll-hint">&larr; Deslizar para ver m&aacute;s &rarr;</div>
     </div>
 
     <!-- ACCIONES -->
@@ -415,7 +420,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard no-print" style="padding:12px 15px;margin-top:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <p class="slabel" style="margin:0;">📋 Historial de Cotizaciones</p>
-        <button onclick="Historial.load()" style="background:#eef3fb;color:var(--c-blue);font-size:.64rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
+        <button onclick="Historial.load()" style="background:#eef3fb;color:var(--c-blue);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
       </div>
       <div id="historialContent"><p style="color:var(--c-light);font-size:.72rem;margin:0;">Tocá "Actualizar" para cargar el historial</p></div>
     </div>
@@ -485,7 +490,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         <div style="padding:22px 22px 18px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--c-border);">
             <img id="condShareLogo" alt="HenderSeeds" style="height:32px;">
-            <span style="font-size:.56rem;color:var(--c-light);" id="cond-share-fecha"></span>
+            <span style="font-size:.7rem;color:var(--c-light);" id="cond-share-fecha"></span>
           </div>
           <p style="margin:0 0 12px;font-size:.72rem;font-weight:700;color:var(--c-navy);text-transform:uppercase;letter-spacing:.08em;">Condiciones Comerciales</p>
           <div id="cond-share-table"></div>
@@ -512,32 +517,32 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         </div>
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
           <div>
-            <p style="margin:0;font-size:.46rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--c-light);">Cliente</p>
+            <p style="margin:0;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--c-light);">Cliente</p>
             <p style="margin:2px 0 0;font-size:.82rem;font-weight:700;color:var(--c-navy);" id="q-cliente">—</p>
           </div>
-          <p style="margin:0;font-size:.5rem;color:var(--c-light);text-align:right;" id="q-fecha"></p>
+          <p style="margin:0;font-size:.7rem;color:var(--c-light);text-align:right;" id="q-fecha"></p>
         </div>
         <div style="display:none;"><span id="q-vendedor"></span><span id="q-cuit"></span></div>
         <div id="q-descuentos" style="display:none;"></div>
         <table style="width:100%;border-collapse:collapse;margin-bottom:10px;table-layout:fixed;">
           <colgroup><col style="width:auto"><col style="width:44px"><col style="width:38px"><col style="width:62px"><col style="width:62px"></colgroup>
           <thead><tr style="background:var(--c-navy);">
-            <th style="padding:6px 8px;text-align:left;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);border-radius:6px 0 0 0;">Híbrido</th>
-            <th style="padding:6px 4px;text-align:center;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Banda</th>
-            <th style="padding:6px 4px;text-align:center;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Cant.</th>
-            <th style="padding:6px 6px;text-align:right;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Contado</th>
-            <th style="padding:6px 8px;text-align:right;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);border-radius:0 6px 0 0;">Mayo 27</th>
+            <th style="padding:6px 8px;text-align:left;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);border-radius:6px 0 0 0;">Híbrido</th>
+            <th style="padding:6px 4px;text-align:center;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Banda</th>
+            <th style="padding:6px 4px;text-align:center;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Cant.</th>
+            <th style="padding:6px 6px;text-align:right;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);">Contado</th>
+            <th style="padding:6px 8px;text-align:right;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.85);border-radius:0 6px 0 0;">Mayo 27</th>
           </tr></thead>
           <tbody id="q-tbody"></tbody>
         </table>
-        <p style="font-size:.46rem;color:#cbd5e1;text-align:center;margin:0;">Precios netos en USD · Sujeto a confirmación de stock y precios vigentes — Henderseeds S.R.L.</p>
+        <p style="font-size:.7rem;color:#cbd5e1;text-align:center;margin:0;">Precios netos en USD · Sujeto a confirmación de stock y precios vigentes — Henderseeds S.R.L.</p>
       </div>
       <div style="display:none;"><span id="q-neto"></span><span id="q-contado"></span><span id="q-iva"></span><span id="q-final"></span></div>
       <div style="background:linear-gradient(90deg,var(--c-navy),var(--c-sky));height:4px;"></div>
     </div>
 
     <!-- Ref number (outside capture area, only visible in overlay) -->
-    <p style="margin:6px 12px 0;font-size:.64rem;font-weight:600;color:rgba(255,255,255,.5);text-align:center;">Ref: <span id="q-numero" style="color:rgba(255,255,255,.8);">—</span></p>
+    <p style="margin:6px 12px 0;font-size:.7rem;font-weight:600;color:rgba(255,255,255,.5);text-align:center;">Ref: <span id="q-numero" style="color:rgba(255,255,255,.8);">—</span></p>
 
     <!-- QUOTE ACTIONS -->
     <div class="quote-actions" style="padding:12px 12px 0;display:flex;gap:8px;">
@@ -554,7 +559,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         PDF
       </button>
     </div>
-    <p style="color:rgba(255,255,255,.4);font-size:.68rem;text-align:center;padding:8px 16px 0;">Tocá "Enviar imagen" para compartir por WhatsApp, mail o cualquier app</p>
+    <p style="color:rgba(255,255,255,.4);font-size:.7rem;text-align:center;padding:8px 16px 0;">Tocá "Enviar imagen" para compartir por WhatsApp, mail o cualquier app</p>
   </div>
 </div>
 
@@ -574,39 +579,39 @@ const CONFIG = {
    ══════════════════════════════════════════════════════════════════ */
 const CATALOGO_DEFAULT = {
   maiz: [
-    {id:"NS7765 Viptera3",b1:250,b2:240,b3:230.4},
-    {id:"NS7621 Viptera3",b1:245,b2:235.2,b3:225.792},
-    {id:"NS7624 Viptera3CL",b1:235,b2:225.6,b3:216.576},
-    {id:"NS7921 Viptera3CL",b1:240,b2:230.4,b3:221.184},
-    {id:"AX7761VT3P",b1:240,b2:230.4,b3:221.184},
-    {id:"NS7818VIP3",b1:200,b2:192,b3:184.32},
-    {id:"NS7852 Viptera3",b1:260,b2:247,b3:197.6},
-    {id:"NS7925 Viptera3",b1:245,b2:232.75,b3:186.2}
+    {id:"NS7765 Viptera3",b1:250,b2:240,b3:230.4,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7621 Viptera3",b1:245,b2:235.2,b3:225.792,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7624 Viptera3CL",b1:235,b2:225.6,b3:216.576,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7921 Viptera3CL",b1:240,b2:230.4,b3:221.184,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"AX7761VT3P",b1:240,b2:230.4,b3:221.184,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7818VIP3",b1:200,b2:192,b3:184.32,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7852 Viptera3",b1:260,b2:247,b3:197.6,b1_disp:100,b2_disp:100,b3_disp:100},
+    {id:"NS7925 Viptera3",b1:245,b2:232.75,b3:186.2,b1_disp:100,b2_disp:100,b3_disp:100}
   ],
   girasol: [
-    {id:"NS1113CL",b1:375,b2:356.25,b3:null},
-    {id:"NS1227CLHO",b1:385,b2:365.75,b3:null},
-    {id:"NS1115CL",b1:315,b2:299.25,b3:null},
-    {id:"NS1117CL",b1:345,b2:327.75,b3:262.2}
+    {id:"NS1113CL",b1:375,b2:356.25,b3:null,b1_disp:100,b2_disp:100,b3_disp:0},
+    {id:"NS1227CLHO",b1:385,b2:365.75,b3:null,b1_disp:100,b2_disp:100,b3_disp:0},
+    {id:"NS1115CL",b1:315,b2:299.25,b3:null,b1_disp:100,b2_disp:100,b3_disp:0},
+    {id:"NS1117CL",b1:345,b2:327.75,b3:262.2,b1_disp:100,b2_disp:100,b3_disp:100}
   ]
 };
 
 /* ══════════════════════════════════════════════════════════════════
    STATE
    ══════════════════════════════════════════════════════════════════ */
-let CATALOGO = CATALOGO_DEFAULT;
+let CATALOGO = JSON.parse(localStorage.getItem('hs_catalogo_cache') || 'null') || CATALOGO_DEFAULT;
 let lineas = [];
 let lastLC = [];
 let vendor = '';
 let highlightIdx = -1;
 let ddItems = [];
-let clientes = [];
+let clientes = JSON.parse(localStorage.getItem('hs_clientes_cache') || '[]');
 
 /* ══════════════════════════════════════════════════════════════════
    UTILS
    ══════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const fmt = n => Math.round(n).toLocaleString('es-AR');
+const fmt = n => n.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const dateStr = () => new Date().toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -738,30 +743,37 @@ const App = {
     if(id==='tech') TechFicha.load();
     if(id==='cond') Conditions.load();
   },
-  async loadCatalog() {
+  loadCatalog() {
     if(!CONFIG.APPS_SCRIPT_URL){ $('catalogStatus').innerHTML='<span class="conn-dot offline"></span>Catálogo local'; return; }
-    $('catalogStatus').innerHTML='<span class="conn-dot" style="background:#94a3b8"></span>Cargando...';
-    try {
-      const r = await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCatalogo',{redirect:'follow'});
-      const d = await r.json();
-      if(d.maiz && d.maiz.length) {
-        CATALOGO = d;
-        $('catalogStatus').innerHTML='<span class="conn-dot online"></span>Precios actualizados';
-        if(lineas.length) Calc.renderLines();
-      } else { $('catalogStatus').innerHTML='<span class="conn-dot error"></span>Sheets vacía, catálogo local'; }
-      // Load clients in parallel
-      try {
-        const cr = await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getClientes',{redirect:'follow'});
-        const cd = await cr.json();
-        if(cd.ok && cd.clientes) { clientes = cd.clientes; console.log('Clientes:',clientes.length); }
-      } catch(e2) { console.warn('No se cargaron clientes'); }
-      // Sync any pending quotes from failed previous saves
-      Sheets.syncPending();
-    } catch(e) {
-      console.error('loadCatalog error:', e);
-      $('catalogStatus').innerHTML='<span class="conn-dot offline"></span>Sin conexión, catálogo local';
-      Toast.warn('Sin conexión a Sheets','Las cotizaciones se guardarán localmente hasta que vuelva la conexión.');
-    }
+    // Show cached data immediately, refresh in background
+    const hasCachedCatalog = localStorage.getItem('hs_catalogo_cache');
+    $('catalogStatus').innerHTML = hasCachedCatalog
+      ? '<span class="conn-dot online"></span>Catálogo (cache)'
+      : '<span class="conn-dot" style="background:#94a3b8"></span>Cargando...';
+    // Background refresh catalog
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCatalogo',{redirect:'follow'})
+      .then(r => r.json())
+      .then(d => {
+        if(d.maiz && d.maiz.length) {
+          CATALOGO = d;
+          localStorage.setItem('hs_catalogo_cache', JSON.stringify(d));
+          $('catalogStatus').innerHTML='<span class="conn-dot online"></span>Precios actualizados';
+          if(lineas.length) Calc.renderLines();
+        } else { $('catalogStatus').innerHTML='<span class="conn-dot error"></span>Sheets vacía, catálogo local'; }
+        Sheets.syncPending();
+      })
+      .catch(e => {
+        console.error('loadCatalog error:', e);
+        $('catalogStatus').innerHTML = hasCachedCatalog
+          ? '<span class="conn-dot" style="background:#f59e0b"></span>Sin conexión, usando cache'
+          : '<span class="conn-dot offline"></span>Sin conexión, catálogo local';
+        if(!hasCachedCatalog) Toast.warn('Sin conexión a Sheets','Las cotizaciones se guardarán localmente hasta que vuelva la conexión.');
+      });
+    // Background refresh clients
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getClientes',{redirect:'follow'})
+      .then(r => r.json())
+      .then(cd => { if(cd.ok && cd.clientes) { clientes = cd.clientes; localStorage.setItem('hs_clientes_cache', JSON.stringify(clientes)); console.log('Clientes actualizados:',clientes.length); } })
+      .catch(() => console.warn('No se actualizaron clientes, usando cache'));
   },
   initUI() {
     // Set all logo images from single source
@@ -843,6 +855,7 @@ const App = {
     if(!nombre) return;
     $('cliente-dd').classList.remove('show');
     clientes.push({nombre, cuit:''});
+    localStorage.setItem('hs_clientes_cache', JSON.stringify(clientes));
     if(CONFIG.APPS_SCRIPT_URL) {
       try { await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'addCliente',nombre})}); }
       catch(e) { console.warn('Error agregando cliente'); }
@@ -857,7 +870,8 @@ const Calc = {
   addHybrid(name) {
     const h = findHybrid(name);
     if(!h) return;
-    lineas.push({tipo:hybridType(name),hibrido:name,banda:1,cant:0,lista:h.b1});
+    const defBanda = h.b1_disp > 0 ? 1 : h.b2_disp > 0 ? 2 : h.b3_disp > 0 ? 3 : 1;
+    lineas.push({tipo:hybridType(name),hibrido:name,banda:defBanda,cant:0,lista:h['b'+defBanda]||h.b1});
     this.renderLines();
   },
   removeLine(i) { lineas.splice(i,1); this.renderLines(); },
@@ -869,7 +883,7 @@ const Calc = {
     ddItems = [];
     let html = '';
     [{label:'🌽 Maíz',items:CATALOGO.maiz},{label:'🌻 Girasol',items:CATALOGO.girasol}].forEach(grp => {
-      const matches = grp.items.filter(h => !q || h.id.toLowerCase().includes(q));
+      const matches = grp.items.filter(h => (!q || h.id.toLowerCase().includes(q)) && (h.b1_disp > 0 || h.b2_disp > 0 || h.b3_disp > 0));
       if(!matches.length) return;
       html += `<div class="dd-cat">${grp.label}</div>`;
       matches.forEach(h => {
@@ -936,9 +950,9 @@ const Calc = {
           <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B1: $${fmt(hy?hy.b1:0)}</span>
         </div>
         <select class="row-inp" onchange="Calc.updateLine(${i},'banda',this.value)">
-          <option value="1" ${l.banda===1?'selected':''}>B1</option>
-          <option value="2" ${l.banda===2?'selected':''}>B2</option>
-          ${hasB3?`<option value="3" ${l.banda===3?'selected':''}>B3</option>`:''}
+          ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1 (${hy.b1_disp}%)</option>`:''}
+          ${hy && hy.b2_disp > 0?`<option value="2" ${l.banda===2?'selected':''}>B2 (${hy.b2_disp}%)</option>`:''}
+          ${hasB3 && hy.b3_disp > 0?`<option value="3" ${l.banda===3?'selected':''}>B3 (${hy.b3_disp}%)</option>`:''}
         </select>
         <input type="number" class="row-inp" value="${l.cant}" min="0"
           onblur="Calc.updateLine(${i},'cant',this.value)"
@@ -1001,13 +1015,13 @@ const Calc = {
   },
   renderResumen(lc) {
     if(!lc.length){ $('resumenLineas').innerHTML='<p style="color:var(--c-light);font-size:.75rem;margin:0;">Sin híbridos cargados.</p>'; return; }
-    const pct=v=>v>0?`<span style="color:#15803d;font-weight:700;font-size:.68rem;">${v}%</span>`:`<span style="color:var(--c-border);font-size:.68rem;">—</span>`;
-    let t='<table class="rdesc-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B.</th><th>Pre-C.</th><th>Cdo.</th><th>Cre.</th><th>Cros.</th><th>Vol.</th><th>Dto.Z</th><th>Dto.H</th><th>P.Neto</th><th>Cant.</th><th>s/IVA</th><th>c/IVA</th></tr></thead><tbody>';
+    const pct=v=>v>0?`<span style="color:#15803d;font-weight:700;font-size:.7rem;">${v}%</span>`:`<span style="color:var(--c-border);font-size:.7rem;">—</span>`;
+    let t='<table class="rdesc-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B.</th><th class="mob-hide">Pre-C.</th><th class="mob-hide">Cdo.</th><th class="mob-hide">Cre.</th><th class="mob-hide">Cros.</th><th class="mob-hide">Vol.</th><th class="mob-hide">Dto.Z</th><th class="mob-hide">Dto.H</th><th>P.Neto</th><th>Cant.</th><th>s/IVA</th><th>c/IVA</th></tr></thead><tbody>';
     lc.forEach(l=>{
-      t+=`<tr><td style="font-size:.69rem;">${l.hibrido}</td><td style="font-family:var(--mono);">B${l.banda}</td><td>${pct(l.pPre)}</td><td>${pct(l.pCont)}</td><td>${pct(l.pCre)}</td><td>${pct(l.pCro)}</td><td>${pct(l.pVol)}</td><td>${pct(l.valZ)}</td><td>${pct(l.valP)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(l.unitNeto)}</td><td style="font-family:var(--mono);">${+l.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(l.totalSIVA)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(l.totalCIVA)}</td></tr>`;
+      t+=`<tr><td style="font-size:.7rem;">${l.hibrido}</td><td style="font-family:var(--mono);">B${l.banda}</td><td class="mob-hide">${pct(l.pPre)}</td><td class="mob-hide">${pct(l.pCont)}</td><td class="mob-hide">${pct(l.pCre)}</td><td class="mob-hide">${pct(l.pCro)}</td><td class="mob-hide">${pct(l.pVol)}</td><td class="mob-hide">${pct(l.valZ)}</td><td class="mob-hide">${pct(l.valP)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(l.unitNeto)}</td><td style="font-family:var(--mono);">${+l.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(l.totalSIVA)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(l.totalCIVA)}</td></tr>`;
     });
     const gt=lc.reduce((s,l)=>s+l.totalCIVA,0);
-    t+=`</tbody><tfoot><tr><td colspan="12" style="text-align:left;font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);">Total c/IVA</td><td style="font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--c-navy);">USD ${fmt(gt)}</td></tr></tfoot></table>`;
+    t+=`</tbody><tfoot><tr><td colspan="12" style="text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);">Total c/IVA</td><td style="font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--c-navy);">USD ${fmt(gt)}</td></tr></tfoot></table>`;
     $('resumenLineas').innerHTML=t;
   }
 };
@@ -1034,7 +1048,7 @@ const Market = {
 
     const draw = (t,el,fp,fZP,fV) => {
       const label=t==='maiz'?'🌽 Maíz — Precio Neto':'🌻 Girasol — Precio Neto';
-      let h=`<p style="margin:0 0 10px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">${label}</p>`;
+      let h=`<p style="margin:0 0 10px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">${label}</p>`;
       h+='<table class="mkt-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B1</th><th>B2</th>';
       if(t==='maiz')h+='<th>B3</th>';
       h+='</tr></thead><tbody>';
@@ -1395,7 +1409,7 @@ const TechFicha = {
       <div class="tcard-body">
         <p class="tdesc ${isG?'girasol-desc':''}">${h.descripcion||''}</p>
         ${stats}
-        <div class="tambientes"><span style="font-size:.5rem;font-weight:600;color:var(--c-light);margin-right:4px;">AMB:</span>${ambientes}</div>
+        <div class="tambientes"><span style="font-size:.7rem;font-weight:600;color:var(--c-light);margin-right:4px;">AMB:</span>${ambientes}</div>
         <div style="margin-bottom:12px;"><p class="slabel" style="margin-bottom:8px;">Perfil sanitario (1=excelente · 9=deficiente · R=resistente)</p>${this.buildSanitario(h,tipo)}</div>
         ${this.buildEnsayos(h,tipo)}
         ${marbeteBtn}
@@ -1445,7 +1459,7 @@ const Conditions = {
     data.forEach(r=>{ const key=r.moneda||'Otro'; if(!groups[key])groups[key]=[]; groups[key].push(r); });
     let h='';
     Object.keys(groups).forEach(moneda=>{
-      h+=`<div style="margin-bottom:12px;"><p style="margin:0 0 6px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);border-bottom:2px solid var(--c-accent);padding-bottom:4px;">${moneda}</p>`;
+      h+=`<div style="margin-bottom:12px;"><p style="margin:0 0 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);border-bottom:2px solid var(--c-accent);padding-bottom:4px;">${moneda}</p>`;
       h+='<table class="cond-table"><thead><tr><th>Detalle</th><th>TNA</th><th>TEA</th><th>Plazo</th></tr></thead><tbody>';
       groups[moneda].forEach((r,i)=>{
         const bg=i%2===0?'#fafbfc':'#fff';
@@ -1500,11 +1514,11 @@ const Historial = {
         <p style="margin:0 0 6px;font-size:.72rem;font-weight:700;color:#92400e;">⚠️ ${pending.length} cotización(es) sin sincronizar</p>`;
       pending.forEach(c => {
         const total = c.items.reduce((s,i)=>s+(+i.totalSIVA||0),0);
-        localHtml += `<div style="background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:4px;font-size:.68rem;">
+        localHtml += `<div style="background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:4px;font-size:.7rem;">
           <strong>${c.cliente}</strong> · ${c.vendedor} · ${c.fecha}<br>
           ${c.items.length} item(s) · USD ${fmt(total)} s/IVA</div>`;
       });
-      localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load())" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.68rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
+      localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load())" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.7rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
     }
 
     if(!CONFIG.APPS_SCRIPT_URL){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
@@ -1531,15 +1545,15 @@ const Historial = {
     let h='';
     quotes.forEach(q=>{
       const totalSiva=q.items.reduce((s,i)=>s+(+i.siva||0),0);
-      h+=`<div class="hist-card"><div class="hist-header"><div><span class="hist-num">#${String(q.numero).padStart(4,'0')}</span><span class="hist-date">${q.fecha}</span></div><span class="hist-vendor">${q.vendedor}</span></div><p class="hist-client">${q.cliente}</p><div style="overflow-x:auto;"><table class="hist-table"><thead><tr><th style="text-align:left">Híbrido</th><th>B.</th><th>Cant</th><th style="text-align:right">P.Neto</th><th>Pre</th><th>Cdo</th><th>Vol</th><th>Zon</th><th>Hend</th><th style="text-align:right">s/IVA</th></tr></thead><tbody>`;
+      h+=`<div class="hist-card"><div class="hist-header"><div><span class="hist-num">#${String(q.numero).padStart(4,'0')}</span><span class="hist-date">${q.fecha}</span></div><span class="hist-vendor">${q.vendedor}</span></div><p class="hist-client">${q.cliente}</p><div style="overflow-x:auto;"><table class="hist-table"><thead><tr><th style="text-align:left">Híbrido</th><th>B.</th><th>Cant</th><th style="text-align:right">P.Neto</th><th class="mob-hide">Pre</th><th class="mob-hide">Cdo</th><th class="mob-hide">Vol</th><th class="mob-hide">Zon</th><th class="mob-hide">Hend</th><th style="text-align:right">s/IVA</th></tr></thead><tbody>`;
       q.items.forEach(i=>{
-        h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td style="text-align:center;color:#15803d">${i.pre}</td><td style="text-align:center;color:#15803d">${i.cont}</td><td style="text-align:center;color:#15803d">${i.vol}</td><td style="text-align:center;color:#15803d">${i.zonal}</td><td style="text-align:center;color:#15803d">${i.hend}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
+        h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.pre}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.cont}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.vol}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.zonal}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.hend}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
       });
-      h+=`</tbody></table></div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div></div>`;
+      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div></div>`;
     });
 
     if(totalPages>1) {
-      h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.64rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
+      h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.7rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
     }
     $('historialContent').innerHTML=(this._localHtml||'')+h;
   }

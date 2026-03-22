@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cotizador Agroinsumos — Henderseeds v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   justify-content: space-between;
   gap: 8px;
   padding: 4px 0 6px;
-  font-size: .62rem;
+  font-size: .7rem;
   color: var(--text-mut);
 }
 .status-bar .vname { font-weight: 700; color: var(--navy-sky); cursor: pointer; }
@@ -174,7 +174,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .form-lbl {
-  font-size: .62rem;
+  font-size: .7rem;
   font-weight: 700;
   color: var(--accent-dark);
   text-transform: uppercase;
@@ -360,7 +360,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(217,119,6,.2); }
-.plazo-chip small { display: block; font-weight: 400; font-size: .52rem; opacity: .7; margin-top: 1px; }
+.plazo-chip small { display: block; font-weight: 400; font-size: .7rem; opacity: .7; margin-top: 1px; }
 
 /* ── Totales ── */
 .totales {
@@ -401,7 +401,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .btn-accent { background: var(--accent); color: white; box-shadow: 0 3px 12px rgba(217,119,6,.26); }
 .btn-green { background: #25d366; color: white; box-shadow: 0 3px 12px rgba(37,211,102,.26); }
 .btn-outline { background: var(--navy-light); color: #fff; box-shadow: 0 3px 12px rgba(30,41,59,.22); }
-.btn-sm { font-size: .68rem; padding: 6px 14px; }
+.btn-sm { font-size: .7rem; padding: 6px 14px; }
 
 /* ── Panel referencia (abajo) ── */
 .ref-panel { }
@@ -599,7 +599,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .hist-empty { text-align: center; padding: 40px 20px; color: var(--text-mut); }
 
 /* ── Status ── */
-.status { display: flex; align-items: center; gap: 5px; font-size: .62rem; color: var(--text-mut); padding: 6px 4px; }
+.status { display: flex; align-items: center; gap: 5px; font-size: .7rem; color: var(--text-mut); padding: 6px 4px; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
 .status-dot.on { background: var(--green); }
 
@@ -609,13 +609,14 @@ input, select, button { font-family: inherit; font-size: inherit; }
   .col-cotiz { min-width: 0; }
   .app-body { overflow-x: auto; }
   .rows-scroll { margin: 0 -14px; padding: 0 14px; -webkit-overflow-scrolling: touch; }
-  .rows-header, .row-item { min-width: 520px; }
+  .rows-header, .row-item, .row-new { min-width: 0; }
+  .mob-hide { display: none !important; }
   .row-new { display: flex; gap: 6px; min-width: 0; }
   .row-new .row-new-search { flex: 1; }
   .row-new .row-val, .row-new > span:last-child { display: none; }
   .plazo-bar { flex-wrap: wrap; }
   #fin-config { flex-basis: 100%; flex-wrap: wrap; gap: 6px !important; }
-  .resumen-row { grid-template-columns: 1fr 60px 55px 75px; font-size: .68rem; }
+  .resumen-row { grid-template-columns: 1fr 60px 55px 75px; font-size: .7rem; }
   .wa-bar { padding: 8px 6px; gap: 6px; }
   .wa-bar .btn { font-size: .72rem; padding: 10px 8px; }
   .app-header { flex-wrap: wrap; gap: 4px; }
@@ -623,8 +624,9 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 @media (max-width: 380px) {
   body { font-size: 14px; }
-  .tab-btn { font-size: .68rem; padding: 9px 2px; }
-  .rows-header, .row-item { min-width: 480px; }
+  .tab-btn { font-size: .7rem; padding: 9px 2px; }
+  .rows-header, .row-item { min-width: 0; font-size: 10px; gap: 2px; padding: 5px 4px; }
+  .row-inp { font-size: 10px; padding: 2px 2px; }
   .card { padding: 10px; }
   .app-block { padding: 10px; }
 }
@@ -653,7 +655,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
   <!-- STATUS BAR -->
   <div class="status-bar">
-    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.58rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
+    <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.7rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
     <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
     <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
   </div>
@@ -675,7 +677,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
       <div class="col-cotiz">
         <div class="card fu fu1" style="padding:12px 15px; position:relative; z-index:100;">
           <div style="position:relative;">
-            <div class="form-lbl">Cliente</div>
+            <label class="form-lbl" for="cliente">Cliente</label>
             <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"
               oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)">
             <div class="dropdown cliente-dd" id="cliente-dd"></div>
@@ -1198,7 +1200,16 @@ const App = {
 
     App.addAplicacion();
     // CRITICAL: wait for catalog to load before allowing interaction
+    var loadingEl = document.createElement('div');
+    loadingEl.id = 'catalog-loading';
+    loadingEl.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-sec);font-size:14px;';
+    loadingEl.innerHTML = '<div style="margin-bottom:8px;font-size:24px;animation:spin 1s linear infinite;display:inline-block;">&#9696;</div><br>Cargando catálogo...';
+    var styleTag = document.createElement('style');
+    styleTag.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    loadingEl.appendChild(styleTag);
+    $('aplicaciones-container').appendChild(loadingEl);
     await Market.init();
+    var le = $('catalog-loading'); if (le) le.remove();
     App.renderLista(plazoActual);
   },
 
@@ -1448,6 +1459,7 @@ const App = {
     setTimeout(() => {
       const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
       if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[1]) { inps[1].focus(); inps[1].select(); } }
+      else { var si = document.getElementById('search-' + aid); if (si) si.focus(); }
     }, 50);
   },
 
@@ -1478,6 +1490,7 @@ const App = {
     setTimeout(() => {
       const lastRow = document.querySelector(`[data-rowid="${rowId}"]`);
       if (lastRow) { const inps = lastRow.querySelectorAll('.row-inp'); if (inps[0]) { inps[0].focus(); inps[0].select(); } }
+      else { var si = document.getElementById('search-' + aid); if (si) si.focus(); }
     }, 50);
   },
 
@@ -1485,9 +1498,10 @@ const App = {
   renderAplicaciones() {
     const container = $('aplicaciones-container');
     const recargo = App.getRecargo();
-    const gridCols = recargo > 0
-      ? '1fr 52px 68px 58px 62px 58px 62px 68px 24px'
-      : '1fr 52px 68px 62px 58px 62px 68px 24px';
+    const mob = window.innerWidth < 640;
+    const gridCols = mob
+      ? (recargo > 0 ? '1fr 54px 52px 48px 50px 18px' : '1fr 54px 48px 50px 18px')
+      : (recargo > 0 ? '1fr 52px 68px 58px 62px 58px 62px 68px 24px' : '1fr 52px 68px 62px 58px 62px 68px 24px');
 
     container.innerHTML = aplicaciones.map((app, appIdx) => {
       const has = app.hectareas || 0;
@@ -1505,7 +1519,7 @@ const App = {
             <span class="row-prod-name">${r.producto}</span>
             <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
           </div>
-          <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
+          <span class="row-val mob-hide" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App._debouncedUpdateField(${app.id},${r.id},'precio',this.value)">
@@ -1513,9 +1527,9 @@ const App = {
           <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
             oninput="App._debouncedUpdateField(${app.id},${r.id},'dosis',this.value)">
-          <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
+          <span class="row-val mob-hide">${volumen ? fmt(volumen) : '—'}</span>
           <span class="row-val costo">${fmt(costoHa)}</span>
-          <span class="row-val">${monto ? fmt(monto) : '—'}</span>
+          <span class="row-val mob-hide">${monto ? fmt(monto) : '—'}</span>
           <button class="row-rm" onclick="App.removeRow(${app.id},${r.id})">&times;</button>
         </div>`;
       }).join('');
@@ -1547,12 +1561,12 @@ const App = {
         <div class="app-body">
           <div class="form-row" style="margin-bottom:10px;">
             <div>
-              <div class="form-lbl">Establecimiento</div>
+              <label class="form-lbl">Establecimiento</label>
               <input type="text" class="inp inp-sm" placeholder="Campo / Lote" value="${app.establecimiento}"
                 onchange="App.updateAppField(${app.id},'establecimiento',this.value)">
             </div>
             <div>
-              <div class="form-lbl">Hectáreas</div>
+              <label class="form-lbl">Hectáreas</label>
               <input type="number" class="inp inp-sm" placeholder="Has" min="1" value="${app.hectareas || ''}"
                 oninput="App.updateAppField(${app.id},'hectareas',this.value)">
             </div>
@@ -1561,13 +1575,13 @@ const App = {
           <div class="rows-scroll">
             <div class="rows-header" style="grid-template-columns:${gridCols}">
               <span>Producto</span>
-              <span style="text-align:right; color:var(--text-mut);">Sug.</span>
+              <span class="mob-hide" style="text-align:right; color:var(--text-mut);">Sug.</span>
               <span style="text-align:right">Contado</span>
               ${recargo > 0 ? '<span style="text-align:right;color:var(--accent);">Financ.</span>' : ''}
               <span style="text-align:right">Dosis</span>
-              <span style="text-align:right">Vol.</span>
+              <span class="mob-hide" style="text-align:right">Vol.</span>
               <span style="text-align:right">$/ha</span>
-              <span style="text-align:right">Monto</span>
+              <span class="mob-hide" style="text-align:right">Monto</span>
               <span></span>
             </div>
             <div id="rows-${app.id}">${rowsHtml}</div>
@@ -1695,7 +1709,7 @@ const App = {
     let html = '<div class="resumen-card">';
     html += '<div class="resumen-title">Resumen</div>';
     // Header
-    html += `<div class="resumen-row" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-sec);border-bottom:1.5px solid var(--border);padding-bottom:4px;">
+    html += `<div class="resumen-row" style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-sec);border-bottom:1.5px solid var(--border);padding-bottom:4px;">
       <span>Producto</span>
       <span style="text-align:right;">Volumen</span>
       <span style="text-align:right;">Precio</span>
@@ -1729,7 +1743,7 @@ const App = {
     const allRows = aplicaciones.flatMap(a => a.rows);
     let totalHa = 0;
     const lineas = allRows.map(r => {
-      const precioP = Calc.precioConRecargo(r.precio, plazoActual);
+      const precioP = r.precio * (1 + App.getRecargo() / 100);
       const costoHa = precioP * r.dosis;
       const vol = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? precioP * r.dosis * has : null;
@@ -2007,20 +2021,21 @@ const App = {
         doc.save(fileName);
       }
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('Error compartiendo PDF:', err);
-        try {
-          const doc = App.generarPDF(modo);
-          doc.save('Henderseeds_' + (esReceta ? 'Receta' : 'Cotizacion') + '.pdf');
-        } catch(e) { console.error(e); }
+      if (err.name === 'AbortError') {
+        return; // User cancelled — do not register
       }
+      console.error('Error compartiendo PDF:', err);
+      try {
+        const doc = App.generarPDF(modo);
+        doc.save('Henderseeds_' + (esReceta ? 'Receta' : 'Cotizacion') + '.pdf');
+      } catch(e) { console.error(e); }
+    } finally {
+      btn.textContent = origText;
+      btn.disabled = false;
     }
 
     // Registrar en Sheets e historial
     App._registrarYGuardar(modo);
-
-    btn.textContent = origText;
-    btn.disabled = false;
   },
 
   /* ── Clientes ── */

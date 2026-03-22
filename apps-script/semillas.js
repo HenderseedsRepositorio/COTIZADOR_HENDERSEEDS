@@ -133,8 +133,13 @@ function getCatalogo() {
   var catalogo = { maiz: [], girasol: [] };
   for (var i = 1; i < data.length; i++) {
     var tipo = data[i][0], id = data[i][1], b1 = data[i][2], b2 = data[i][3], b3 = data[i][4];
+    var b1d = data[i][5], b2d = data[i][6], b3d = data[i][7];
     if (!tipo || !id) continue;
-    var item = { id: String(id).trim(), b1: Number(b1) || 0, b2: Number(b2) || null, b3: Number(b3) || null };
+    var item = { id: String(id).trim(), b1: Number(b1) || 0, b2: Number(b2) || null, b3: Number(b3) || null,
+      b1_disp: Math.round(Number(b1d) || 0),
+      b2_disp: Math.round(Number(b2d) || 0),
+      b3_disp: Math.round(Number(b3d) || 0)
+    };
     var key = String(tipo).trim().toLowerCase();
     if (key === 'maiz' || key === 'maíz') catalogo.maiz.push(item);
     else if (key === 'girasol') catalogo.girasol.push(item);
@@ -185,40 +190,52 @@ function getNextQuoteNumber() {
 }
 
 function registrarCotizacion(data) {
-  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName('Cotizaciones');
-  var numero = getNextQuoteNumber();
-  var fecha = Utilities.formatDate(new Date(), 'America/Argentina/Buenos_Aires', 'dd/MM/yyyy HH:mm');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName('Cotizaciones');
+    var numero = getNextQuoteNumber();
+    var fecha = Utilities.formatDate(new Date(), 'America/Argentina/Buenos_Aires', 'dd/MM/yyyy HH:mm');
 
-  var items = data.items || [];
+    var items = data.items || [];
+    var rows = [];
 
-  for (var i = 0; i < items.length; i++) {
-    var item = items[i];
-    sheet.appendRow([
-      numero,
-      fecha,
-      data.vendedor || '—',
-      data.cliente || '—',
-      data.cuit || '—',
-      item.hibrido || '',
-      'B' + (item.banda || 1),
-      item.cant || 0,
-      item.precioNeto || 0,
-      item.bandPct || 0,
-      item.pPre || 0,
-      item.pCont || 0,
-      item.pCre || 0,
-      item.pCro || 0,
-      item.pVol || 0,
-      item.valZ || 0,
-      item.valP || 0,
-      item.totalSIVA || 0,
-      item.totalCIVA || 0,
-      data.establecimiento || '—'
-    ]);
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      rows.push([
+        numero,
+        fecha,
+        data.vendedor || '—',
+        data.cliente || '—',
+        data.cuit || '—',
+        item.hibrido || '',
+        'B' + (item.banda || 1),
+        item.cant || 0,
+        item.precioNeto || 0,
+        item.bandPct || 0,
+        item.pPre || 0,
+        item.pCont || 0,
+        item.pCre || 0,
+        item.pCro || 0,
+        item.pVol || 0,
+        item.valZ || 0,
+        item.valP || 0,
+        item.totalSIVA || 0,
+        item.totalCIVA || 0,
+        data.establecimiento || '—'
+      ]);
+    }
+
+    if (rows.length > 0) {
+      var startRow = sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, rows.length, 20).setValues(rows);
+    }
+
+    return numero;
+  } finally {
+    lock.releaseLock();
   }
-
-  return numero;
 }
 
 function getDatosTecnicos() {
@@ -399,64 +416,68 @@ function getHistorialAgro() {
 function getNextNumberAgro() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName('Historial Cotizaciones');
-  if (!sheet) return { numero: 1 };
-
-  var data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return { numero: 1 };
-
-  var max = 0;
-  for (var i = 1; i < data.length; i++) {
-    var n = Number(data[i][0]) || 0;
-    if (n > max) max = n;
-  }
-  return { numero: max + 1 };
+  if (!sheet || sheet.getLastRow() < 2) return { numero: 1 };
+  var lastVal = sheet.getRange(sheet.getLastRow(), 1).getValue();
+  return { numero: (Number(lastVal) || 0) + 1 };
 }
 
 function registrarCotizacionAgro(data) {
-  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName('Historial Cotizaciones');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName('Historial Cotizaciones');
 
-  if (!sheet) {
-    sheet = ss.insertSheet('Historial Cotizaciones');
-    sheet.appendRow([
-      'nro_cotizacion', 'fecha', 'vendedor', 'cliente', 'localidad',
-      'hectareas', 'plazo', 'recargo_pct',
-      'categoria', 'producto', 'unidad', 'precio_ud', 'dosis_ha',
-      'costo_ha', 'subtotal_sin_iva', 'iva_pct', 'iva_monto',
-      'subtotal_con_iva', 'total_cotizacion', 'observaciones'
-    ]);
+    if (!sheet) {
+      sheet = ss.insertSheet('Historial Cotizaciones');
+      sheet.appendRow([
+        'nro_cotizacion', 'fecha', 'vendedor', 'cliente', 'localidad',
+        'hectareas', 'plazo', 'recargo_pct',
+        'categoria', 'producto', 'unidad', 'precio_ud', 'dosis_ha',
+        'costo_ha', 'subtotal_sin_iva', 'iva_pct', 'iva_monto',
+        'subtotal_con_iva', 'total_cotizacion', 'observaciones'
+      ]);
+    }
+
+    var nextNum = getNextNumberAgro().numero;
+    var fecha = new Date();
+    var lineas = data.lineas || [];
+
+    var totalCotiz = 0;
+    lineas.forEach(function(l) {
+      var costoHa = (Number(l.precio) || 0) * (Number(l.dosis) || 0);
+      var iva = costoHa * ((Number(l.iva_pct) || 21) / 100);
+      totalCotiz += (costoHa + iva) * (Number(data.hectareas) || 1);
+    });
+
+    var rows = [];
+    lineas.forEach(function(l) {
+      var precio = Number(l.precio) || 0;
+      var dosis = Number(l.dosis) || 0;
+      var costoHa = precio * dosis;
+      var has = Number(data.hectareas) || 0;
+      var subtSinIva = has > 0 ? costoHa * has : costoHa;
+      var ivaPct = Number(l.iva_pct) || 21;
+      var ivaMonto = subtSinIva * (ivaPct / 100);
+
+      rows.push([
+        nextNum, fecha, data.vendedor || '', data.cliente || '',
+        data.localidad || '', has, data.plazo || 'contado', data.recargo_pct || 0,
+        l.categoria || '', l.producto || '', l.unidad || 'L',
+        precio, dosis, costoHa, subtSinIva, ivaPct, ivaMonto,
+        subtSinIva + ivaMonto, totalCotiz, l.observaciones || ''
+      ]);
+    });
+
+    if (rows.length > 0) {
+      var startRow = sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, rows.length, 20).setValues(rows);
+    }
+
+    return { ok: true, numero: nextNum };
+  } finally {
+    lock.releaseLock();
   }
-
-  var nextNum = getNextNumberAgro().numero;
-  var fecha = new Date();
-  var lineas = data.lineas || [];
-
-  var totalCotiz = 0;
-  lineas.forEach(function(l) {
-    var costoHa = (Number(l.precio) || 0) * (Number(l.dosis) || 0);
-    var iva = costoHa * ((Number(l.iva_pct) || 21) / 100);
-    totalCotiz += (costoHa + iva) * (Number(data.hectareas) || 1);
-  });
-
-  lineas.forEach(function(l) {
-    var precio = Number(l.precio) || 0;
-    var dosis = Number(l.dosis) || 0;
-    var costoHa = precio * dosis;
-    var has = Number(data.hectareas) || 0;
-    var subtSinIva = has > 0 ? costoHa * has : costoHa;
-    var ivaPct = Number(l.iva_pct) || 21;
-    var ivaMonto = subtSinIva * (ivaPct / 100);
-
-    sheet.appendRow([
-      nextNum, fecha, data.vendedor || '', data.cliente || '',
-      data.localidad || '', has, data.plazo || 'contado', data.recargo_pct || 0,
-      l.categoria || '', l.producto || '', l.unidad || 'L',
-      precio, dosis, costoHa, subtSinIva, ivaPct, ivaMonto,
-      subtSinIva + ivaMonto, totalCotiz, l.observaciones || ''
-    ]);
-  });
-
-  return { ok: true, numero: nextNum };
 }
 
 function getClientes() {
@@ -477,13 +498,25 @@ function getClientes() {
 }
 
 function addCliente(data) {
+  if (!data.nombre || !data.nombre.trim()) return { ok: false, error: 'Nombre vacío' };
+
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName('Clientes');
   if (!sheet) {
     sheet = ss.insertSheet('Clientes');
     sheet.appendRow(['Cliente', 'CUIT']);
   }
-  sheet.appendRow([data.nombre || '', data.cuit || '']);
+
+  // Check for duplicates
+  var existing = sheet.getDataRange().getValues();
+  var nombreNorm = data.nombre.trim().toLowerCase();
+  for (var i = 1; i < existing.length; i++) {
+    if ((existing[i][0] || '').toString().trim().toLowerCase() === nombreNorm) {
+      return { ok: false, error: 'Cliente ya existe' };
+    }
+  }
+
+  sheet.appendRow([data.nombre.trim(), data.cuit || '']);
   return { ok: true };
 }
 
@@ -510,9 +543,10 @@ function loadCampana(productor) {
     var allData = sheet.getDataRange().getValues();
     if (allData.length < 2) return { ok: true, data: null, isNew: true };
 
-    var meta = JSON.parse(allData[1][0] || '{}');
+    var meta = JSON.parse(allData[1][1] || '{}');
     var lotes = [];
     var ordenes = [];
+    var skipped = 0;
 
     for (var i = 2; i < allData.length; i++) {
       var tipo = allData[i][0];
@@ -522,11 +556,12 @@ function loadCampana(productor) {
         var parsed = JSON.parse(json);
         if (tipo === 'LOTE') lotes.push(parsed);
         else if (tipo === 'ORDEN') ordenes.push(parsed);
-      } catch(e) { /* skip bad rows */ }
+      } catch(e) { skipped++; }
     }
 
     return {
       ok: true,
+      skipped: skipped,
       data: {
         lotes: lotes,
         ordenes: ordenes,
@@ -554,25 +589,35 @@ function saveCampana(payload) {
   var campData = payload.data;
   if (!campData) return { ok: false, error: 'Sin datos' };
 
-  sheet.clear();
-  sheet.appendRow(['tipo', 'json', 'updatedAt']);
+  // Build the complete 2D array BEFORE clearing the sheet
+  var rows = [];
 
+  // Row 1: headers
+  rows.push(['tipo', 'json', 'updatedAt']);
+
+  // Row 2: metadata
   var meta = {
     campana: campData.campana || '2025/26',
     aplicadores: campData.aplicadores || [],
     tiposLabor: campData.tiposLabor || []
   };
-  sheet.appendRow(['META', JSON.stringify(meta), new Date().toISOString()]);
+  rows.push(['META', JSON.stringify(meta), new Date().toISOString()]);
 
+  // Lotes
   var lotes = campData.lotes || [];
   for (var i = 0; i < lotes.length; i++) {
-    sheet.appendRow(['LOTE', JSON.stringify(lotes[i]), '']);
+    rows.push(['LOTE', JSON.stringify(lotes[i]), '']);
   }
 
+  // Ordenes
   var ordenes = campData.ordenes || [];
   for (var j = 0; j < ordenes.length; j++) {
-    sheet.appendRow(['ORDEN', JSON.stringify(ordenes[j]), '']);
+    rows.push(['ORDEN', JSON.stringify(ordenes[j]), '']);
   }
+
+  // Atomic write: clear then set all values in a single call
+  sheet.clear();
+  sheet.getRange(1, 1, rows.length, 3).setValues(rows);
 
   return { ok: true, updatedAt: new Date().toISOString(), sheetName: sheetName };
 }

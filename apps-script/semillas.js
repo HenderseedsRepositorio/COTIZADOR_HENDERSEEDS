@@ -108,6 +108,9 @@ function doPost(e) {
       case 'deleteCotizacion':
         result = deleteCotizacion(data);
         break;
+      case 'updateCotizacion':
+        result = updateCotizacion(data);
+        break;
 
       default:
         result = { error: 'Acción POST no reconocida: ' + data.action };
@@ -258,6 +261,46 @@ function deleteCotizacion(data) {
     sheet.deleteRow(rowsToDelete[j]);
   }
   return { ok: true, deleted: rowsToDelete.length };
+}
+
+function updateCotizacion(data) {
+  var numero = Number(data.numero);
+  if (!numero) return { ok: false, error: 'Número inválido' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName('Cotizaciones');
+    if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
+    // Delete old rows for this quote number
+    var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+    for (var i = values.length - 1; i >= 0; i--) {
+      if (Number(values[i][0]) === numero) sheet.deleteRow(i + 1);
+    }
+    // Insert new rows with same number
+    var fecha = Utilities.formatDate(new Date(), 'America/Argentina/Buenos_Aires', 'dd/MM/yyyy HH:mm');
+    var items = data.items || [];
+    var rows = [];
+    for (var j = 0; j < items.length; j++) {
+      var item = items[j];
+      rows.push([
+        numero, fecha, data.vendedor || '—', data.cliente || '—', data.cuit || '—',
+        item.hibrido || '', 'B' + (item.banda || 1), item.cant || 0,
+        item.precioNeto || 0, item.bandPct || '0%',
+        item.pPre || '0%', item.pCont || '0%', item.pCre || '0%', item.pCro || '0%',
+        item.pVol || '0%', item.valZ || '0%', item.valP || '0%',
+        item.totalSIVA || 0, item.totalCIVA || 0,
+        data.establecimiento || '—'
+      ]);
+    }
+    if (rows.length > 0) {
+      var startRow = sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, rows.length, 20).setValues(rows);
+    }
+    return { ok: true, numero: numero };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function getDatosTecnicos() {

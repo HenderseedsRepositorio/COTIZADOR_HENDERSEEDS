@@ -414,6 +414,12 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Compartir Cotización
       </button>
+      <button id="btnSaveQuote" onclick="Sheets.saveQuote()" style="flex:1;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
+        💾 Guardar cotización
+      </button>
+    </div>
+    <div id="editingBanner" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.75rem;color:#1e40af;font-weight:600;display:none;">
+      ✏️ Editando cotización <span id="editingNum"></span> · <a href="#" onclick="Sheets.clearEditing();return false;" style="color:#dc2626;text-decoration:underline;">Cancelar edición</a>
     </div>
 
     <!-- HISTORIAL -->
@@ -606,6 +612,7 @@ let vendor = '';
 let highlightIdx = -1;
 let ddItems = [];
 let clientes = JSON.parse(localStorage.getItem('hs_clientes_cache') || '[]');
+let editingQuoteNum = null; // número de cotización cargada desde historial
 
 /* ══════════════════════════════════════════════════════════════════
    UTILS
@@ -1170,6 +1177,46 @@ const Sheets = {
       });
     }
   },
+  async saveQuote() {
+    if(!Quote._validate()) return;
+    const btn=$('btnSaveQuote'); const orig=btn.innerHTML;
+    btn.disabled=true; btn.innerHTML='⏳ Guardando...';
+    try {
+      const payload=this._buildPayload();
+      if(editingQuoteNum) {
+        // Update existing quote
+        payload.action='updateCotizacion';
+        payload.numero=editingQuoteNum;
+        const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        const text=await r.text();
+        let d; try{d=JSON.parse(text);}catch(e){throw new Error('Respuesta no JSON');}
+        if(d.error) throw new Error(d.error);
+        Toast.ok('Cotización actualizada','#'+String(editingQuoteNum).padStart(4,'0')+' guardada en Sheets.');
+      } else {
+        // Register new quote
+        const numero=await this._sendToSheets(payload);
+        editingQuoteNum=numero;
+        this._showEditingBanner();
+        Toast.ok('Cotización guardada','#'+String(numero).padStart(4,'0')+' registrada en Sheets.');
+      }
+    } catch(e) {
+      Toast.warn('Error al guardar',e.message);
+    } finally {
+      btn.disabled=false; btn.innerHTML=orig;
+    }
+  },
+  clearEditing() {
+    editingQuoteNum=null;
+    $('editingBanner').style.display='none';
+    lineas.length=0; Calc.renderLines();
+    $('cliente').value=''; $('cuit').value='';
+    Toast.ok('Edición cancelada','Cotizador limpio.');
+  },
+  _showEditingBanner() {
+    $('editingNum').textContent='#'+String(editingQuoteNum).padStart(4,'0');
+    $('editingBanner').style.display='block';
+  },
   async syncPending() {
     const pending = LocalBackup.getPending();
     if(!pending.length || !CONFIG.APPS_SCRIPT_URL) return;
@@ -1576,9 +1623,12 @@ const Historial = {
       lineas.push({tipo:hybridType(it.hibrido),hibrido:it.hibrido,banda:b,cant:+it.cant||0,lista:h?h['b'+b]||h.b1:0});
     });
     Calc.renderLines();
+    // Track editing state
+    editingQuoteNum=numero;
+    Sheets._showEditingBanner();
     // Scroll to top
     window.scrollTo({top:0,behavior:'smooth'});
-    Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y compartí como nueva cotización.');
+    Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y guardá con 💾 o compartí.');
   },
   async eliminar(numero) {
     if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;

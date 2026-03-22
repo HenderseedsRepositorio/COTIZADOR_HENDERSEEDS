@@ -340,7 +340,6 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
       </div>
-      <div style="margin-top:6px;"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Establecimiento</label><input type="text" id="establecimiento" placeholder="Nombre del campo (opcional)" class="inp" style="font-size:.82rem;padding:7px 9px;width:100%;box-sizing:border-box;"></div>
     </div>
 
     <!-- HÍBRIDOS -->
@@ -1181,8 +1180,6 @@ const Quote = {
     $('q-vendedor').innerText=vendor||'—';
     $('q-cliente').innerText=$('cliente').value||'—';
     $('q-cuit').innerText=$('cuit').value||'';
-    const estab=$('establecimiento').value;
-    if(estab) $('q-cliente').innerText+=` — ${estab}`;
     $('q-neto').innerText=`USD ${fmt(net)}`;
     $('q-contado').innerText=`USD ${fmt(net)}`;
     $('q-iva').innerText=`USD ${fmt(net*CONFIG.IVA)}`;

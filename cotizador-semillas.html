@@ -1192,39 +1192,22 @@ const Quote = {
     $('q-iva').innerText=`USD ${fmt(net*CONFIG.IVA)}`;
     $('q-final').innerText=`USD ${fmt(net*(1+CONFIG.IVA))}`;
 
-    // Descuentos summary — show ALL active discounts
-    let dHtml='';
-    const addDesc=(tipo,emoji,color,label)=>{
-      const m=lc.find(l=>l.tipo===tipo);
-      if(!m)return;
-      const parts=[];
-      if(m.pPre>0) parts.push(`Pre-campaña: ${m.pPre}%`);
-      if(m.pCont>0) parts.push(`Contado: ${m.pCont}%`);
-      if(m.pCre>0) parts.push(`Crecer: ${m.pCre}%`);
-      if(m.pCro>0) parts.push(`Cross: ${m.pCro}%`);
-      if(m.pVol>0) parts.push(`Vol: ${m.pVol}%`);
-      if(m.valZ>0) parts.push(`Zonal: ${m.valZ}%`);
-      if(m.valP>0) parts.push(`Hend: ${m.valP}%`);
-      if(!parts.length) return;
-      dHtml+=`<div style="background:#f8faff;border-radius:6px;padding:6px 10px;border-left:3px solid ${color};"><p style="margin:0 0 3px;font-size:.56rem;font-weight:700;color:${color};text-transform:uppercase;">${emoji} ${label}</p><p style="margin:0;font-size:.62rem;color:#475569;line-height:1.5;">${parts.join(' · ')}</p></div>`;
-    };
-    addDesc('maiz','🌽','#89ba16','Maíz');
-    addDesc('girasol','🌻','#f59e0b','Girasol');
-    $('q-descuentos').innerHTML=dHtml;
-    if(dHtml) $('q-descuentos').style.display='grid';
+    // Hide discounts detail from shared image — client only sees final prices
+    $('q-descuentos').innerHTML='';
+    $('q-descuentos').style.display='none';
 
     $('q-numero').innerText='⏳ Registrando...';
     const num=await Sheets.register();
     $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL (sin sincronizar)';
 
-    // Column headers: if contado active show Contado + Lista, otherwise just Neto
-    const colContHead=hasCont?'Contado':'Neto';
-    const colListHead=hasCont?'Lista':'';
-
+    // Always show both Contado and Mayo 27 columns
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
-      const listaPrice=hasCont?`<td class="q-lista">\\$${fmt(l.unitNeto/contFactor)}</td>`:'';
-      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\\$${fmt(l.unitNeto)}</td>${listaPrice}</tr>`;
+      // If contado is active: unitNeto already has 8% off, mayo = unitNeto / 0.92
+      // If contado is NOT active: unitNeto is the base price (mayo), contado = unitNeto * 0.92
+      const pContado=hasCont?l.unitNeto:Math.round(l.unitNeto*0.92*100)/100;
+      const pMayo=hasCont?Math.round(l.unitNeto/0.92*100)/100:l.unitNeto;
+      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\\$${fmt(pContado)}</td><td class="q-lista">\\$${fmt(pMayo)}</td></tr>`;
     }).join('');
   },
   _validate() {

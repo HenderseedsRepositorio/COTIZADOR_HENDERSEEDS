@@ -779,8 +779,8 @@ let logoDataUrl = null;
 })();
 
 /* ── Estado ── */
-let catalogo = CATALOGO_FALLBACK;
-let financiacion = FINANCIACION_FALLBACK;
+let catalogo = JSON.parse(localStorage.getItem('hs_agro_catalogo_cache') || 'null') || CATALOGO_FALLBACK;
+let financiacion = JSON.parse(localStorage.getItem('hs_agro_financiacion_cache') || 'null') || FINANCIACION_FALLBACK;
 let aplicaciones = [];
 let appId = 0;
 let rowId = 0;
@@ -789,7 +789,7 @@ let plazoActual = 'contado';
 let prodSeleccionado = null;
 let highlightIdx = -1;
 let ddItems = [];
-let clientes = [];
+let clientes = JSON.parse(localStorage.getItem('hs_agro_clientes_cache') || '[]');
 let clienteHighlight = -1;
 let clienteMatches = [];
 
@@ -844,55 +844,55 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_
 const Market = {
   online: false,
 
-  async init() {
+  init() {
     if (!API_URL) {
       Market.setStatus(false, 'Offline — datos locales');
       return;
     }
-    Market.setStatus(null, 'Conectando...');
-    try {
-      // Cargar catálogo y financiación en paralelo
-      const [catRes, finRes, cliRes] = await Promise.all([
-        Market.fetch('getCatalogoAgro'),
-        Market.fetch('getFinanciacionAgro'),
-        Market.fetch('getClientes')
-      ]);
+    // Show cached data immediately
+    const hasCachedCat = localStorage.getItem('hs_agro_catalogo_cache');
+    const totalCached = Object.values(catalogo).reduce((s,arr) => s + arr.length, 0);
+    Market.setStatus(hasCachedCat ? true : null, hasCachedCat ? 'Cache — ' + totalCached + ' productos' : 'Conectando...');
 
-      console.log('Respuesta catálogo:', JSON.stringify(catRes).substring(0, 500));
-      console.log('Respuesta financiación:', JSON.stringify(finRes).substring(0, 500));
-
+    // Background refresh all data
+    Promise.all([
+      Market.fetch('getCatalogoAgro'),
+      Market.fetch('getFinanciacionAgro'),
+      Market.fetch('getClientes')
+    ]).then(([catRes, finRes, cliRes]) => {
       if (catRes.ok && catRes.catalogo) {
         catalogo = catRes.catalogo;
-        var totalProds = Object.values(catalogo).reduce(function(s, arr) { return s + arr.length; }, 0);
-        console.log('Catálogo cargado:', Object.keys(catalogo).length, 'categorías,', totalProds, 'productos');
+        localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
+        var totalProds = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
         Market.setStatus(true, 'Sheets — ' + totalProds + ' productos');
-      } else {
-        console.error('Catálogo no cargó:', catRes.error || 'sin campo catalogo');
+      } else if (!hasCachedCat) {
         Market.setStatus(false, 'Error catálogo — datos locales');
       }
-
       if (finRes.ok && finRes.financiacion) {
         financiacion = finRes.financiacion;
+        localStorage.setItem('hs_agro_financiacion_cache', JSON.stringify(financiacion));
       }
       if (cliRes.ok && cliRes.clientes) {
         clientes = cliRes.clientes;
-        console.log('Clientes cargados:', clientes.length);
+        localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
       }
       App.renderLista(plazoActual);
-
       // Sync pending local quotes
-      if(LocalBackup.getPending().length) {
-        for(const cot of LocalBackup.getPending()) {
-          try {
-            await Market.post({ action:'registrarAgro', vendedor:cot.vendedor, cliente:cot.cliente, items:cot.items });
-            LocalBackup.markSynced(cot.localId);
-          } catch(e) { break; }
-        }
+      const pending = LocalBackup.getPending();
+      if (pending.length) {
+        (async () => {
+          for (const cot of pending) {
+            try {
+              await Market.post({ action:'registrarAgro', vendedor:cot.vendedor, cliente:cot.cliente, items:cot.items });
+              LocalBackup.markSynced(cot.localId);
+            } catch(e) { break; }
+          }
+        })();
       }
-    } catch (err) {
+    }).catch(err => {
       console.error('Market.init error:', err);
-      Market.setStatus(false, 'Error — usando datos locales');
-    }
+      Market.setStatus(hasCachedCat ? true : false, hasCachedCat ? 'Sin conexión — usando cache' : 'Error — datos locales');
+    });
   },
 
   async fetch(action) {
@@ -966,13 +966,16 @@ const Market = {
 
 /* ── Historial ── */
 const Historial = {
-  items: [],
+  items: JSON.parse(localStorage.getItem('hs_agro_historial_cache') || '[]'),
   async cargar() {
+    // Show cached immediately, then refresh
+    if (Historial.items.length) Historial.render();
     if (!API_URL) return;
     try {
       const res = await Market.fetch('getHistorialAgro');
       if (res.ok && res.historial) {
         Historial.items = res.historial;
+        localStorage.setItem('hs_agro_historial_cache', JSON.stringify(res.historial));
         Historial.render();
       }
     } catch(e) { console.error('Error cargando historial:', e); }
@@ -1168,7 +1171,7 @@ const App = {
     $('vendor-overlay').classList.add('hidden');
   },
   changeVendor() { $('vendor-overlay').classList.remove('hidden'); },
-  async init() {
+  init() {
     const saved = localStorage.getItem('henderseeds_vendor') || localStorage.getItem('vendedor');
     if (saved) App.selectVendor(saved);
     if ($('displayDate')) $('displayDate').textContent = dateStr();
@@ -1199,18 +1202,9 @@ const App = {
     });
 
     App.addAplicacion();
-    // CRITICAL: wait for catalog to load before allowing interaction
-    var loadingEl = document.createElement('div');
-    loadingEl.id = 'catalog-loading';
-    loadingEl.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-sec);font-size:14px;';
-    loadingEl.innerHTML = '<div style="margin-bottom:8px;font-size:24px;animation:spin 1s linear infinite;display:inline-block;">&#9696;</div><br>Cargando catálogo...';
-    var styleTag = document.createElement('style');
-    styleTag.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-    loadingEl.appendChild(styleTag);
-    $('aplicaciones-container').appendChild(loadingEl);
-    await Market.init();
-    var le = $('catalog-loading'); if (le) le.remove();
+    // Render lista immediately with cached data, refresh in background
     App.renderLista(plazoActual);
+    Market.init();
   },
 
   /* ── Render plazos dinámicos (si vienen de Sheets) ── */

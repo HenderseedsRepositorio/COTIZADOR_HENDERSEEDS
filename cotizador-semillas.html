@@ -1207,7 +1207,7 @@ const Quote = {
       // If contado is NOT active: unitNeto is the base price (mayo), contado = unitNeto * 0.92
       const pContado=hasCont?l.unitNeto:Math.round(l.unitNeto*0.92*100)/100;
       const pMayo=hasCont?Math.round(l.unitNeto/0.92*100)/100:l.unitNeto;
-      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">\\$${fmt(pContado)}</td><td class="q-lista">\\$${fmt(pMayo)}</td></tr>`;
+      return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">$${fmt(pContado)}</td><td class="q-lista">$${fmt(pMayo)}</td></tr>`;
     }).join('');
   },
   _validate() {

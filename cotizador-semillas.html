@@ -947,12 +947,12 @@ const Calc = {
       return `<div class="row-item">
         <div class="row-prod">
           <span class="row-prod-name">${emoji(l.tipo)} ${l.hibrido}</span>
-          <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B1: $${fmt(hy?hy.b1:0)}</span>
+          <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B${l.banda}: $${fmt(hy?hy['b'+l.banda]||hy.b1:0)} · Disp: ${hy?hy['b'+l.banda+'_disp']||0:0}%</span>
         </div>
         <select class="row-inp" onchange="Calc.updateLine(${i},'banda',this.value)">
-          ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1 (${hy.b1_disp}%)</option>`:''}
-          ${hy && hy.b2_disp > 0?`<option value="2" ${l.banda===2?'selected':''}>B2 (${hy.b2_disp}%)</option>`:''}
-          ${hasB3 && hy.b3_disp > 0?`<option value="3" ${l.banda===3?'selected':''}>B3 (${hy.b3_disp}%)</option>`:''}
+          ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1</option>`:''}
+          ${hy && hy.b2_disp > 0?`<option value="2" ${l.banda===2?'selected':''}>B2</option>`:''}
+          ${hasB3 && hy.b3_disp > 0?`<option value="3" ${l.banda===3?'selected':''}>B3</option>`:''}
         </select>
         <input type="number" class="row-inp" value="${l.cant}" min="0"
           onblur="Calc.updateLine(${i},'cant',this.value)"

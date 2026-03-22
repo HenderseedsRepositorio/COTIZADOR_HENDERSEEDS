@@ -136,9 +136,9 @@ function getCatalogo() {
     var b1d = data[i][5], b2d = data[i][6], b3d = data[i][7];
     if (!tipo || !id) continue;
     var item = { id: String(id).trim(), b1: Number(b1) || 0, b2: Number(b2) || null, b3: Number(b3) || null,
-      b1_disp: Math.round((Number(b1d) || 0) * (Number(b1d) <= 1 ? 100 : 1)),
-      b2_disp: Math.round((Number(b2d) || 0) * (Number(b2d) <= 1 ? 100 : 1)),
-      b3_disp: Math.round((Number(b3d) || 0) * (Number(b3d) <= 1 ? 100 : 1))
+      b1_disp: Math.round((Number(b1d) || 0) * 100),
+      b2_disp: Math.round((Number(b2d) || 0) * 100),
+      b3_disp: Math.round((Number(b3d) || 0) * 100)
     };
     var key = String(tipo).trim().toLowerCase();
     if (key === 'maiz' || key === 'maíz') catalogo.maiz.push(item);

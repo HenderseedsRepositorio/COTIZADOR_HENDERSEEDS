@@ -986,10 +986,13 @@ const Historial = {
       body.innerHTML = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
       return;
     }
-    body.innerHTML = Historial.items.map(h => {
+    const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
+    const estadoColors = {Pendiente:'#f59e0b', Enviada:'#3b82f6', 'Venta cargada':'#22c55e'};
+    body.innerHTML = Historial.items.map((h, idx) => {
       const tipoTag = h.tipo === 'Receta'
         ? `<span style="font-size:10px; background:var(--bg); color:var(--text-sec); padding:1px 6px; border-radius:4px;">Receta</span>`
         : `<span style="font-size:10px; background:var(--accent-bg); color:var(--accent); padding:1px 6px; border-radius:4px;">Cotización</span>`;
+      const est = estados[h.numero] || 'Pendiente';
       const thead = `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:4px 0; border-bottom:1px solid var(--border); font-size:9px; font-weight:700; color:var(--text-mut); text-transform:uppercase;">
         <span>Producto</span><span style="text-align:right">Dosis</span><span style="text-align:right">Vol.</span><span style="text-align:right">Precio</span><span style="text-align:right">$/ha</span><span style="text-align:right">Monto</span>
       </div>`;
@@ -1003,32 +1006,104 @@ const Historial = {
           <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${l.monto || '—'}</span>
         </div>`
       ).join('');
-      return `<div class="card" style="margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <div style="display:flex; gap:6px; align-items:center;">
-            <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${h.numero || '—'}</span>
-            ${tipoTag}
+      // Status buttons
+      const statusHtml = ['Pendiente','Enviada','Venta cargada'].map(s => {
+        const active = est === s;
+        return `<button onclick="Historial.setEstado('${h.numero}','${s}')" style="padding:5px 4px;font-size:10px;font-weight:${active?'800':'600'};border-radius:6px;border:1.5px solid ${estadoColors[s]};cursor:pointer;font-family:var(--font);background:${active?estadoColors[s]:'#fff'};color:${active?'#fff':estadoColors[s]};white-space:nowrap;">${s}</button>`;
+      }).join('');
+      return `<div class="card" style="margin-bottom:10px;display:flex;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div style="display:flex; gap:6px; align-items:center;">
+              <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${h.numero || '—'}</span>
+              ${tipoTag}
+            </div>
+            <span style="font-size:11px; color:var(--text-mut);">${h.fecha} · ${h.vendedor || ''} · ${h.plazo || ''}</span>
           </div>
-          <span style="font-size:11px; color:var(--text-mut);">${h.fecha} · ${h.plazo || ''}</span>
+          <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${h.cliente || 'Sin nombre'}</div>
+          ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${h.establecimiento || ''}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? h.hectareas + ' has' : ''}</div>` : ''}
+          <div style="margin-top:4px; overflow-x:auto;">
+            ${thead}${trows}
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid var(--border);">
+            <span style="font-weight:700; font-size:12px;">Total/ha</span>
+            <span style="font-family:var(--mono); font-weight:700; font-size:12px; color:var(--accent);">USD ${h.total}</span>
+          </div>
+          ${h.hectareas ? `<div style="display:flex; justify-content:space-between;">
+            <span style="font-size:11px; color:var(--text-sec);">Total ${h.hectareas} has</span>
+            <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
+          </div>` : ''}
+          <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
+            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:5px 8px;" onclick="Historial.modificar(${idx})">Modificar en cotizador</button>
+            <button class="btn btn-green btn-sm" style="font-size:11px; padding:5px 8px;" onclick="Historial.exportar(${idx})">PDF</button>
+            <button onclick="Historial.eliminar(${idx})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button>
+          </div>
         </div>
-        <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${h.cliente || 'Sin nombre'}</div>
-        ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${h.establecimiento || ''}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? h.hectareas + ' has' : ''}</div>` : ''}
-        <div style="margin-top:4px; overflow-x:auto;">
-          ${thead}${trows}
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid var(--border);">
-          <span style="font-weight:700; font-size:12px;">Total/ha</span>
-          <span style="font-family:var(--mono); font-weight:700; font-size:12px; color:var(--accent);">USD ${h.total}</span>
-        </div>
-        ${h.hectareas ? `<div style="display:flex; justify-content:space-between;">
-          <span style="font-size:11px; color:var(--text-sec);">Total ${h.hectareas} has</span>
-          <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
-        </div>` : ''}
-        <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
-          <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:5px 8px;" onclick="Historial.exportar(${Historial.items.indexOf(h)})">Reenviar PDF</button>
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:70px;">
+          ${statusHtml}
         </div>
       </div>`;
     }).join('');
+  },
+  setEstado(numero, estado) {
+    const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
+    estados[numero] = estado;
+    localStorage.setItem('hs_agro_quote_estados', JSON.stringify(estados));
+    this.render();
+  },
+  modificar(idx) {
+    const h = Historial.items[idx];
+    if (!h) return;
+    // Set client
+    $('cliente').value = h.cliente || '';
+    // Clear existing aplicaciones and load from history
+    aplicaciones.length = 0;
+    appId++;
+    const app = { id: appId, establecimiento: h.establecimiento || '', hectareas: h.hectareas || 0, rows: [] };
+    (h.lineas || []).forEach(l => {
+      rowId++;
+      app.rows.push({
+        id: rowId,
+        producto: l.producto || '',
+        cat: l.categoria || '',
+        precio: parseFloat(l.precio) || 0,
+        unidad: l.unidad || 'L',
+        dosis: parseFloat(l.dosis) || 0,
+        iva_pct: l.iva_pct || 21,
+        proveedor: '',
+        costo_usd: 0,
+        margen_pct: 0,
+        precio_margen: parseFloat(l.precio) || 0,
+        formulacion: l.formulacion || '',
+        presentacion: 0
+      });
+    });
+    aplicaciones.push(app);
+    App.renderAplicaciones();
+    // Switch to cotizar tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-tab="cotizar"]').classList.add('active');
+    $('tab-cotizar').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
+  },
+  async eliminar(idx) {
+    const h = Historial.items[idx];
+    if (!h) return;
+    if (!confirm('¿Eliminar cotización #' + (h.numero || '') + '? Esta acción no se puede deshacer.')) return;
+    try {
+      const r = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'deleteCotizacionAgro', numero: h.numero }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const text = await r.text();
+      let d; try { d = JSON.parse(text); } catch(e) { throw new Error('Respuesta no JSON'); }
+      if (d.ok) {
+        Historial.items.splice(idx, 1);
+        localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
+        Historial.render();
+        alert('Eliminada', 'Cotización eliminada.');
+      } else { alert('Error', d.error || 'No se pudo eliminar'); }
+    } catch(e) { alert('Error de conexión', e.message); }
   },
   async recargar() {
     await Historial.cargar();

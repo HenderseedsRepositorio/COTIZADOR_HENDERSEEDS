@@ -100,6 +100,9 @@ function doPost(e) {
       case 'addCliente':
         result = addCliente(data);
         break;
+      case 'deleteCotizacionAgro':
+        result = deleteCotizacionAgro(data);
+        break;
 
       // ── Campaña ──
       case 'saveCampana':
@@ -484,6 +487,24 @@ function getNextNumberAgro() {
   if (!sheet || sheet.getLastRow() < 2) return { numero: 1 };
   var lastVal = sheet.getRange(sheet.getLastRow(), 1).getValue();
   return { numero: (Number(lastVal) || 0) + 1 };
+}
+
+function deleteCotizacionAgro(data) {
+  var numero = Number(data.numero);
+  if (!numero) return { ok: false, error: 'Número inválido' };
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Historial Cotizaciones');
+  if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
+  var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+  var rowsToDelete = [];
+  for (var i = values.length - 1; i >= 0; i--) {
+    if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+  }
+  if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
+  for (var j = 0; j < rowsToDelete.length; j++) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+  return { ok: true, deleted: rowsToDelete.length };
 }
 
 function registrarCotizacionAgro(data) {

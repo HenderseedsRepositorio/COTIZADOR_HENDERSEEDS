@@ -1549,7 +1549,7 @@ const Historial = {
       q.items.forEach(i=>{
         h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.pre}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.cont}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.vol}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.zonal}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.hend}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
       });
-      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div><div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Cargar en cotizador</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div></div>`;
+      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div><div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Modificar en cotizador</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div></div>`;
     });
 
     if(totalPages>1) {
@@ -1583,8 +1583,10 @@ const Historial = {
   async eliminar(numero) {
     if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;
     try {
-      const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'deleteCotizacion',numero})});
-      const d=await r.json();
+      const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'deleteCotizacion',numero})});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const text=await r.text();
+      let d; try{d=JSON.parse(text);}catch(e){throw new Error('Respuesta no es JSON');}
       if(d.ok){ Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.'); this.load(); }
       else { Toast.warn('Error',d.error||'No se pudo eliminar'); }
     } catch(e){ Toast.warn('Error de conexión',e.message); }

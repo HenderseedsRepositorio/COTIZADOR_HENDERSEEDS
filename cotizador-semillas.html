@@ -1264,7 +1264,21 @@ const Quote = {
     $('q-descuentos').style.display='none';
 
     $('q-numero').innerText='⏳ Registrando...';
-    const num=await Sheets.register();
+    let num;
+    if(editingQuoteNum) {
+      // Update existing quote instead of creating new
+      const payload=Sheets._buildPayload();
+      payload.action='updateCotizacion';
+      payload.numero=editingQuoteNum;
+      try {
+        const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+        const text=await r.text();
+        const d=JSON.parse(text);
+        num=d.ok?editingQuoteNum:null;
+      } catch(e) { num=null; }
+    } else {
+      num=await Sheets.register();
+    }
     $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL (sin sincronizar)';
 
     // Always show both Contado and Mayo 27 columns

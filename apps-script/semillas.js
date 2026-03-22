@@ -105,6 +105,9 @@ function doPost(e) {
       case 'saveCampana':
         result = saveCampana(data);
         break;
+      case 'deleteCotizacion':
+        result = deleteCotizacion(data);
+        break;
 
       default:
         result = { error: 'Acción POST no reconocida: ' + data.action };
@@ -236,6 +239,25 @@ function registrarCotizacion(data) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function deleteCotizacion(data) {
+  var numero = Number(data.numero);
+  if (!numero) return { ok: false, error: 'Número inválido' };
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Cotizaciones');
+  if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
+  var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+  var rowsToDelete = [];
+  for (var i = values.length - 1; i >= 0; i--) {
+    if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+  }
+  if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
+  // Delete from bottom to top so row indices don't shift
+  for (var j = 0; j < rowsToDelete.length; j++) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+  return { ok: true, deleted: rowsToDelete.length };
 }
 
 function getDatosTecnicos() {

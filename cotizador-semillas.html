@@ -1549,13 +1549,45 @@ const Historial = {
       q.items.forEach(i=>{
         h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.pre}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.cont}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.vol}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.zonal}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.hend}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
       });
-      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div></div>`;
+      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div><div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Cargar en cotizador</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div></div>`;
     });
 
     if(totalPages>1) {
       h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.7rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
     }
     $('historialContent').innerHTML=(this._localHtml||'')+h;
+  },
+  cargar(numero) {
+    const groups={};
+    this._cache.forEach(row=>{ const n=row[0]; if(!groups[n])groups[n]={numero:n,vendedor:row[2],cliente:row[3],cuit:row[4],items:[]}; groups[n].items.push({hibrido:row[5],banda:String(row[6]).replace(/\D/g,'')||'1',cant:row[7],pre:row[10],cont:row[11],vol:row[14],zonal:row[15],hend:row[16]}); });
+    const q=groups[numero];
+    if(!q){ Toast.warn('No encontrada'); return; }
+    // Set client
+    $('cliente').value=q.cliente||'';
+    $('cuit').value=q.cuit||'';
+    // Set discounts from first item
+    const first=q.items[0];
+    $('chkPre').checked=+first.pre>0; $('chkContado').checked=+first.cont>0;
+    // Clear and load lines
+    lineas.length=0;
+    q.items.forEach(it=>{
+      const h=findHybrid(it.hibrido);
+      const b=parseInt(it.banda)||1;
+      lineas.push({tipo:hybridType(it.hibrido),hibrido:it.hibrido,banda:b,cant:+it.cant||0,lista:h?h['b'+b]||h.b1:0});
+    });
+    Calc.renderLines();
+    // Scroll to top
+    window.scrollTo({top:0,behavior:'smooth'});
+    Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y compartí como nueva cotización.');
+  },
+  async eliminar(numero) {
+    if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;
+    try {
+      const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'deleteCotizacion',numero})});
+      const d=await r.json();
+      if(d.ok){ Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.'); this.load(); }
+      else { Toast.warn('Error',d.error||'No se pudo eliminar'); }
+    } catch(e){ Toast.warn('Error de conexión',e.message); }
   }
 };
 

@@ -337,7 +337,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;position:relative;z-index:20;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App.filterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
+        <div class="cliente-wrap"><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.63rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" class="inp" style="font-size:.82rem;padding:7px 9px;"></div>
       </div>
     </div>
@@ -357,7 +357,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <div class="row-new no-print" id="row-new">
         <div class="row-new-search">
           <input type="text" id="hybridSearch" placeholder="+ Agregar híbrido..." autocomplete="off"
-            onfocus="Calc.showDropdown()" oninput="Calc.filterDropdown()">
+            onfocus="Calc.showDropdown()" oninput="Calc._debouncedFilterDropdown()">
           <div class="h-dropdown" id="hybridDD"></div>
         </div>
         <span style="font-size:.66rem;color:var(--c-light);text-align:center;">—</span>
@@ -373,8 +373,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
         <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
-          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="3" min="3" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
-          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valZG',-0.5)">−</button><input type="number" id="valZG" value="3" min="3" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZG',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="3" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valZG',-0.5)">−</button><input type="number" id="valZG" value="3" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZG',0.5)">+</button></div></div>
         </div>
         <div class="dto-group"><p class="dto-title">Dto. Henderseeds</p>
           <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valPM',-0.5)">−</button><input type="number" id="valPM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPM',0.5)">+</button></div></div>
@@ -428,8 +428,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="mktToggleGrid"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;" class="mkt-dtos">
         <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
-          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Market.step('mktZonalM',-0.5)">−</button><input type="number" id="mktZonalM" value="3" min="3" max="15" step="0.5" class="stepper-val" onchange="Market.render()"><button type="button" onclick="Market.step('mktZonalM',0.5)">+</button></div></div>
-          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Market.step('mktZonalG',-0.5)">−</button><input type="number" id="mktZonalG" value="3" min="3" max="15" step="0.5" class="stepper-val" onchange="Market.render()"><button type="button" onclick="Market.step('mktZonalG',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Market.step('mktZonalM',-0.5)">−</button><input type="number" id="mktZonalM" value="3" min="0" max="15" step="0.5" class="stepper-val" onchange="Market.render()"><button type="button" onclick="Market.step('mktZonalM',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Market.step('mktZonalG',-0.5)">−</button><input type="number" id="mktZonalG" value="3" min="0" max="15" step="0.5" class="stepper-val" onchange="Market.render()"><button type="button" onclick="Market.step('mktZonalG',0.5)">+</button></div></div>
         </div>
         <div class="dto-group"><p class="dto-title">Dto. Henderseeds</p>
           <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Market.step('mktProdM',-0.5)">−</button><input type="number" id="mktProdM" value="7" min="0" max="15" step="0.5" class="stepper-val" onchange="Market.render()"><button type="button" onclick="Market.step('mktProdM',0.5)">+</button></div></div>
@@ -609,6 +609,10 @@ const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('es-AR');
 const dateStr = () => new Date().toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+function debounce(fn, ms=150) { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
 function findHybrid(name) {
   return CATALOGO.maiz.find(h=>h.id===name) || CATALOGO.girasol.find(h=>h.id===name);
 }
@@ -629,7 +633,7 @@ const Toast = {
     const c=$('toastContainer');
     const el=document.createElement('div');
     el.className=`toast toast-${type}`;
-    let html=`<div class="toast-body"><span class="toast-title">${title}</span>${body||''}`;
+    let html=`<div class="toast-body"><span class="toast-title">${esc(title)}</span>${body?esc(body):''}`;
     if(opts.action) html+=`<br><button class="toast-action" id="toast-action-${Date.now()}">${opts.actionLabel||'Reintentar'}</button>`;
     html+=`</div><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
     el.innerHTML=html;
@@ -813,16 +817,16 @@ const App = {
       : (showAll ? clientes.slice(0,30) : []);
     let html = matches.map(c =>
       `<div class="dd-item" onclick="App.selectCliente('${c.nombre.replace(/'/g,"\\'")}')">`+
-      `<span>${c.nombre}</span></div>`
+      `<span>${esc(c.nombre)}</span></div>`
     ).join('');
     if(q && (!matches.length || !matches.some(c => c.nombre.toLowerCase()===q))) {
-      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${esc($('cliente').value.trim())}"</div>`;
     }
     if(!html && !q) {
       dd.classList.remove('show'); return;
     }
     if(!html && q) {
-      html = `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+      html = `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${esc($('cliente').value.trim())}"</div>`;
     }
     dd.innerHTML = html;
     dd.classList.add('show');
@@ -907,7 +911,7 @@ const Calc = {
       l.banda=parseInt(val);
       const h=findHybrid(l.hibrido); l.lista=h['b'+val]||h.b1;
       this.renderLines();
-    } else { l[field]=val; this.run(); }
+    } else { l[field]=val; this._debouncedRun(); }
   },
   step(id, delta) {
     const el=$(id); let v=parseFloat(el.value)||0;
@@ -1049,6 +1053,9 @@ const Market = {
     draw('girasol','tableMktGirasol',fPreG,fZPg,fVg);
   }
 };
+Calc._debouncedRun = debounce(() => Calc.run(), 150);
+Calc._debouncedFilterDropdown = debounce(() => Calc.filterDropdown(), 200);
+App._debouncedFilterClientes = debounce(() => App.filterClientes(), 200);
 
 /* ══════════════════════════════════════════════════════════════════
    SHEETS — registro de cotizaciones
@@ -1298,7 +1305,7 @@ const TechFicha = {
       this._loaded=true;
       this.render();
     } catch(e) {
-      $('techCards').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error: '+e.message+'</p>';
+      $('techCards').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error: '+esc(e.message)+'</p>';
     }
   },
 
@@ -1446,7 +1453,7 @@ const Conditions = {
       this.renderTable();
     } catch(e) {
       console.error('Condiciones error:',e);
-      $('condTable').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error al cargar: '+e.message+'</p>';
+      $('condTable').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error al cargar: '+esc(e.message)+'</p>';
     }
   },
   buildTableHTML(data) {
@@ -1526,7 +1533,7 @@ const Historial = {
       this._cache=data; this._page=0;
       this._localHtml=localHtml;
       this.render();
-    } catch(e) { $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+e.message+'</p>'; }
+    } catch(e) { $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+esc(e.message)+'</p>'; }
   },
   goPage(delta) { this._page+=delta; this.render(); },
   render() {

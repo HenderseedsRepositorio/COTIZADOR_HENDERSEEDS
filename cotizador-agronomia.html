@@ -677,7 +677,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
           <div style="position:relative;">
             <div class="form-lbl">Cliente</div>
             <input id="cliente" type="text" class="inp inp-sm" placeholder="Buscar..." autocomplete="off"
-              oninput="App.filterClientes()" onfocus="App.filterClientes(true)">
+              oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)">
             <div class="dropdown cliente-dd" id="cliente-dd"></div>
           </div>
         </div>
@@ -742,6 +742,9 @@ input, select, button { font-family: inherit; font-size: inherit; }
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+function debounce(fn, ms=150) { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
 /* ══════════════════════════════════════════
    CATÁLOGO FALLBACK — copia de "Catalogo Agronomia" en Sheets
@@ -802,6 +805,33 @@ const Calc = {
   }
 };
 
+/* ── Local Backup — localStorage fallback for agro quotes ── */
+const LocalBackup = {
+  KEY: 'hs_agro_cotizaciones_backup',
+  save(cotizacion) {
+    try {
+      const all = this.getAll();
+      all.unshift(cotizacion);
+      if(all.length>50) all.length=50;
+      localStorage.setItem(this.KEY, JSON.stringify(all));
+    } catch(e) { console.warn('LocalBackup save error:', e); }
+  },
+  getAll() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)||'[]'); }
+    catch(e) { return []; }
+  },
+  markSynced(localId) {
+    try {
+      const all = this.getAll();
+      const q = all.find(c=>c.localId===localId);
+      if(q) { q.synced=true; localStorage.setItem(this.KEY, JSON.stringify(all)); }
+    } catch(e) {}
+  },
+  getPending() {
+    return this.getAll().filter(c=>!c.synced);
+  }
+};
+
 /* ══════════════════════════════════════════
    API_URL — Pegá acá la URL de tu Apps Script deploy
    Dejala vacía para usar datos fallback locales
@@ -847,6 +877,16 @@ const Market = {
         console.log('Clientes cargados:', clientes.length);
       }
       App.renderLista(plazoActual);
+
+      // Sync pending local quotes
+      if(LocalBackup.getPending().length) {
+        for(const cot of LocalBackup.getPending()) {
+          try {
+            await Market.post({ action:'registrarAgro', vendedor:cot.vendedor, cliente:cot.cliente, items:cot.items });
+            LocalBackup.markSynced(cot.localId);
+          } catch(e) { break; }
+        }
+      }
     } catch (err) {
       console.error('Market.init error:', err);
       Market.setStatus(false, 'Error — usando datos locales');
@@ -1348,8 +1388,8 @@ const App = {
         const stockTxt = p.stock > 0 ? `<span style="color:var(--green);">stk:${p.stock}</span>` : '<span style="color:var(--text-mut);">s/stk</span>';
         html += `<div class="dd-item" onclick="App.selectFromDropdown(${aid},${idx})">
           <div>
-            <span style="font-weight:600;">${p.producto}</span>
-            <span style="font-size:10px; color:var(--text-mut);"> · ${(p.proveedor||'').replace(/ S\.A\.?/g,'')}</span>
+            <span style="font-weight:600;">${esc(p.producto)}</span>
+            <span style="font-size:10px; color:var(--text-mut);"> · ${esc((p.proveedor||'').replace(/ S\.A\.?/g,''))}</span>
           </div>
           <div style="text-align:right;">
             <div class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad}</div>
@@ -1361,7 +1401,7 @@ const App = {
     const nombreManual = searchEl.value.trim();
     if (nombreManual) {
       html += `<div class="dd-item dd-add" onclick="App.addManual(${aid},'${nombreManual.replace(/'/g, "\\'")}')">
-        <span style="color:var(--accent); font-weight:700;">+ Agregar "${nombreManual}" manualmente</span>
+        <span style="color:var(--accent); font-weight:700;">+ Agregar "${esc(nombreManual)}" manualmente</span>
       </div>`;
     }
     if (!html) html = '<div style="padding:12px; color:var(--text-mut); font-size:13px;">Escribí para buscar o agregar</div>';
@@ -1468,11 +1508,11 @@ const App = {
           <span class="row-val" style="color:var(--text-mut); font-size:10px;">$${fmt(r.precio_margen)}</span>
           <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
-            oninput="App.updateField(${app.id},${r.id},'precio',this.value)">
+            oninput="App._debouncedUpdateField(${app.id},${r.id},'precio',this.value)">
           ${recargo > 0 ? `<span class="row-val" style="color:var(--accent);font-weight:600;">$${fmt(precioFinal)}</span>` : ''}
           <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
-            oninput="App.updateField(${app.id},${r.id},'dosis',this.value)">
+            oninput="App._debouncedUpdateField(${app.id},${r.id},'dosis',this.value)">
           <span class="row-val">${volumen ? fmt(volumen) : '—'}</span>
           <span class="row-val costo">${fmt(costoHa)}</span>
           <span class="row-val">${monto ? fmt(monto) : '—'}</span>
@@ -1536,7 +1576,7 @@ const App = {
           <div class="row-new" style="grid-template-columns:${gridCols}">
             <div class="row-new-search app-dropdown">
               <input type="text" id="search-${app.id}" placeholder="+ Agregar producto..." autocomplete="off"
-                onfocus="App.showDropdown(${app.id})" oninput="App.filterDropdown(${app.id})">
+                onfocus="App.showDropdown(${app.id})" oninput="App._debouncedFilterDropdown(${app.id})">
               <div class="dropdown" id="dropdown-${app.id}"></div>
             </div>
             <span class="row-val" style="color:var(--text-mut);">—</span>
@@ -1663,7 +1703,7 @@ const App = {
     </div>`;
     Object.values(productMap).forEach(p => {
       html += `<div class="resumen-row">
-        <span style="font-weight:600;font-size:.78rem;">${p.producto}</span>
+        <span style="font-weight:600;font-size:.78rem;">${esc(p.producto)}</span>
         <span style="font-family:var(--mono);font-weight:600;text-align:right;">${p.totalVol > 0 ? fmt(p.totalVol) + ' ' + p.unidad : '—'}</span>
         <span style="font-family:var(--mono);text-align:right;">$${fmt(p.precio)}</span>
         <span style="font-family:var(--mono);font-weight:600;text-align:right;">${p.totalMonto > 0 ? '$' + fmt(p.totalMonto) : '—'}</span>
@@ -1696,11 +1736,23 @@ const App = {
       totalHa += costoHa;
       return { producto: r.producto, dosis: r.dosis, unidad: r.unidad, precio: fmt(precioP), costoHa: fmt(costoHa), vol: vol ? fmt(vol) : '—', monto: monto ? fmt(monto) : '—' };
     });
+    // Save local backup immediately (before network call)
+    const localId = 'agro_'+Date.now();
+    const backup = {
+      localId,
+      fecha: dateStr(),
+      vendedor: vendor,
+      cliente: $('cliente').value||'—',
+      items: lineas,
+      synced: false
+    };
+    LocalBackup.save(backup);
+
     // Registrar en Sheets
     let numero = '—';
     try {
       const result = await Market.registrarCotizacion();
-      if (result && result.ok) numero = result.numero;
+      if (result && result.ok) { numero = result.numero; LocalBackup.markSynced(localId); }
     } catch(e) { console.error(e); }
     // Recargar historial desde Sheets
     Historial.recargar();
@@ -1982,12 +2034,12 @@ const App = {
     if (!clienteMatches.length && !q) { dd.classList.remove('show'); return; }
     let html = clienteMatches.map((c, i) =>
       `<div class="dd-item${i === clienteHighlight ? ' highlighted' : ''}" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">
-        <span>${c.nombre}</span>
-        <span style="font-size:11px;color:var(--text-mut);">${c.cuit || ''}</span>
+        <span>${esc(c.nombre)}</span>
+        <span style="font-size:11px;color:var(--text-mut);">${esc(c.cuit || '')}</span>
       </div>`
     ).join('');
     if (q && (!clienteMatches.length || !clienteMatches.some(c => c.nombre.toLowerCase() === q))) {
-      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${$('cliente').value.trim()}"</div>`;
+      html += `<div class="dd-item dd-add" onclick="App.addCliente()">+ Agregar "${esc($('cliente').value.trim())}"</div>`;
     }
     dd.innerHTML = html;
     dd.classList.add('show');
@@ -2071,6 +2123,9 @@ const App = {
     $('lista-body').innerHTML = html;
   }
 };
+App._debouncedFilterClientes = debounce(() => App.filterClientes(), 200);
+App._debouncedFilterDropdown = debounce((aid) => App.filterDropdown(aid), 200);
+App._debouncedUpdateField = debounce((aid, rid, field, val) => App.updateField(aid, rid, field, val), 150);
 
 document.addEventListener('DOMContentLoaded', App.init);
 </script>

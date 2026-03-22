@@ -67,7 +67,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .row-inp{width:100%;padding:4px 5px;border:1.5px solid var(--c-border);border-radius:7px;font-family:var(--mono);font-size:.72rem;font-weight:600;text-align:right;color:var(--c-navy);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;-moz-appearance:textfield}
 .row-inp::-webkit-inner-spin-button,.row-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .row-inp:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
-select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 12 12'%3E%3Cpath fill='%230d2d5e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;text-align:left}
+select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 12 12'%3E%3Cpath fill='%230d2d5e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;text-align:left;width:52px!important;overflow:hidden;text-overflow:clip}
 .row-price{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--c-navy);text-align:right}
 .row-rm{width:24px;height:24px;border-radius:50%;border:none;background:none;color:#fca5a5;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .row-rm:hover{background:#fef2f2;color:#ef4444}
@@ -950,9 +950,9 @@ const Calc = {
           <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B${l.banda}: $${fmt(hy?hy['b'+l.banda]||hy.b1:0)} · Disp: ${hy?hy['b'+l.banda+'_disp']||0:0}%</span>
         </div>
         <select class="row-inp" onchange="Calc.updateLine(${i},'banda',this.value)">
-          ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1</option>`:''}
-          ${hy && hy.b2_disp > 0?`<option value="2" ${l.banda===2?'selected':''}>B2</option>`:''}
-          ${hasB3 && hy.b3_disp > 0?`<option value="3" ${l.banda===3?'selected':''}>B3</option>`:''}
+          ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1 (${hy.b1_disp}%)</option>`:''}
+          ${hy && hy.b2_disp > 0?`<option value="2" ${l.banda===2?'selected':''}>B2 (${hy.b2_disp}%)</option>`:''}
+          ${hasB3 && hy.b3_disp > 0?`<option value="3" ${l.banda===3?'selected':''}>B3 (${hy.b3_disp}%)</option>`:''}
         </select>
         <input type="number" class="row-inp" value="${l.cant}" min="0"
           onblur="Calc.updateLine(${i},'cant',this.value)"

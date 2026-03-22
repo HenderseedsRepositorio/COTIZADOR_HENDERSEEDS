@@ -1594,20 +1594,54 @@ const Historial = {
     const totalPages=Math.ceil(allQuotes.length/this._perPage);
     const quotes=allQuotes.slice(this._page*this._perPage, (this._page+1)*this._perPage);
 
+    const estados=JSON.parse(localStorage.getItem('hs_quote_estados')||'{}');
+    const estadoColors={Pendiente:'#f59e0b',Enviada:'#3b82f6','Venta cargada':'#22c55e'};
     let h='';
     quotes.forEach(q=>{
       const totalSiva=q.items.reduce((s,i)=>s+(+i.siva||0),0);
-      h+=`<div class="hist-card"><div class="hist-header"><div><span class="hist-num">#${String(q.numero).padStart(4,'0')}</span><span class="hist-date">${q.fecha}</span></div><span class="hist-vendor">${q.vendedor}</span></div><p class="hist-client">${q.cliente}</p><div style="overflow-x:auto;"><table class="hist-table"><thead><tr><th style="text-align:left">Híbrido</th><th>B.</th><th>Cant</th><th style="text-align:right">P.Neto</th><th class="mob-hide">Pre</th><th class="mob-hide">Cdo</th><th class="mob-hide">Vol</th><th class="mob-hide">Zon</th><th class="mob-hide">Hend</th><th style="text-align:right">s/IVA</th></tr></thead><tbody>`;
+      const est=estados[q.numero]||'Pendiente';
+      const first=q.items[0];
+      // Discount summary from first item
+      const dtos=[];
+      if(first.pre && first.pre!=='0%' && first.pre!=='0') dtos.push('Pre:'+first.pre);
+      if(first.cont && first.cont!=='0%' && first.cont!=='0') dtos.push('Cdo:'+first.cont);
+      if(first.vol && first.vol!=='0%' && first.vol!=='0') dtos.push('Vol:'+first.vol);
+      if(first.zonal && first.zonal!=='0%' && first.zonal!=='0') dtos.push('Zon:'+first.zonal);
+      if(first.hend && first.hend!=='0%' && first.hend!=='0') dtos.push('Hend:'+first.hend);
+      h+=`<div class="hist-card" style="display:flex;gap:10px;">`;
+      // Left: quote content
+      h+=`<div style="flex:1;min-width:0;">`;
+      h+=`<div class="hist-header"><div><span class="hist-num">#${String(q.numero).padStart(4,'0')}</span><span class="hist-date">${q.fecha}</span></div><span class="hist-vendor">${q.vendedor}</span></div>`;
+      h+=`<p class="hist-client">${q.cliente}</p>`;
+      if(dtos.length) h+=`<p style="margin:2px 0 6px;font-size:.7rem;color:#15803d;font-weight:600;">${dtos.join(' · ')}</p>`;
+      h+=`<div style="overflow-x:auto;"><table class="hist-table"><thead><tr><th style="text-align:left">Híbrido</th><th>B.</th><th>Cant</th><th style="text-align:right">P.Neto</th><th style="text-align:right">s/IVA</th></tr></thead><tbody>`;
       q.items.forEach(i=>{
-        h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.pre}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.cont}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.vol}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.zonal}</td><td class="mob-hide" style="text-align:center;color:#15803d">${i.hend}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
+        h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
       });
-      h+=`</tbody></table></div><div class="scroll-hint">\u2190 Deslizar para ver m\u00e1s \u2192</div><div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div><div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Modificar en cotizador</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div></div>`;
+      h+=`</tbody></table></div>`;
+      h+=`<div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div>`;
+      h+=`<div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Modificar</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div>`;
+      h+=`</div>`;
+      // Right: status buttons
+      h+=`<div style="display:flex;flex-direction:column;gap:4px;min-width:70px;">`;
+      ['Pendiente','Enviada','Venta cargada'].forEach(s=>{
+        const active=est===s;
+        h+=`<button onclick="Historial.setEstado(${q.numero},'${s}')" style="padding:6px 4px;font-size:.62rem;font-weight:${active?'800':'600'};border-radius:6px;border:1.5px solid ${estadoColors[s]};cursor:pointer;font-family:var(--font);background:${active?estadoColors[s]:'#fff'};color:${active?'#fff':estadoColors[s]};white-space:nowrap;">${s}</button>`;
+      });
+      h+=`</div>`;
+      h+=`</div>`;
     });
 
     if(totalPages>1) {
       h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.7rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
     }
     $('historialContent').innerHTML=(this._localHtml||'')+h;
+  },
+  setEstado(numero, estado) {
+    const estados=JSON.parse(localStorage.getItem('hs_quote_estados')||'{}');
+    estados[numero]=estado;
+    localStorage.setItem('hs_quote_estados',JSON.stringify(estados));
+    this.render();
   },
   cargar(numero) {
     const groups={};

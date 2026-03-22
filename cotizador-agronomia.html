@@ -706,6 +706,15 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
 
     </div>
+
+    <!-- HISTORIAL en Cotizar -->
+    <div class="card" style="padding:12px 15px;margin-top:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <p style="font-weight:700;font-size:.8rem;color:var(--navy);margin:0;">📋 Historial de Cotizaciones</p>
+        <button onclick="Historial.cargar()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
+      </div>
+      <div id="hist-body-inline"><p style="color:var(--text-mut);font-size:.75rem;margin:0;">Tocá "Actualizar" para cargar el historial</p></div>
+    </div>
   </section>
 
   <!-- ═══ TAB LISTA ═══ -->
@@ -982,8 +991,11 @@ const Historial = {
   },
   render() {
     const body = $('hist-body');
+    const bodyInline = $('hist-body-inline');
     if (!Historial.items.length) {
-      body.innerHTML = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
+      const empty = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
+      body.innerHTML = empty;
+      if (bodyInline) bodyInline.innerHTML = empty;
       return;
     }
     const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
@@ -1044,6 +1056,7 @@ const Historial = {
         </div>
       </div>`;
     }).join('');
+    if (bodyInline) bodyInline.innerHTML = body.innerHTML;
   },
   setEstado(numero, estado) {
     const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');

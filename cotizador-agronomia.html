@@ -318,12 +318,12 @@ input, select, button { font-family: inherit; font-size: inherit; }
   background: var(--bg);
 }
 .dd-item {
-  padding: 8px 12px;
+  padding: 4px 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   border-bottom: 1px solid var(--bg);
 }
 .dd-item:hover, .dd-item.highlighted { background: var(--accent-bg); }
@@ -1390,16 +1390,12 @@ const App = {
       filtered.forEach(p => {
         const idx = ddItems.length;
         ddItems.push({ ...p, cat });
-        const stockTxt = p.stock > 0 ? `<span style="color:var(--green);">stk:${p.stock}</span>` : '<span style="color:var(--text-mut);">s/stk</span>';
         html += `<div class="dd-item" onclick="App.selectFromDropdown(${aid},${idx})">
           <div>
             <span style="font-weight:600;">${esc(p.producto)}</span>
             <span style="font-size:10px; color:var(--text-mut);"> · ${esc((p.proveedor||'').replace(/ S\.A\.?/g,''))}</span>
           </div>
-          <div style="text-align:right;">
-            <div class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad}</div>
-            <div style="font-size:10px;">${stockTxt}</div>
-          </div>
+          <div class="dd-item-price">$${fmt(p.precio_usd)}/${p.unidad||'U'}</div>
         </div>`;
       });
     });

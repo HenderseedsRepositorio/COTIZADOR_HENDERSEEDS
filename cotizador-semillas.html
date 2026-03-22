@@ -1615,26 +1615,19 @@ const Historial = {
     quotes.forEach(q=>{
       const totalSiva=q.items.reduce((s,i)=>s+(+i.siva||0),0);
       const est=estados[q.numero]||'Pendiente';
-      const first=q.items[0];
-      // Discount summary from first item
-      const dtos=[];
-      if(first.pre && first.pre!=='0%' && first.pre!=='0') dtos.push('Pre:'+first.pre);
-      if(first.cont && first.cont!=='0%' && first.cont!=='0') dtos.push('Cdo:'+first.cont);
-      if(first.vol && first.vol!=='0%' && first.vol!=='0') dtos.push('Vol:'+first.vol);
-      if(first.zonal && first.zonal!=='0%' && first.zonal!=='0') dtos.push('Zon:'+first.zonal);
-      if(first.hend && first.hend!=='0%' && first.hend!=='0') dtos.push('Hend:'+first.hend);
       h+=`<div class="hist-card" style="display:flex;gap:10px;">`;
       // Left: quote content
       h+=`<div style="flex:1;min-width:0;">`;
       h+=`<div class="hist-header"><div><span class="hist-num">#${String(q.numero).padStart(4,'0')}</span><span class="hist-date">${q.fecha}</span></div><span class="hist-vendor">${q.vendedor}</span></div>`;
       h+=`<p class="hist-client">${q.cliente}</p>`;
-      if(dtos.length) h+=`<p style="margin:2px 0 6px;font-size:.7rem;color:#15803d;font-weight:600;">${dtos.join(' · ')}</p>`;
-      h+=`<div style="overflow-x:auto;"><table class="hist-table"><thead><tr><th style="text-align:left">Híbrido</th><th>B.</th><th>Cant</th><th style="text-align:right">P.Neto</th><th style="text-align:right">s/IVA</th></tr></thead><tbody>`;
+      const hpct=v=>{const n=parseFloat(v);return n>0?`<span style="color:#15803d;font-weight:700;font-size:.7rem;">${v}</span>`:`<span style="color:var(--c-border);font-size:.7rem;">—</span>`;};
+      const totalCiva=q.items.reduce((s,i)=>s+(+i.siva||0)*(1+0.21),0);
+      h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B.</th><th class="mob-hide">Pre</th><th class="mob-hide">Cdo</th><th class="mob-hide">Vol</th><th class="mob-hide">Zon</th><th class="mob-hide">Hend</th><th>P.Neto</th><th>Cant</th><th>s/IVA</th><th>c/IVA</th></tr></thead><tbody>`;
       q.items.forEach(i=>{
-        h+=`<tr><td style="font-weight:600;text-align:left">${i.hibrido}</td><td style="text-align:center">${i.banda}</td><td style="text-align:center;font-family:var(--mono)">${i.cant}</td><td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--c-navy)">\$${i.precio}</td><td style="text-align:right;font-family:var(--mono)">\$${fmt(+i.siva)}</td></tr>`;
+        const civa=(+i.siva||0)*(1+0.21);
+        h+=`<tr><td style="font-size:.7rem;">${i.hibrido}</td><td style="font-family:var(--mono);">${i.banda}</td><td class="mob-hide">${hpct(i.pre)}</td><td class="mob-hide">${hpct(i.cont)}</td><td class="mob-hide">${hpct(i.vol)}</td><td class="mob-hide">${hpct(i.zonal)}</td><td class="mob-hide">${hpct(i.hend)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(+i.precio)}</td><td style="font-family:var(--mono);">${+i.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(+i.siva)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(civa)}</td></tr>`;
       });
-      h+=`</tbody></table></div>`;
-      h+=`<div class="hist-total"><span>Total s/IVA: USD ${fmt(totalSiva)}</span></div>`;
+      h+=`</tbody><tfoot><tr><td colspan="10" style="text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);">Total c/IVA</td><td style="font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--c-navy);">USD ${fmt(totalCiva)}</td></tr></tfoot></table></div>`;
       h+=`<div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Modificar</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div>`;
       h+=`</div>`;
       // Right: status buttons

@@ -617,6 +617,17 @@ const App = {
     $('productor-gate').style.display = '';
     $('app-main').style.display = 'none';
     formDirty = false;
+    // Clear all views to prevent stale data when switching users
+    $('lotes-list').innerHTML = '';
+    $('ordenes-list').innerHTML = '';
+    $('analisis-body').innerHTML = '';
+    $('planos-kpis').innerHTML = '';
+    $('planos-map').innerHTML = '';
+    // Reset to first tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-tab="lotes"]').classList.add('active');
+    $('tab-lotes').classList.add('active');
   },
 
 
@@ -678,7 +689,7 @@ const App = {
     cs.value = data.campana; cs.addEventListener('change', function() { data.campana = this.value; Storage.save(data); });
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
-    App._initAplicaciones(); App.renderLotes(); App.renderPlanos(); App.refreshSelectors();
+    App._initAplicaciones(); App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
     loadCatalog().then(() => App._assignCatalogPrices());
   },
 

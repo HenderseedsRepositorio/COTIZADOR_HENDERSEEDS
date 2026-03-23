@@ -775,14 +775,14 @@ const App = {
           <span style="font-size:11px;color:var(--text-sec);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.establecimiento||'')}</span>
           <span style="text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;">${l.hectareas}</span>
           <span style="background:#ea580c;width:2px;height:100%;border-radius:1px;opacity:.3;"></span>
-          <span style="text-align:center;">${cultivoBadge(fina.cultivo, fina.variedad)}</span>
+          <span style="text-align:center;cursor:pointer;" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">${cultivoBadge(fina.cultivo, fina.variedad)} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-mut)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;opacity:.4;"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
           <span style="text-align:center;">${densidadCell(fina.densidad)}</span>
           <span style="background:#d97706;width:2px;height:100%;border-radius:1px;opacity:.3;"></span>
-          <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
+          <span style="text-align:center;cursor:pointer;" onclick="App.openPlanModal('${esc(l.id)}','${campPlan}')">${cultivoBadge(gCult, gruesa.variedad)} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-mut)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;opacity:.4;"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
           <span style="text-align:center;">${densidadCell(gruesa.densidad)}</span>
-          <span style="text-align:right;display:flex;gap:2px;justify-content:flex-end;">
-            <button style="background:none;border:none;cursor:pointer;padding:4px;" onclick="App.openLoteModal('${esc(l.id)}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-            <button style="background:none;border:none;cursor:pointer;padding:4px;" onclick="App.removeLote('${esc(l.id)}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          <span style="text-align:right;display:flex;gap:2px;justify-content:flex-end;align-items:center;">
+            <button style="background:none;border:none;cursor:pointer;padding:4px;" onclick="App.openLoteModal('${esc(l.id)}')" title="Editar lote"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+            <button style="background:none;border:none;cursor:pointer;padding:2px;opacity:.3;" onclick="if(confirm('Eliminar lote ${esc(l.nombre)}?'))App.removeLote('${esc(l.id)}')" title="Eliminar lote"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
           </span>
         </div>`;
       });

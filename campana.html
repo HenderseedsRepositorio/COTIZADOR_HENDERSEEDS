@@ -712,8 +712,10 @@ const App = {
     const cBg = (c) => ({'cult-maiz':'#fef3c7','cult-girasol':'#f3e8ff','cult-soja':'#dcfce7','cult-trigo':'#ffedd5','cult-barbecho':'#f1f5f9'}[App._cultivoClass(c)] || '');
     const cultivoBadge = (cult, vari) => {
       if (!cult) return '<span style="color:var(--text-mut);font-size:11px;">—</span>';
-      return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:${cBg(cult)};color:${cColor(cult)};border:1px solid ${cColor(cult)}30;">${esc(cult)}</span>${vari ? `<span style="font-size:9px;color:var(--text-mut);margin-left:4px;">${esc(vari)}</span>` : ''}`;
+      return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:${cBg(cult)};color:${cColor(cult)};border:1px solid ${cColor(cult)}30;">${esc(cult)}</span>${vari ? `<span style="font-size:9px;font-weight:600;color:var(--text-sec);margin-left:3px;">${esc(vari)}</span>` : ''}`;
     };
+    const densidadCell = (d) => d ? `<span style="font-family:var(--mono);font-size:10px;color:var(--text-sec);">${fmtInt(d)}</span>` : '<span style="color:var(--text-mut);font-size:10px;">—</span>';
+    const gridCols = '65px 1fr 50px 2px 130px 55px 2px 130px 55px 36px';
 
     // Group by establecimiento
     const groups = {};
@@ -749,17 +751,18 @@ const App = {
 
     // Table header
     html += `<div style="overflow-x:auto;"><div style="min-width:680px;">`;
-    html += `<div style="display:grid;grid-template-columns:70px 1fr 55px 2px 140px 2px 140px 40px;gap:4px;padding:8px 10px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--navy);">
-      <span>Lote</span><span>Establecimiento</span><span style="text-align:right;">Has</span>
-      <span></span><span style="text-align:center;color:#ea580c;">⬤ Fina</span>
-      <span></span><span style="text-align:center;color:#d97706;">⬤ Gruesa</span><span></span>
+    html += `<div style="display:grid;grid-template-columns:${gridCols};gap:4px;padding:8px 10px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--navy);">
+      <span>Lote</span><span>Estab.</span><span style="text-align:right;">Has</span>
+      <span></span><span style="text-align:center;color:#ea580c;">Fina</span><span style="text-align:center;color:#ea580c;">Dens.</span>
+      <span></span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens.</span><span></span>
     </div>`;
 
     Object.entries(groups).forEach(([est, lotes]) => {
       const estHas = lotes.reduce((s,l) => s + (l.hectareas||0), 0);
-      html += `<div style="display:grid;grid-template-columns:70px 1fr 55px 2px 140px 2px 140px 40px;gap:4px;padding:6px 10px;background:var(--navy);color:white;font-family:var(--title);font-size:11px;text-transform:uppercase;align-items:center;margin-top:4px;border-radius:4px;">
-        <span colspan="3">${esc(est)}</span><span></span><span></span><span></span>
-        <span style="font-family:var(--mono);font-weight:400;text-align:right;font-size:10px;">${fmtInt(estHas)} ha</span><span></span>
+      html += `<div style="display:grid;grid-template-columns:${gridCols};gap:4px;padding:6px 10px;background:var(--navy);color:white;font-family:var(--title);font-size:11px;text-transform:uppercase;align-items:center;margin-top:4px;border-radius:4px;">
+        <span>${esc(est)}</span><span></span>
+        <span style="font-family:var(--mono);font-weight:400;text-align:right;font-size:10px;">${fmtInt(estHas)}</span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
       </div>`;
 
       lotes.forEach((l, i) => {
@@ -767,14 +770,16 @@ const App = {
         const fina = (l.planes && l.planes[finaKey]) || {};
         const gCult = gruesa.cultivo || l.cultivo || '';
         const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
-        html += `<div style="display:grid;grid-template-columns:70px 1fr 55px 2px 140px 2px 140px 40px;gap:4px;padding:8px 10px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
+        html += `<div style="display:grid;grid-template-columns:${gridCols};gap:4px;padding:8px 10px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
           <span style="font-weight:700;font-size:13px;color:var(--navy);">${esc(l.nombre)}</span>
           <span style="font-size:11px;color:var(--text-sec);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.establecimiento||'')}</span>
           <span style="text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;">${l.hectareas}</span>
           <span style="background:#ea580c;width:2px;height:100%;border-radius:1px;opacity:.3;"></span>
           <span style="text-align:center;">${cultivoBadge(fina.cultivo, fina.variedad)}</span>
+          <span style="text-align:center;">${densidadCell(fina.densidad)}</span>
           <span style="background:#d97706;width:2px;height:100%;border-radius:1px;opacity:.3;"></span>
           <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
+          <span style="text-align:center;">${densidadCell(gruesa.densidad)}</span>
           <span style="text-align:right;">
             <button style="background:none;border:none;cursor:pointer;padding:6px;" onclick="App.openLoteModal('${esc(l.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
           </span>

@@ -984,8 +984,13 @@ const App = {
     });
 
     mH += '</div>';
-    mH += `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
-      <button class="btn btn-accent btn-sm" onclick="App._savePlanoPositions();showToast('Plano guardado')" style="font-size:12px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar plano</button>
+
+    // Central save button between GRUESA and FINA
+    mH += `<div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:16px 0;padding:12px;background:var(--accent-bg);border-radius:var(--radius);border:1.5px dashed var(--accent);">
+      <button class="btn btn-accent" onclick="App.guardarPlanoCompleto()" style="font-size:13px;padding:10px 24px;display:flex;align-items:center;gap:6px;border-radius:99px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar todo
+      </button>
       <button class="btn btn-outline btn-sm" onclick="App.openLoteModal()" style="font-size:12px;">+ Agregar lote</button>
     </div>`;
 
@@ -1149,6 +1154,17 @@ const App = {
       };
     });
     Storage.save(data);
+  },
+
+  guardarPlanoCompleto() {
+    App._savePlanoPositions();
+    // Force immediate cloud sync
+    if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
+    Cloud.saveToCloud().then(() => {
+      showToast('Plano guardado y sincronizado');
+    }).catch(() => {
+      showToast('Guardado local. Se sincronizará cuando haya conexión.');
+    });
   },
 
   resetPlanoPositions() {

@@ -471,20 +471,10 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu" style="padding:16px 18px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <p class="slabel" style="margin:0;">Condiciones Comerciales</p>
-        <div style="display:flex;gap:6px;">
-          <button onclick="Conditions.share()" class="no-print btn-sm" style="background:#25d366;color:#fff;box-shadow:0 2px 8px rgba(37,211,102,.26);">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Enviar
-          </button>
-          <button onclick="Conditions.download()" class="no-print btn-sm" style="background:var(--c-blue);color:#fff;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            PNG
-          </button>
-          <button id="btnCondPdf" onclick="Conditions.downloadPDF()" class="no-print btn-sm" style="background:#c0392b;color:#fff;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            PDF
-          </button>
-        </div>
+        <button onclick="Conditions.sharePDF()" class="no-print btn-sm" style="background:#25d366;color:#fff;box-shadow:0 2px 8px rgba(37,211,102,.26);display:flex;align-items:center;gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Compartir
+        </button>
       </div>
       <div id="condTable"><p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando condiciones...</p></div>
     </div>
@@ -1549,20 +1539,16 @@ const Conditions = {
     } catch(e) { if(e.name!=='AbortError') alert('Error al generar imagen'); }
     finally { card.style.position='absolute'; card.style.left='-9999px'; card.style.zIndex=''; }
   },
-  share() { this._capture(true); },
-  download() { this._capture(false); },
-  async downloadPDF() {
+  async sharePDF() {
     if(!this.data) await this.load();
     $('cond-share-fecha').innerText=dateStr();
     $('cond-share-table').innerHTML=this.buildTableHTML(this.data);
     const card=$('cond-share-card');
     card.style.position='fixed'; card.style.left='0'; card.style.top='0'; card.style.zIndex='9999';
-    const btn=$('btnCondPdf'), orig=btn.innerHTML;
-    btn.innerHTML='⏳'; btn.disabled=true;
     try {
-      await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.pdf', {pdf:true, title:'Condiciones Comerciales — Henderseeds'});
+      await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.pdf', {share:true, pdf:true, title:'Condiciones Comerciales — Henderseeds'});
     } catch(e) { if(e.name!=='AbortError') alert('Error al generar PDF'); }
-    finally { card.style.position='absolute'; card.style.left='-9999px'; card.style.zIndex=''; btn.innerHTML=orig; btn.disabled=false; }
+    finally { card.style.position='absolute'; card.style.left='-9999px'; card.style.zIndex=''; }
   }
 };
 

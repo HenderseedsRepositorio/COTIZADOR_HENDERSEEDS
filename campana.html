@@ -1034,7 +1034,7 @@ const App = {
         return;
       }
 
-      mH += `<div style="position:absolute;left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      mH += `<div data-estab-fina="${esc(estab)}" style="position:absolute;left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
       mH += `<div style="font-family:var(--title);font-size:11px;color:#333;text-align:center;margin-bottom:2px;">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
       mH += `<div style="border:2.5px solid #333;overflow:hidden;display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
@@ -1093,6 +1093,7 @@ const App = {
         isDragging = false;
         el.classList.remove('dragging');
         App._savePlanoPositions();
+        App._syncFinaPositions();
       });
 
       // Resize from 4 corners
@@ -1134,8 +1135,25 @@ const App = {
         resizer.addEventListener('pointerup', e => {
           isResizing = false;
           App._savePlanoPositions();
+          App._syncFinaPositions();
         });
       });
+    });
+  },
+
+  _syncFinaPositions() {
+    // Update FINA plano blocks to match GRUESA positions
+    const finaCanvas = document.querySelectorAll('.plano-canvas')[1]; // second canvas is FINA
+    if (!finaCanvas || !data.planoPos) return;
+    finaCanvas.querySelectorAll('[data-estab-fina]').forEach(el => {
+      const estab = el.dataset.estabFina;
+      const pos = data.planoPos[estab];
+      if (pos) {
+        el.style.left = pos.x + '%';
+        el.style.top = pos.y + '%';
+        el.style.width = pos.w + '%';
+        el.style.height = pos.h + '%';
+      }
     });
   },
 

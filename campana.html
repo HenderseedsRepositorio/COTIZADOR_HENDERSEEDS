@@ -742,22 +742,38 @@ const App = {
     kH += '</div>';
     kpiEl.innerHTML = kH;
 
-    // Map
-    let mH = '';
+    // Map — visual plano like the Excel reference image
+    // Each establishment is a bordered block containing lotes as internal divisions
+    let mH = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+
     Object.entries(groups).forEach(([estab, g]) => {
-      mH += `<div class="estab-group"><div class="estab-header"><span class="estab-name">${esc(estab)}</span><span class="estab-has">${fmtInt(g.totalHas)} has</span></div><div class="lotes-grid">`;
+      // Calculate how many columns the lotes grid needs
+      const nLotes = g.lotes.length;
+      const cols = nLotes <= 1 ? 1 : nLotes <= 2 ? 2 : nLotes <= 4 ? 2 : 3;
+      // Establishment block height based on total has
+      const blockH = Math.max(100, Math.min(220, g.totalHas * 0.6));
+
+      mH += `<div style="border:2.5px solid var(--navy);border-radius:4px;position:relative;overflow:hidden;min-height:${blockH}px;${g.totalHas >= 200 ? 'grid-column:span 2;' : ''}">`;
+      // Establishment label
+      mH += `<div style="position:absolute;top:0;left:0;right:0;background:rgba(13,45,94,.85);color:white;padding:4px 8px;font-family:var(--title);font-size:11px;text-transform:uppercase;display:flex;justify-content:space-between;z-index:2;">
+        <span>${esc(estab)}</span><span style="font-family:var(--mono);font-weight:400;font-size:10px;">${fmtInt(g.totalHas)} ha</span></div>`;
+      // Lotes grid inside the block
+      mH += `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);height:100%;padding-top:26px;">`;
       g.lotes.forEach(l => {
-        const cc = App._cultivoClass(l.plan.cultivo);
-        const pct = g.totalHas > 0 ? Math.max((l.hectareas/g.totalHas)*100, 20) : 100;
-        mH += `<div class="lote-rect ${cc}" style="flex:0 0 calc(${pct.toFixed(0)}% - 6px);min-width:80px;" onclick="App.openPlanModal('${esc(l.id)}')">
-          <div class="lr-code">${esc(l.nombre)}</div>
-          <div class="lr-has">${l.hectareas} ha</div>
-          ${l.plan.cultivo ? `<div class="lr-cultivo">${esc(l.plan.cultivo)}</div>` : '<div class="lr-cultivo" style="color:var(--text-mut);">Toca para planificar</div>'}
-          ${l.plan.variedad ? `<div class="lr-variedad">${esc(l.plan.variedad)}${l.plan.densidad ? ' · '+fmtInt(l.plan.densidad)+' pl/ha' : ''}</div>` : ''}
+        const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
+        const bgMap = {'cult-maiz':'#fde68a','cult-girasol':'#e9d5ff','cult-soja':'#bbf7d0','cult-trigo':'#fed7aa','cult-barbecho':'#e2e8f0','cult-empty':'#f8fafc'};
+        const bg = bgMap[cc] || '#f8fafc';
+        const cultivo = l.plan.cultivo || l.cultivo || '';
+        mH += `<div onclick="App.openPlanModal('${esc(l.id)}')" style="background:${bg};border:1px solid rgba(0,0,0,.1);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:6px;transition:opacity .15s;position:relative;" onmouseenter="this.style.opacity='.8'" onmouseleave="this.style.opacity='1'">
+          <div style="position:absolute;top:2px;right:4px;font-family:var(--mono);font-size:9px;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.5);">${l.hectareas}</div>
+          <div style="font-size:10px;font-weight:600;color:rgba(0,0,0,.55);margin-top:2px;">${esc(cultivo || 'Sin plan')}</div>
+          ${l.plan.variedad ? `<div style="font-size:8px;color:rgba(0,0,0,.35);margin-top:1px;">${esc(l.plan.variedad)}</div>` : ''}
         </div>`;
       });
       mH += '</div></div>';
     });
+    mH += '</div>';
     mapEl.innerHTML = mH;
   },
   openPlanModal(lid) {

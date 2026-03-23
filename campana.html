@@ -742,38 +742,91 @@ const App = {
     kH += '</div>';
     kpiEl.innerHTML = kH;
 
-    // Map — visual plano like the Excel reference image
-    // Each establishment is a bordered block containing lotes as internal divisions
-    let mH = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+    // Map — visual field plan (plano de campo)
+    const bgMap = {'cult-maiz':'#fde68a','cult-girasol':'#e9d5ff','cult-soja':'#bbf7d0','cult-trigo':'#fed7aa','cult-barbecho':'#e2e8f0','cult-empty':'#f8fafc'};
+    const loteCell = (l) => {
+      const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
+      const bg = bgMap[cc] || '#f8fafc';
+      const cultivo = l.plan.cultivo || l.cultivo || '';
+      return `<div onclick="App.openPlanModal('${esc(l.id)}')" style="background:${bg};border:1px solid rgba(0,0,0,.15);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:4px;position:relative;min-height:50px;" onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'">
+        <div style="position:absolute;top:1px;right:3px;font-family:var(--mono);font-size:8px;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:rgba(0,0,0,.45);">${l.hectareas}</div>
+        <div style="font-size:9px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo || '—')}</div>
+        ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
+      </div>`;
+    };
+    const estabLabel = (name, has) => `<div style="font-family:var(--title);font-size:10px;color:var(--navy);text-align:center;margin-bottom:2px;">${esc(name)} <span style="font-family:var(--mono);font-weight:400;font-size:9px;color:var(--text-mut);">${fmtInt(has)}ha</span></div>`;
+    const estabBlock = (name, g, gridCss, extraCss) => {
+      let h = `<div style="border:2px solid var(--navy);border-radius:3px;overflow:hidden;${extraCss||''}">`;
+      h += estabLabel(name, g.totalHas);
+      h += `<div style="display:grid;${gridCss};height:calc(100% - 20px);">`;
+      g.lotes.forEach(l => { h += loteCell(l); });
+      h += '</div></div>';
+      return h;
+    };
 
-    Object.entries(groups).forEach(([estab, g]) => {
-      // Calculate how many columns the lotes grid needs
-      const nLotes = g.lotes.length;
-      const cols = nLotes <= 1 ? 1 : nLotes <= 2 ? 2 : nLotes <= 4 ? 2 : 3;
-      // Establishment block height based on total has
-      const blockH = Math.max(100, Math.min(220, g.totalHas * 0.6));
+    // Build positioned plano layout
+    let mH = '<div style="position:relative;width:100%;aspect-ratio:2.2/1;min-height:350px;background:#1a1a2e;border-radius:var(--radius);padding:8px;overflow:hidden;">';
 
-      mH += `<div style="border:2.5px solid var(--navy);border-radius:4px;position:relative;overflow:hidden;min-height:${blockH}px;${g.totalHas >= 200 ? 'grid-column:span 2;' : ''}">`;
-      // Establishment label
-      mH += `<div style="position:absolute;top:0;left:0;right:0;background:rgba(13,45,94,.85);color:white;padding:4px 8px;font-family:var(--title);font-size:11px;text-transform:uppercase;display:flex;justify-content:space-between;z-index:2;">
-        <span>${esc(estab)}</span><span style="font-family:var(--mono);font-weight:400;font-size:10px;">${fmtInt(g.totalHas)} ha</span></div>`;
-      // Lotes grid inside the block
-      mH += `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);height:100%;padding-top:26px;">`;
-      g.lotes.forEach(l => {
-        const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
-        const bgMap = {'cult-maiz':'#fde68a','cult-girasol':'#e9d5ff','cult-soja':'#bbf7d0','cult-trigo':'#fed7aa','cult-barbecho':'#e2e8f0','cult-empty':'#f8fafc'};
-        const bg = bgMap[cc] || '#f8fafc';
-        const cultivo = l.plan.cultivo || l.cultivo || '';
-        mH += `<div onclick="App.openPlanModal('${esc(l.id)}')" style="background:${bg};border:1px solid rgba(0,0,0,.1);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:6px;transition:opacity .15s;position:relative;" onmouseenter="this.style.opacity='.8'" onmouseleave="this.style.opacity='1'">
-          <div style="position:absolute;top:2px;right:4px;font-family:var(--mono);font-size:9px;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
-          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.5);">${l.hectareas}</div>
-          <div style="font-size:10px;font-weight:600;color:rgba(0,0,0,.55);margin-top:2px;">${esc(cultivo || 'Sin plan')}</div>
-          ${l.plan.variedad ? `<div style="font-size:8px;color:rgba(0,0,0,.35);margin-top:1px;">${esc(l.plan.variedad)}</div>` : ''}
-        </div>`;
-      });
-      mH += '</div></div>';
-    });
+    // Position each establishment like the real field map
+    const gArr = Object.entries(groups);
+    const g = (name) => { const found = gArr.find(([n]) => n.toLowerCase().includes(name.toLowerCase())); return found ? found[1] : null; };
+
+    // San Clemente — left, tall
+    if (g('clemente')) {
+      const sc = g('clemente'); const name = gArr.find(([n])=>n.toLowerCase().includes('clemente'))[0];
+      const cols = sc.lotes.length <= 2 ? '1fr 1fr' : 'repeat('+Math.ceil(sc.lotes.length/2)+',1fr)';
+      mH += `<div style="position:absolute;left:2%;top:5%;width:24%;height:88%;">${estabBlock(name,sc,'grid-template-columns:'+cols+';grid-template-rows:1fr 1fr','height:100%')}</div>`;
+    }
+    // 2 Hermanas — top center-right
+    if (g('hermanas')) {
+      const dh = g('hermanas'); const name = gArr.find(([n])=>n.toLowerCase().includes('hermanas'))[0];
+      mH += `<div style="position:absolute;left:50%;top:3%;width:22%;height:22%;">${estabBlock(name,dh,'grid-template-columns:1fr','height:100%')}</div>`;
+    }
+    // La Porteña — far right
+    if (g('porte')) {
+      const lp = g('porte'); const name = gArr.find(([n])=>n.toLowerCase().includes('porte'))[0];
+      mH += `<div style="position:absolute;right:2%;top:3%;width:14%;height:40%;">${estabBlock(name,lp,'grid-template-columns:1fr;grid-template-rows:1fr 1fr','height:100%')}</div>`;
+    }
+    // El Parche 2 — center
+    if (g('parche 2') || g('Parche 2')) {
+      const ep2 = g('parche 2') || g('Parche 2'); const name = gArr.find(([n])=>n.toLowerCase().includes('parche 2'))[0];
+      mH += `<div style="position:absolute;left:38%;top:22%;width:14%;height:25%;">${estabBlock(name,ep2,'grid-template-columns:1fr','height:100%')}</div>`;
+    }
+    // El Parche — bottom center-left
+    const epMatch = gArr.find(([n])=>n.toLowerCase()==='el parche');
+    if (epMatch) {
+      const ep = epMatch[1];
+      const epCols = ep.lotes.length <= 2 ? '1fr 1fr' : ep.lotes.length <= 3 ? '1fr 1fr 1fr' : 'repeat('+Math.min(ep.lotes.length,4)+',1fr)';
+      mH += `<div style="position:absolute;left:28%;top:55%;width:28%;height:40%;">${estabBlock(epMatch[0],ep,'grid-template-columns:'+epCols+';grid-template-rows:1fr 1fr','height:100%')}</div>`;
+    }
+    // Doña Josefa — bottom right
+    if (g('josefa') || g('josefa')) {
+      const dj = g('josefa'); const name = gArr.find(([n])=>n.toLowerCase().includes('josefa'))[0];
+      mH += `<div style="position:absolute;left:58%;top:55%;width:28%;height:40%;">${estabBlock(name,dj,'grid-template-columns:repeat('+Math.min(dj.lotes.length,3)+',1fr)','height:100%')}</div>`;
+    }
+    // Pirovano — if exists, below San Clemente
+    if (g('pirovano') || g('Pirovano')) {
+      const pv = g('pirovano') || g('Pirovano'); const name = gArr.find(([n])=>n.toLowerCase().includes('pirovano'))[0];
+      mH += `<div style="position:absolute;left:2%;top:55%;width:24%;height:40%;">${estabBlock(name,pv,'grid-template-columns:1fr','height:100%')}</div>`;
+    }
+
+    // Any remaining establishments not positioned — put below the map
+    const positioned = ['clemente','hermanas','porte','parche 2','parche','josefa','pirovano'];
+    const remaining = gArr.filter(([n]) => !positioned.some(p => n.toLowerCase().includes(p) || n.toLowerCase() === 'el '+p));
+
     mH += '</div>';
+
+    // Fallback for unpositioned establishments
+    if (remaining.length) {
+      mH += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">';
+      remaining.forEach(([name, g2]) => {
+        const cols = g2.lotes.length <= 2 ? '1fr 1fr' : 'repeat('+Math.min(g2.lotes.length,3)+',1fr)';
+        mH += estabBlock(name, g2, 'grid-template-columns:'+cols, 'min-height:100px');
+      });
+      mH += '</div>';
+    }
+
     mapEl.innerHTML = mH;
   },
   openPlanModal(lid) {

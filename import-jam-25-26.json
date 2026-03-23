@@ -90,6 +90,20 @@
       "hectareas": 70.0,
       "cultivo": "Maiz tardio",
       "establecimiento": "El Parche"
+    },
+    {
+      "id": "lt_sc2",
+      "nombre": "SC2",
+      "hectareas": 80.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "San Clemente"
+    },
+    {
+      "id": "lt_sc3",
+      "nombre": "SC3",
+      "hectareas": 30.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "San Clemente"
     }
   ],
   "ordenes": [

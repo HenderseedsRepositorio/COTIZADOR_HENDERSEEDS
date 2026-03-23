@@ -423,12 +423,15 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     </div>
 
     <!-- HISTORIAL -->
-    <div class="hcard no-print" style="padding:12px 15px;margin-top:16px;">
+    <div class="no-print" style="margin-top:16px;text-align:center;">
+      <button id="btn-ver-historial" onclick="Historial.toggle()" style="background:#eef3fb;color:var(--c-blue);font-size:.78rem;font-weight:700;padding:8px 20px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;">📋 Ver Historial</button>
+    </div>
+    <div id="hist-card-nidera" class="hcard no-print" style="padding:12px 15px;margin-top:10px;display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <p class="slabel" style="margin:0;">📋 Historial de Cotizaciones</p>
-        <button onclick="Historial.load()" style="background:#eef3fb;color:var(--c-blue);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
+        <button onclick="Historial.toggle()" style="background:#eef3fb;color:var(--c-blue);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">✕ Cerrar</button>
       </div>
-      <div id="historialContent"><p style="color:var(--c-light);font-size:.72rem;margin:0;">Tocá "Actualizar" para cargar el historial</p></div>
+      <div id="historialContent"></div>
     </div>
   </div>
 
@@ -1556,6 +1559,18 @@ const Conditions = {
    HISTORIAL — últimas cotizaciones desde Sheets
    ══════════════════════════════════════════════════════════════════ */
 const Historial = {
+  toggle() {
+    const card=$('hist-card-nidera');
+    const btn=$('btn-ver-historial');
+    if(card.style.display==='none'){
+      card.style.display='block';
+      btn.style.display='none';
+      Historial.load();
+    } else {
+      card.style.display='none';
+      btn.style.display='inline-flex';
+    }
+  },
   _cache: null,
   _page: 0,
   _perPage: 10,

@@ -718,6 +718,7 @@ const App = {
     // Group by establecimiento
     const groups = {};
     data.lotes.forEach(l => { const e = l.establecimiento || 'Sin estab.'; if (!groups[e]) groups[e] = []; groups[e].push(l); });
+    Object.values(groups).forEach(arr => arr.sort((a,b) => a.nombre.localeCompare(b.nombre, undefined, {numeric:true})));
 
     let html = '';
     const totalHas = data.lotes.reduce((s,l) => s + (l.hectareas||0), 0);

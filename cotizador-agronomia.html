@@ -622,6 +622,15 @@ input, select, button { font-family: inherit; font-size: inherit; }
   .app-header { flex-wrap: wrap; gap: 4px; }
   .app-summary { font-size: 10px; }
 }
+.cond-table{width:100%;border-collapse:collapse;font-size:.72rem;table-layout:fixed}
+.cond-table th{font-size:.7rem;font-weight:600;color:#64748b;padding:5px 8px;border-bottom:1px solid var(--border)}
+.cond-table th:first-child{text-align:left;width:40%}
+.cond-table th:nth-child(2),.cond-table th:nth-child(3),.cond-table th:nth-child(4){text-align:right;width:20%}
+.cond-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+.cond-table td:first-child{font-weight:600;color:#0d2033;text-align:left}
+.cond-table td:nth-child(2),.cond-table td:nth-child(3),.cond-table td:nth-child(4){text-align:right;font-family:var(--mono)}
+.cond-table td:nth-child(2){font-weight:700;color:var(--navy)}
+.cond-table td:nth-child(3){color:#64748b}
 @media (max-width: 380px) {
   body { font-size: 14px; }
   .tab-btn { font-size: .7rem; padding: 9px 2px; }
@@ -742,26 +751,29 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
   <!-- ═══ TAB CONDICIONES ═══ -->
   <section id="tab-condiciones" class="tab-content">
-    <div class="card" style="padding:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <p style="font-weight:700;font-size:.85rem;color:var(--navy);margin:0;">Condiciones Comerciales</p>
-        <button onclick="Condiciones.share()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir</button>
+    <div class="card" style="padding:16px 18px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p style="font-weight:700;font-size:.82rem;color:var(--navy);margin:0;text-transform:uppercase;letter-spacing:.06em;">Condiciones Comerciales</p>
+        <button onclick="Condiciones.share()" style="background:#25d366;color:#fff;font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);box-shadow:0 2px 8px rgba(37,211,102,.26);display:flex;align-items:center;gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Compartir
+        </button>
       </div>
-      <div id="condTable"><p style="color:var(--text-mut);font-size:.75rem;">Cargando condiciones...</p></div>
+      <div id="condTable"><p style="color:var(--text-mut);font-size:.75rem;">⏳ Cargando condiciones...</p></div>
     </div>
-    <!-- Hidden card for sharing -->
+    <!-- Hidden: shareable conditions card (identical to Nidera) -->
     <div id="cond-share-card" style="position:absolute;left:-9999px;top:0;width:400px;">
       <div id="cond-share-content" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.3);">
-        <div style="background:linear-gradient(90deg,var(--navy),#2d6fc4,#e8f0fe);height:6px;"></div>
+        <div style="background:linear-gradient(90deg,#0d2d5e,#2d6fc4,#e8f0fe);height:6px;"></div>
         <div style="padding:22px 22px 18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--border);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid #e2e8f0;">
             <img src="assets/logo-henderseeds.png" alt="HenderSeeds" style="height:32px;">
-            <span style="font-size:.7rem;color:var(--text-mut);" id="cond-share-fecha"></span>
+            <span style="font-size:.7rem;color:#94a3b8;" id="cond-share-fecha"></span>
           </div>
-          <p style="margin:0 0 12px;font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;">Condiciones Comerciales</p>
+          <p style="margin:0 0 12px;font-size:.72rem;font-weight:700;color:#0d2d5e;text-transform:uppercase;letter-spacing:.08em;">Condiciones Comerciales</p>
           <div id="cond-share-table"></div>
         </div>
-        <div style="background:linear-gradient(90deg,var(--navy),#e8f0fe);height:4px;"></div>
+        <div style="background:linear-gradient(90deg,#0d2d5e,#e8f0fe);height:4px;"></div>
       </div>
     </div>
   </section>
@@ -1331,30 +1343,22 @@ const Condiciones = {
     }
   },
   buildTableHTML(data) {
-    const groups = {};
-    data.forEach(r => { const m = r.moneda || 'USD'; if (!groups[m]) groups[m] = []; groups[m].push(r); });
-    let html = '';
-    Object.keys(groups).forEach(moneda => {
-      html += `<p style="font-weight:700;font-size:.78rem;color:var(--navy);margin:12px 0 6px;text-transform:uppercase;">${moneda}</p>`;
-      html += '<table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:8px;">';
-      html += '<thead><tr style="background:var(--navy);color:#fff;"><th style="padding:6px 8px;text-align:left;font-size:.65rem;">Detalle</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">TNA</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">TEA</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">Plazo</th></tr></thead><tbody>';
-      groups[moneda].forEach((r, i) => {
-        const bg = i % 2 === 0 ? '#f8fafc' : '#fff';
-        html += `<tr style="background:${bg};"><td style="padding:5px 8px;">${r.detalle || ''}</td><td style="padding:5px 8px;text-align:right;font-family:var(--mono);">${this.fmtRate(r.tna)}</td><td style="padding:5px 8px;text-align:right;font-family:var(--mono);">${this.fmtRate(r.tea)}</td><td style="padding:5px 8px;text-align:right;">${r.plazo || ''}</td></tr>`;
+    if(!data||!data.length) return '<p style="color:var(--text-mut);font-size:.75rem;">Sin condiciones cargadas</p>';
+    const groups={};
+    data.forEach(r=>{ const key=r.moneda||'Otro'; if(!groups[key])groups[key]=[]; groups[key].push(r); });
+    let h='';
+    Object.keys(groups).forEach(moneda=>{
+      h+=`<div style="margin-bottom:12px;"><p style="margin:0 0 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;">${moneda}</p>`;
+      h+='<table class="cond-table"><thead><tr><th>Detalle</th><th>TNA</th><th>TEA</th><th>Plazo</th></tr></thead><tbody>';
+      groups[moneda].forEach((r,i)=>{
+        const bg=i%2===0?'#fafbfc':'#fff';
+        h+=`<tr style="background:${bg};"><td>${r.detalle||''}</td><td>${this.fmtRate(r.tna)}</td><td>${this.fmtRate(r.tea)}</td><td>${r.plazo||''}d</td></tr>`;
       });
-      html += '</tbody></table>';
+      h+='</tbody></table></div>';
     });
-    return html;
+    return h;
   },
-  renderTable() {
-    if (!this.data) return;
-    const html = this.buildTableHTML(this.data);
-    $('condTable').innerHTML = html;
-    const share = $('cond-share-table');
-    if (share) share.innerHTML = html;
-    const dateEl = $('cond-share-date');
-    if (dateEl) dateEl.textContent = dateStr();
-  },
+  renderTable() { $('condTable').innerHTML=this.buildTableHTML(this.data); },
   async share() {
     if (!this.data) { await this.load(); }
     if (!this.data) return;

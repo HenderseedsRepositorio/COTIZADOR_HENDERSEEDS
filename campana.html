@@ -889,11 +889,11 @@ const App = {
       const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
       const bg = bgMap[cc] || '#fff';
       const cultivo = l.plan.cultivo || l.cultivo || '';
-      return `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}')">
-        <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
-        <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
-        <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
-        ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
+      return `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;" onclick="App.openPlanModal('${esc(l.id)}')">
+        <div style="font-family:var(--title);font-size:11px;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(l.nombre)}</div>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${l.hectareas} <span style="font-size:9px;font-weight:400;">ha</span></div>
+        ${cultivo ? `<div style="font-size:9px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>` : ''}
+        ${l.plan.variedad ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.35);font-family:var(--mono);">${esc(l.plan.variedad)}${l.plan.densidad ? ' · ' + fmtInt(l.plan.densidad) : ''}</div>` : ''}
       </div>`;
     };
 
@@ -910,12 +910,14 @@ const App = {
 
       const cellBg = (l) => bgMap[App._cultivoClass(l?.plan?.cultivo || l?.cultivo)] || '#fff';
       const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}')"` : '';
-      const cellInfo = (l, align) => {
+      const cellInfo = (l) => {
         if (!l) return '';
         const cultivo = l.plan?.cultivo || l.cultivo || '';
-        return `<div style="position:absolute;${align};padding:4px;pointer-events:none;">
-          <div style="font-size:8px;font-weight:700;color:rgba(0,0,0,.35);">${esc(l.nombre)}</div>
-          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>
+        return `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%;">
+          <div style="font-family:var(--title);font-size:10px;color:rgba(0,0,0,.5);letter-spacing:.5px;">${esc(l.nombre)}</div>
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas} <span style="font-size:8px;font-weight:400;">ha</span></div>
+          ${cultivo ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.45);">${esc(cultivo)}</div>` : ''}
+          ${l.plan?.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);font-family:var(--mono);">${esc(l.plan.variedad)}</div>` : ''}
         </div>`;
       };
 
@@ -926,24 +928,20 @@ const App = {
       // 4 zones using clip-path or positioned divs
       // Top row: SC1 (left ~40%) + SC2 (right ~60%)
       h += `<div style="position:absolute;top:0;left:0;width:40%;height:45%;background:${cellBg(sc1)};border-bottom:1.5px solid rgba(0,0,0,.2);border-right:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc1)}>
-        ${cellInfo(sc1,'top:0;left:0')}
-        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc1?.hectareas||''}</div>
+        ${cellInfo(sc1)}
       </div>`;
       h += `<div style="position:absolute;top:0;left:40%;width:60%;height:45%;background:${cellBg(sc2)};border-bottom:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc2)}>
-        ${cellInfo(sc2,'top:0;right:0')}
-        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc2?.hectareas||''}</div>
+        ${cellInfo(sc2)}
       </div>`;
 
       // Middle: SC3 (right side, smaller)
       h += `<div style="position:absolute;top:45%;right:0;width:55%;height:20%;background:${cellBg(sc3)};border-bottom:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc3)}>
-        ${cellInfo(sc3,'top:0;right:0')}
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc3?.hectareas||''}</div>
+        ${cellInfo(sc3)}
       </div>`;
 
       // Bottom: SC4 (full width, large)
       h += `<div style="position:absolute;bottom:0;left:0;width:100%;height:35%;background:${cellBg(sc4)};cursor:pointer;" ${cellClick(sc4)}>
-        ${cellInfo(sc4,'top:4px;right:4px')}
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc4?.hectareas||''}</div>
+        ${cellInfo(sc4)}
       </div>`;
 
       // Diagonal road line (SVG overlay)
@@ -1055,11 +1053,11 @@ const App = {
         const cc = App._cultivoClass(finaPlan.cultivo || '');
         const bg = bgMap[cc] || '#fff';
         const cultivo = finaPlan.cultivo || '';
-        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">
-          <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
-          <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
-          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
-          ${finaPlan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(finaPlan.variedad)}</div>` : ''}
+        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">
+          <div style="font-family:var(--title);font-size:11px;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(l.nombre)}</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${l.hectareas} <span style="font-size:9px;font-weight:400;">ha</span></div>
+          ${cultivo ? `<div style="font-size:9px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>` : ''}
+          ${finaPlan.variedad ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.35);font-family:var(--mono);">${esc(finaPlan.variedad)}${finaPlan.densidad ? ' · ' + fmtInt(finaPlan.densidad) : ''}</div>` : ''}
         </div>`;
       });
       mH += '</div></div>';

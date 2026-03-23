@@ -1,0 +1,1870 @@
+{
+  "lotes": [
+    {
+      "id": "lt_dm_am6",
+      "nombre": "AM6",
+      "hectareas": 28.0,
+      "cultivo": "Trigo",
+      "establecimiento": "AM"
+    },
+    {
+      "id": "lt_dm_am8",
+      "nombre": "AM8",
+      "hectareas": 26.0,
+      "cultivo": "Trigo",
+      "establecimiento": "AM"
+    },
+    {
+      "id": "lt_dm_sc6",
+      "nombre": "SC6",
+      "hectareas": 31.0,
+      "cultivo": "Trigo",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_ef1",
+      "nombre": "EF1",
+      "hectareas": 34.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef8",
+      "nombre": "EF8",
+      "hectareas": 16.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_lt2",
+      "nombre": "LT2",
+      "hectareas": 15.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "La Tapera"
+    },
+    {
+      "id": "lt_dm_sc1",
+      "nombre": "SC1",
+      "hectareas": 45.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_ef4",
+      "nombre": "EF4",
+      "hectareas": 30.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef5",
+      "nombre": "EF5",
+      "hectareas": 17.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef6",
+      "nombre": "EF6",
+      "hectareas": 14.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef7",
+      "nombre": "EF7",
+      "hectareas": 27.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef2",
+      "nombre": "EF2",
+      "hectareas": 27.0,
+      "cultivo": "Girasol",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_ef3",
+      "nombre": "EF3",
+      "hectareas": 28.0,
+      "cultivo": "Girasol",
+      "establecimiento": "El Frances"
+    },
+    {
+      "id": "lt_dm_sc3",
+      "nombre": "SC3",
+      "hectareas": 39.0,
+      "cultivo": "Girasol",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_sc4",
+      "nombre": "SC4",
+      "hectareas": 39.0,
+      "cultivo": "Girasol",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_am5",
+      "nombre": "AM5",
+      "hectareas": 28.0,
+      "cultivo": "Girasol",
+      "establecimiento": "AM"
+    },
+    {
+      "id": "lt_dm_am2",
+      "nombre": "AM2",
+      "hectareas": 35.0,
+      "cultivo": "Girasol",
+      "establecimiento": "AM"
+    },
+    {
+      "id": "lt_dm_am1",
+      "nombre": "AM1",
+      "hectareas": 26.0,
+      "cultivo": "Girasol",
+      "establecimiento": "AM"
+    },
+    {
+      "id": "lt_dm_sc2",
+      "nombre": "SC2",
+      "hectareas": 39.0,
+      "cultivo": "Maiz",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_sc5",
+      "nombre": "SC5",
+      "hectareas": 25.0,
+      "cultivo": "Maiz",
+      "establecimiento": "Sucesion"
+    },
+    {
+      "id": "lt_dm_lt1",
+      "nombre": "LT1",
+      "hectareas": 30.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "La Tapera"
+    },
+    {
+      "id": "lt_dm_fm5",
+      "nombre": "FM5",
+      "hectareas": 20.0,
+      "cultivo": "Maiz tardio",
+      "establecimiento": "FM"
+    }
+  ],
+  "ordenes": [
+    {
+      "id": "ord_dm1",
+      "fecha": "2025-05-23",
+      "aplicador": "perez david",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "notas": "Trigo - Fina",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am6",
+              "hectareas": 28.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_am8",
+              "hectareas": 26.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_sc6",
+              "hectareas": 31.0,
+              "cultivo": "Trigo"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.058,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.058,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "METSULFURON 60% SURFURON X 100 GR",
+              "dosis": 0.006,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.117,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.7,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUVOX X 20 LT",
+              "dosis": 1.88,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm2",
+      "fecha": "2025-08-04",
+      "aplicador": "perez david",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef1",
+              "hectareas": 34.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef8",
+              "hectareas": 16.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 15.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_sc1",
+              "hectareas": 45.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.055,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.046,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.135,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.9,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.5,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm3",
+      "fecha": "2025-08-04",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Trigo - Fina",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am6",
+              "hectareas": 28.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_am8",
+              "hectareas": 26.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_sc6",
+              "hectareas": 31.0,
+              "cultivo": "Trigo"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.058,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.117,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "METSULFURON 60% SURFURON X 100 GR",
+              "dosis": 0.0055,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BIFENTRIN 25% X 1 LT",
+              "dosis": 0.118,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm4",
+      "fecha": "2025-09-12",
+      "aplicador": "perez david",
+      "tipo": "Barbecho largo",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef4",
+              "hectareas": 30.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef5",
+              "hectareas": 17.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef6",
+              "hectareas": 14.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef7",
+              "hectareas": 27.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 12.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.15,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.6,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm5",
+      "fecha": "2025-09-12",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef2",
+              "hectareas": 27.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef3",
+              "hectareas": 28.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.054,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DIFLUFENICAN 50 SIGMA X 5 LT",
+              "dosis": 0.272,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.55,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm6",
+      "fecha": "2025-09-30",
+      "aplicador": "posada",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Trigo - Fina",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am6",
+              "hectareas": 28.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_am8",
+              "hectareas": 26.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_sc1",
+              "hectareas": 31.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BIOFUSION",
+              "dosis": 0.117,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NANOK",
+              "dosis": 0.7,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUTRITION GROW X 5 LT",
+              "dosis": 0.47,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm7",
+      "fecha": "2025-10-09",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc3",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_sc4",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am5",
+              "hectareas": 28.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am2",
+              "hectareas": 35.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am1",
+              "hectareas": 26.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.048,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.32,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HALOXIFOP VELOCITY X 5 LT",
+              "dosis": 0.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.12,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.4,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm8",
+      "fecha": "2025-10-09",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Maiz - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc2",
+              "hectareas": 39.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "lt_dm_sc3",
+              "hectareas": 26.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.046,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.076,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 0.93,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.93,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.15,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.15,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.75,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm9",
+      "fecha": "2025-10-16",
+      "aplicador": "perez david",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "notas": "Maiz - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc1",
+              "hectareas": 45.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.044,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.065,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 0.88,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.88,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "ZETAMETRINA MUSTANG X 5 LT",
+              "dosis": 0.11,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "AMPLIGO X 1LT",
+              "dosis": 0.088,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.55,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm10",
+      "fecha": "2025-10-31",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Maiz - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc2",
+              "hectareas": 39.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "lt_dm_sc5",
+              "hectareas": 25.0,
+              "cultivo": "Maiz"
+            },
+            {
+              "loteId": "lt_dm_sc1",
+              "hectareas": 41.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.047,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.095,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.142,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.024,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 2.85,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm11",
+      "fecha": "2025-10-31",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am1",
+              "hectareas": 20.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am2",
+              "hectareas": 21.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am5",
+              "hectareas": 25.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_sc3",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_sc4",
+              "hectareas": 39.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 6.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.27,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PARAQUAT SIGMA X 20 LT",
+              "dosis": 2.13,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.2,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CORAGEN EVO X 0,5 LT",
+              "dosis": 0.053,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm12",
+      "fecha": "2025-10-31",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef1",
+              "hectareas": 34.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef4",
+              "hectareas": 28.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef5",
+              "hectareas": 15.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef6",
+              "hectareas": 19.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef7",
+              "hectareas": 21.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef8",
+              "hectareas": 18.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HARRIER x 5 LT",
+              "dosis": 0.11,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 0.96,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.89,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "DICAMBA GALOPE X 5 LT",
+              "dosis": 0.145,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CORAGEN EVO X 0,5 LT",
+              "dosis": 0.052,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.78,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm13",
+      "fecha": "2025-10-31",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef3",
+              "hectareas": 25.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef2",
+              "hectareas": 20.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.044,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.22,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.33,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HALOXIFOP VELOCITY X 5 LT",
+              "dosis": 0.11,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 2.66,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm14",
+      "fecha": "2025-12-04",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc3",
+              "hectareas": 37.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_sc4",
+              "hectareas": 37.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am1",
+              "hectareas": 20.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.212,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CLEARSOL",
+              "dosis": 0.107,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.021,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HALOXIFOP VELOCITY X 5 LT",
+              "dosis": 0.106,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm15",
+      "fecha": "2025-12-04",
+      "aplicador": "perez david",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am2",
+              "hectareas": 18.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am5",
+              "hectareas": 22.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef2",
+              "hectareas": 15.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef3",
+              "hectareas": 25.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CLEARSOL",
+              "dosis": 0.1,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.021,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CLETODIM ZYNION® PLUS X 20 LT",
+              "dosis": 0.5,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFENTRAZONE CAPAZ 50 X 5 LT",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm16",
+      "fecha": "2025-12-04",
+      "aplicador": "perez david",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef1",
+              "hectareas": 35.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef4",
+              "hectareas": 27.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef5",
+              "hectareas": 12.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef6",
+              "hectareas": 13.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef7",
+              "hectareas": 4.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef8",
+              "hectareas": 19.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.18,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 0.72,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "MAYORAL",
+              "dosis": 0.27,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.021,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm17",
+      "fecha": "2025-12-04",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_lt1",
+              "hectareas": 30.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 5.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_fm5",
+              "hectareas": 20.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.036,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.18,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.09,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "HEAT X 0,35 KG",
+              "dosis": 0.038,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CLETODIM ZYNION® PLUS X 20 LT",
+              "dosis": 0.36,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.54,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm18",
+      "fecha": "2025-12-27",
+      "aplicador": "perez david",
+      "tipo": "Pre emergente",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_lt1",
+              "hectareas": 35.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_fm5",
+              "hectareas": 20.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 5.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "MAYORAL",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.165,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUVOX X 20 LT",
+              "dosis": 2.66,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BIFENTRIN 25% X 1 LT",
+              "dosis": 0.165,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm19",
+      "fecha": "2025-12-27",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_ef1",
+              "hectareas": 35.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef4",
+              "hectareas": 27.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef5",
+              "hectareas": 12.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef6",
+              "hectareas": 13.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef7",
+              "hectareas": 14.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_ef8",
+              "hectareas": 19.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.165,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 2.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFATO DE AMONIO SINERGIA X 20 LT",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm20",
+      "fecha": "2025-12-27",
+      "aplicador": "perez david",
+      "tipo": "Barbecho corto",
+      "costoLabor": 0,
+      "notas": "Maiz 2º",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am6",
+              "hectareas": 26.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_am8",
+              "hectareas": 28.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_sc6",
+              "hectareas": 30.0,
+              "cultivo": "Trigo"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.058,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.24,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.07,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "2,4D VOLERIS X 20 LT",
+              "dosis": 1.19,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.9,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "FIPRONIL 20% SIGMA X 1 LT",
+              "dosis": 0.023,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm21",
+      "fecha": "2025-12-27",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Girasol - Gruesa",
+      "estado": "completada",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_sc3",
+              "hectareas": 38.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_sc4",
+              "hectareas": 34.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am1",
+              "hectareas": 21.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am2",
+              "hectareas": 20.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_am5",
+              "hectareas": 22.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef2",
+              "hectareas": 17.0,
+              "cultivo": "Girasol"
+            },
+            {
+              "loteId": "lt_dm_ef3",
+              "hectareas": 28.0,
+              "cultivo": "Girasol"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.25,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "CLETODIM ZYNION® PLUS X 20 LT",
+              "dosis": 0.89,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "ONTARIO X 5 LT",
+              "dosis": 0.138,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm22",
+      "fecha": "2026-01-28",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Maiz tardio - Gruesa",
+      "estado": "pendiente",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_lt1",
+              "hectareas": 31.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_lt2",
+              "hectareas": 8.0,
+              "cultivo": "Maiz tardio"
+            },
+            {
+              "loteId": "lt_dm_fm5",
+              "hectareas": 21.0,
+              "cultivo": "Maiz tardio"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.05,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.33,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "GESAPRIM 90 WDG X 10KG",
+              "dosis": 1.0,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "MESOTRIONE LEKTOR X 5 LT",
+              "dosis": 0.33,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUTRITION GROW X 5 LT",
+              "dosis": 0.5,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 1.83,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    },
+    {
+      "id": "ord_dm23",
+      "fecha": "2026-01-28",
+      "aplicador": "perez david",
+      "tipo": "Post emergente",
+      "costoLabor": 0,
+      "notas": "Maiz 2º",
+      "estado": "pendiente",
+      "aplicaciones": [
+        {
+          "lotes": [
+            {
+              "loteId": "lt_dm_am6",
+              "hectareas": 26.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_am8",
+              "hectareas": 28.0,
+              "cultivo": "Trigo"
+            },
+            {
+              "loteId": "lt_dm_sc6",
+              "hectareas": 30.0,
+              "cultivo": "Trigo"
+            }
+          ],
+          "productos": [
+            {
+              "producto": "HARD X 1 LT",
+              "dosis": 0.047,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "BREAK-THRU MSO MAX X 10 LT",
+              "dosis": 0.238,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "PICLORAM X 5 LT",
+              "dosis": 0.12,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "NUTRITION GROW X 5 LT",
+              "dosis": 0.475,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            },
+            {
+              "producto": "SULFOSATO TOUCHDOWN X 20 LTS",
+              "dosis": 2.38,
+              "precio": 0,
+              "formulacion": "",
+              "presentacion": 0
+            }
+          ]
+        }
+      ],
+      "campana": "2025/26"
+    }
+  ],
+  "aplicadores": [
+    "posada",
+    "perez david"
+  ],
+  "campana": "2025/26"
+}

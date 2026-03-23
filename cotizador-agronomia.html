@@ -742,10 +742,11 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
 </main>
 
-<!-- WA bar -->
+<!-- Action bar -->
 <div class="wa-bar" id="wa-bar" style="display:none;">
-  <button class="btn btn-green" onclick="App.compartirPDF('cotizacion')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Compartir Cotización</button>
-  <button class="btn btn-outline" onclick="App.compartirPDF('receta')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Compartir Receta</button>
+  <button class="btn btn-green" onclick="App.compartirPDF('cotizacion')">📤 Compartir Cotización</button>
+  <button class="btn btn-outline" onclick="App.compartirPDF('receta')">📋 Compartir Receta</button>
+  <button id="btnSaveAgro" class="btn" onclick="App.guardarCotizacion()" style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;">💾 Guardar</button>
 </div>
 
 
@@ -1855,6 +1856,23 @@ const App = {
     } catch(e) { console.error(e); }
     // Recargar historial desde Sheets
     Historial.recargar();
+  },
+
+  async guardarCotizacion() {
+    const allRows = aplicaciones.flatMap(a => a.rows);
+    if (!allRows.length) { alert('Sin productos cargados'); return; }
+    if (!$('cliente').value.trim()) { alert('Falta cliente'); return; }
+    const btn = $('btnSaveAgro');
+    const orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '⏳ Guardando...';
+    try {
+      await App._registrarYGuardar('cotizacion');
+      alert('Cotización guardada en Sheets');
+    } catch(e) {
+      alert('Error: ' + e.message);
+    } finally {
+      btn.disabled = false; btn.innerHTML = orig;
+    }
   },
 
   /* ── PDF profesional (multi-aplicacion) ── */

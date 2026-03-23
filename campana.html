@@ -451,14 +451,9 @@ const Cloud = {
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        redirect: 'follow',
-        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveCampana', productor: currentProductor, data })
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      let result;
-      try { result = JSON.parse(text); } catch(e) { throw new Error('Respuesta no JSON'); }
+      const result = await res.json();
       if (result.ok) {
         Cloud.setStatus('Sincronizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
         const dot = $('status-dot'); if (dot) dot.style.background = 'var(--green)';

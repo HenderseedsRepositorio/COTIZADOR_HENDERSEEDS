@@ -191,6 +191,14 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .lote-rect.cult-barbecho { background:#e2e8f0;border-color:#94a3b8; }
 .lote-rect.cult-empty { background:#ffffff;border-color:var(--border);border-style:dashed; }
 @media(max-width:639px){ .lotes-grid{flex-direction:column;} .lote-rect{flex:0 0 100%!important;min-height:56px;} .plano-kpi{min-width:65px;padding:6px 8px;} .plano-kpi .pk-val{font-size:.82rem;} }
+.plano-canvas { position:relative;width:100%;min-height:500px;background:#2a2a3a;border-radius:var(--radius);overflow:auto; }
+.plano-estab { position:absolute;cursor:grab;user-select:none;touch-action:none; }
+.plano-estab.dragging { opacity:.8;z-index:100;cursor:grabbing; }
+.plano-estab .pe-label { font-family:var(--title);font-size:10px;color:#ccc;text-align:center;margin-bottom:2px;pointer-events:none; }
+.plano-estab .pe-block { border:2.5px solid #444;overflow:hidden;pointer-events:none; }
+.plano-estab .pe-cell { display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3px;position:relative;cursor:pointer;pointer-events:auto; }
+.plano-estab .pe-cell:hover { filter:brightness(.88); }
+.pe-resize { position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;background:rgba(255,255,255,.15);border-radius:2px 0 0 0; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -742,96 +750,152 @@ const App = {
     kH += '</div>';
     kpiEl.innerHTML = kH;
 
-    // Map — visual field plan matching the Excel plano reference
+    // Map — drag & drop field planner
     const bgMap = {'cult-maiz':'#f0d060','cult-girasol':'#d4b0e8','cult-soja':'#90dba0','cult-trigo':'#f0c090','cult-barbecho':'#d0d0d0','cult-empty':'#ffffff'};
 
-    const loteCell = (l) => {
-      const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
-      const bg = bgMap[cc] || '#fff';
-      const cultivo = l.plan.cultivo || l.cultivo || '';
-      return `<div onclick="App.openPlanModal('${esc(l.id)}')" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.25);border-bottom:1.5px solid rgba(0,0,0,.25);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:3px;position:relative;" onmouseenter="this.style.filter='brightness(.9)'" onmouseleave="this.style.filter=''">
-        <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.35);">${esc(l.nombre)}</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
-        <div style="font-size:9px;color:rgba(0,0,0,.55);">${esc(cultivo || '')}</div>
-        ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
-      </div>`;
+    // Load saved positions (per user)
+    const posKey = 'sc_plano_pos_' + currentProductor;
+    const savedPos = JSON.parse(localStorage.getItem(posKey) || '{}');
+
+    // Default positions for known establishments (% based)
+    const defaultPos = {
+      'San Clemente': {x:2,y:8,w:22,h:82}, '2 Hermanas': {x:52,y:5,w:20,h:22},
+      'La Porteña': {x:82,y:5,w:14,h:40}, 'El Parche 2': {x:40,y:28,w:14,h:22},
+      'El Parche': {x:28,y:56,w:27,h:38}, 'Doña Josefa': {x:57,y:56,w:28,h:38},
+      'Pirovano': {x:2,y:56,w:22,h:38}, 'Charterina': {x:87,y:56,w:11,h:38},
+      'Ginar': {x:30,y:5,w:18,h:45}, 'La Primavera': {x:2,y:5,w:26,h:90}
     };
 
-    // Positioned establishment block
-    const estabPos = (name, has, lotesHtml, gridCss, pos) => {
-      return `<div style="position:absolute;${pos}">
-        <div style="font-family:var(--title);font-size:10px;color:#ccc;text-align:center;margin-bottom:2px;">${esc(name)}<br><span style="font-family:var(--mono);font-size:9px;color:#999;">${fmtInt(has)} ha</span></div>
-        <div style="border:2.5px solid #333;overflow:hidden;height:calc(100% - 28px);display:grid;${gridCss}">
-          ${lotesHtml}
-        </div>
-      </div>`;
-    };
+    const getPos = (estab) => savedPos[estab] || defaultPos[estab] || {x:5,y:5,w:18,h:30};
 
-    const gArr = Object.entries(groups);
-    const gf = (name) => { const f = gArr.find(([n]) => n.toLowerCase().includes(name.toLowerCase())); return f || null; };
+    // Build canvas
+    let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:550px;padding:30px 10px 10px;">`;
+    mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:13px;color:#eee;text-transform:uppercase;letter-spacing:2px;z-index:5;">${esc(campPlan)}</div>`;
 
-    let mH = `<div style="position:relative;width:100%;aspect-ratio:2.2/1;min-height:380px;background:#2a2a3a;border-radius:var(--radius);padding:10px;overflow:hidden;">`;
-    // Title
-    mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:14px;color:#eee;text-transform:uppercase;letter-spacing:2px;">${esc(campPlan)}</div>`;
-
-    // San Clemente — left, tall block
-    let f = gf('clemente');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;', 'left:2%;top:8%;width:24%;height:85%'); }
-
-    // 2 Hermanas — top right area
-    f = gf('hermanas');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr;', 'left:52%;top:5%;width:20%;height:24%'); }
-
-    // La Porteña — far right
-    f = gf('porte');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr;grid-template-rows:1fr 1fr;', 'right:2%;top:5%;width:12%;height:42%'); }
-
-    // El Parche 2 — center
-    f = gArr.find(([n])=>n.toLowerCase()==='el parche 2') || gf('parche 2');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr;', 'left:40%;top:28%;width:13%;height:22%'); }
-
-    // El Parche — bottom center
-    f = gArr.find(([n])=>n.toLowerCase()==='el parche');
-    if (f) { const [n,gd]=f;
+    Object.entries(groups).forEach(([estab, gd]) => {
+      const pos = getPos(estab);
       const nL = gd.lotes.length;
-      const gc = nL<=2?'1fr 1fr':nL<=3?'1fr 1fr 1fr':'repeat('+Math.min(nL,4)+',1fr)';
-      mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:'+gc+';grid-template-rows:1fr 1fr;', 'left:28%;top:56%;width:27%;height:40%');
-    }
+      const cols = nL<=1?1:nL<=2?2:nL<=4?2:3;
+      const rows = Math.ceil(nL / cols);
 
-    // Doña Josefa — bottom right
-    f = gf('josefa');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:repeat('+Math.min(gd.lotes.length,3)+',1fr);grid-template-rows:1fr;', 'left:57%;top:56%;width:28%;height:40%'); }
+      mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#999;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
-    // Pirovano
-    f = gf('pirovano');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr;', 'left:2%;top:56%;width:24%;height:40%'); }
-
-    // Charterina
-    f = gf('charterina');
-    if (f) { const [n,gd]=f; mH += estabPos(n,gd.totalHas, gd.lotes.map(l=>loteCell(l)).join(''), 'grid-template-columns:1fr;', 'right:2%;top:56%;width:12%;height:38%'); }
-
-    // Unpositioned establishments below the map
-    const posNames = ['clemente','hermanas','porte','parche 2','parche','josefa','pirovano','charterina'];
-    const remaining = gArr.filter(([n]) => !posNames.some(p => n.toLowerCase().includes(p) || n.toLowerCase() === 'el '+p));
-
-    mH += '</div>';
-
-    if (remaining.length) {
-      mH += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">';
-      remaining.forEach(([name, gd]) => {
-        mH += `<div style="border:2px solid var(--navy);border-radius:4px;overflow:hidden;min-height:80px;">
-          <div style="font-family:var(--title);font-size:10px;color:var(--navy);text-align:center;padding:4px;">${esc(name)} · ${fmtInt(gd.totalHas)}ha</div>
-          <div style="display:grid;grid-template-columns:repeat(${Math.min(gd.lotes.length,3)},1fr);height:calc(100% - 24px);">${gd.lotes.map(l=>loteCell(l)).join('')}</div>
+      gd.lotes.forEach(l => {
+        const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
+        const bg = bgMap[cc] || '#fff';
+        const cultivo = l.plan.cultivo || l.cultivo || '';
+        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}')">
+          <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
+          <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
+          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
+          ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
         </div>`;
       });
-      mH += '</div>';
-    }
 
-    // Add button for new lote
-    mH += `<div style="text-align:center;margin-top:12px;"><button class="btn btn-outline btn-sm" onclick="App.openLoteModal()" style="font-size:12px;">+ Agregar nuevo lote</button></div>`;
+      mH += '</div>';
+      mH += '<div class="pe-resize"></div>';
+      mH += '</div>';
+    });
+
+    mH += '</div>';
+    mH += `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+      <button class="btn btn-outline btn-sm" onclick="App.openLoteModal()" style="font-size:12px;">+ Agregar lote</button>
+      <button class="btn btn-outline btn-sm" onclick="App.resetPlanoPositions()" style="font-size:12px;color:var(--text-mut);">Resetear posiciones</button>
+    </div>`;
 
     mapEl.innerHTML = mH;
+    App._initPlanoDrag();
   },
+  _initPlanoDrag() {
+    const canvas = $('plano-canvas');
+    if (!canvas) return;
+    const posKey = 'sc_plano_pos_' + currentProductor;
+
+    canvas.querySelectorAll('.plano-estab').forEach(el => {
+      let startX, startY, startLeft, startTop, isDragging = false;
+
+      // Drag
+      el.addEventListener('pointerdown', e => {
+        if (e.target.closest('.pe-cell') || e.target.closest('.pe-resize')) return;
+        e.preventDefault();
+        isDragging = true;
+        el.classList.add('dragging');
+        el.setPointerCapture(e.pointerId);
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX; startY = e.clientY;
+        startLeft = parseFloat(el.style.left); startTop = parseFloat(el.style.top);
+      });
+
+      el.addEventListener('pointermove', e => {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const dx = (e.clientX - startX) / rect.width * 100;
+        const dy = (e.clientY - startY) / rect.height * 100;
+        el.style.left = Math.max(0, Math.min(90, startLeft + dx)) + '%';
+        el.style.top = Math.max(0, Math.min(90, startTop + dy)) + '%';
+      });
+
+      el.addEventListener('pointerup', e => {
+        if (!isDragging) return;
+        isDragging = false;
+        el.classList.remove('dragging');
+        App._savePlanoPositions();
+      });
+
+      // Resize
+      const resizer = el.querySelector('.pe-resize');
+      if (resizer) {
+        let rStartX, rStartY, rStartW, rStartH, isResizing = false;
+        resizer.addEventListener('pointerdown', e => {
+          e.preventDefault(); e.stopPropagation();
+          isResizing = true;
+          resizer.setPointerCapture(e.pointerId);
+          const rect = canvas.getBoundingClientRect();
+          rStartX = e.clientX; rStartY = e.clientY;
+          rStartW = parseFloat(el.style.width); rStartH = parseFloat(el.style.height);
+        });
+        resizer.addEventListener('pointermove', e => {
+          if (!isResizing) return;
+          const rect = canvas.getBoundingClientRect();
+          const dw = (e.clientX - rStartX) / rect.width * 100;
+          const dh = (e.clientY - rStartY) / rect.height * 100;
+          el.style.width = Math.max(8, rStartW + dw) + '%';
+          el.style.height = Math.max(8, rStartH + dh) + '%';
+        });
+        resizer.addEventListener('pointerup', e => {
+          isResizing = false;
+          App._savePlanoPositions();
+        });
+      }
+    });
+  },
+
+  _savePlanoPositions() {
+    const canvas = $('plano-canvas');
+    if (!canvas) return;
+    const posKey = 'sc_plano_pos_' + currentProductor;
+    const positions = {};
+    canvas.querySelectorAll('.plano-estab').forEach(el => {
+      const estab = el.dataset.estab;
+      positions[estab] = {
+        x: parseFloat(el.style.left) || 0,
+        y: parseFloat(el.style.top) || 0,
+        w: parseFloat(el.style.width) || 20,
+        h: parseFloat(el.style.height) || 30
+      };
+    });
+    localStorage.setItem(posKey, JSON.stringify(positions));
+  },
+
+  resetPlanoPositions() {
+    const posKey = 'sc_plano_pos_' + currentProductor;
+    localStorage.removeItem(posKey);
+    App.renderPlanos();
+    showToast('Posiciones reseteadas');
+  },
+
   openPlanModal(lid) {
     const l = data.lotes.find(x => x.id === lid);
     if (!l) return;

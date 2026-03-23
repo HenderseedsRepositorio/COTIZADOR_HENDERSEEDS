@@ -606,7 +606,29 @@ const App = {
     cs.value = data.campana; cs.addEventListener('change', function() { data.campana = this.value; Storage.save(data); });
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
-    App._initAplicaciones(); App.renderLotes(); App.refreshSelectors(); loadCatalog();
+    App._initAplicaciones(); App.renderLotes(); App.refreshSelectors();
+    loadCatalog().then(() => App._assignCatalogPrices());
+  },
+
+  _assignCatalogPrices() {
+    if (!Object.keys(catalogo).length || !data.ordenes.length) return;
+    // Build lookup: product name (lowercase) -> precio_usd
+    const lookup = {};
+    Object.values(catalogo).forEach(items => items.forEach(p => {
+      lookup[p.producto.toLowerCase()] = p.precio_usd || 0;
+    }));
+    let updated = false;
+    data.ordenes.forEach(o => {
+      (o.aplicaciones || []).forEach(a => {
+        (a.productos || []).forEach(p => {
+          if ((!p.precio || p.precio === 0) && lookup[p.producto.toLowerCase()]) {
+            p.precio = lookup[p.producto.toLowerCase()];
+            updated = true;
+          }
+        });
+      });
+    });
+    if (updated) Storage.save(data);
   },
 
   /* ── LOTES CRUD ── */

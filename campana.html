@@ -519,16 +519,13 @@ const App = {
         data = migrateData(Storage.load());
       }
 
-      // Auto-import initial data — version-based: reimport if embedded version is newer
-      const DATA_VERSION = 2; // bump this to force reimport
+      // Auto-import initial data — only if user has NO data at all
       const initialMap = { JAM: typeof JAM_INITIAL_DATA !== 'undefined' ? JAM_INITIAL_DATA : null, Ginar: typeof GINAR_INITIAL_DATA !== 'undefined' ? GINAR_INITIAL_DATA : null };
       const importData = initialMap[userId];
-      const savedVer = parseInt(localStorage.getItem('sc_data_ver_' + userId) || '0');
-      if (importData && savedVer < DATA_VERSION) {
+      if (importData && (!data.ordenes || !data.ordenes.length)) {
         data = JSON.parse(JSON.stringify(importData));
         Storage.save(data);
         Cloud.saveToCloud();
-        localStorage.setItem('sc_data_ver_' + userId, String(DATA_VERSION));
       }
 
       $('productor-gate').style.display = 'none';

@@ -795,7 +795,7 @@ const App = {
     };
     const numCell = (d, unit) => d ? `<span style="font-family:var(--mono);font-size:10px;color:var(--text-sec);">${fmtInt(d)}${unit||''}</span>` : '<span style="color:var(--text-mut);font-size:10px;">—</span>';
     const priceCell = (p) => p ? `<span style="font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600;">$${fmtInt(p)}</span>` : '<span style="color:var(--text-mut);font-size:10px;">—</span>';
-    const gridCols = '55px 80px 40px 2px 90px 42px 35px 35px 24px 2px 90px 42px 35px 35px 24px 28px';
+    const gridCols = '50px 70px 38px 2px 88px 40px 32px 32px 20px 2px 88px 40px 32px 32px 20px 26px';
 
     // Group by establecimiento
     const groups = {};
@@ -838,10 +838,9 @@ const App = {
 
     Object.entries(groups).forEach(([est, lotes]) => {
       const estHas = lotes.reduce((s,l) => s + (l.hectareas||0), 0);
-      html += `<div style="display:grid;grid-template-columns:55px 80px 1fr;gap:2px;padding:5px 6px;background:var(--navy);color:white;font-family:var(--title);font-size:10px;text-transform:uppercase;align-items:center;margin-top:4px;border-radius:4px;">
+      html += `<div style="padding:5px 8px;background:var(--navy);color:white;font-family:var(--title);font-size:10px;text-transform:uppercase;margin-top:4px;border-radius:4px;display:flex;align-items:center;gap:8px;white-space:nowrap;">
         <span>${esc(est)}</span>
-        <span style="font-family:var(--mono);font-weight:400;font-size:9px;">${fmtInt(estHas)} ha</span>
-        <span></span>
+        <span style="font-family:var(--mono);font-weight:400;font-size:9px;opacity:.7;">${fmtInt(estHas)} ha</span>
       </div>`;
 
       lotes.forEach((l, i) => {
@@ -858,13 +857,13 @@ const App = {
           <span style="text-align:center;">${numCell(fina.densidad)}</span>
           <span style="text-align:center;">${numCell(fina.rinde)}</span>
           <span style="text-align:center;">${priceCell(fina.precio)}</span>
-          <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')" style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;cursor:pointer;padding:3px 4px;display:inline-flex;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>
+          <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')" style="background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>
           <span style="background:#d97706;width:2px;height:100%;border-radius:1px;opacity:.25;"></span>
           <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
           <span style="text-align:center;">${numCell(gruesa.densidad)}</span>
           <span style="text-align:center;">${numCell(gruesa.rinde)}</span>
           <span style="text-align:center;">${priceCell(gruesa.precio)}</span>
-          <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${campPlan}')" style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;cursor:pointer;padding:3px 4px;display:inline-flex;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>
+          <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${campPlan}')" style="background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>
           <span style="text-align:right;display:flex;gap:1px;justify-content:flex-end;align-items:center;">
             <button style="background:none;border:none;cursor:pointer;padding:3px;" onclick="App.openLoteModal('${esc(l.id)}')" title="Editar lote"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
             <button style="background:none;border:none;cursor:pointer;padding:1px;opacity:.2;" onclick="if(confirm('Eliminar ${esc(l.nombre)}?'))App.removeLote('${esc(l.id)}')" title="Eliminar"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>

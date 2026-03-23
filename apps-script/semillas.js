@@ -69,6 +69,7 @@ function doGet(e) {
       // ── Campaña ──
       case 'loadCampana':         result = loadCampana(e.parameter.productor); break;
       case 'listProductores':     result = listProductores(); break;
+      case 'loginCampana':        result = loginCampana(e.parameter.user, e.parameter.pass); break;
 
       default:
         result = { error: 'Acción no reconocida: ' + action };
@@ -706,6 +707,23 @@ function saveCampana(payload) {
   sheet.getRange(1, 1, rows.length, 3).setValues(rows);
 
   return { ok: true, updatedAt: new Date().toISOString(), sheetName: sheetName };
+}
+
+function loginCampana(user, pass) {
+  if (!user || !pass) return { ok: false, error: 'Usuario y contraseña requeridos' };
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Usuarios');
+  if (!sheet) return { ok: false, error: 'Hoja Usuarios no encontrada' };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    var u = String(data[i][0] || '').trim().toLowerCase();
+    var p = String(data[i][1] || '').trim();
+    var nombre = String(data[i][2] || '').trim() || data[i][0];
+    if (u === user.trim().toLowerCase() && p === pass.trim()) {
+      return { ok: true, nombre: nombre, productor: String(data[i][3] || nombre).trim() };
+    }
+  }
+  return { ok: false, error: 'Usuario o contraseña incorrectos' };
 }
 
 function listProductores() {

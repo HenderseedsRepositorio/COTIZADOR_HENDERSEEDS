@@ -212,13 +212,17 @@ textarea.inp { resize: vertical; min-height: 60px; }
     <img src="assets/logo-henderseeds.png" alt="Henderseeds" style="height:30px;width:auto;object-fit:contain;">
   </div>
 
-  <!-- Productor selector (shown before anything else) -->
-  <div id="productor-gate" class="card fu" style="text-align:center;padding:30px 20px;margin-top:20px;">
-    <div style="font-family:var(--title);font-size:16px;color:var(--navy);text-transform:uppercase;margin-bottom:14px;">Seguimiento de Lotes</div>
-    <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Ingresa tu nombre para cargar o crear tu cuenta</div>
-    <input type="text" id="productor-input" class="inp" placeholder="Nombre del productor..." style="max-width:300px;margin:0 auto 10px;display:block;">
-    <div id="productor-list" style="margin-bottom:14px;"></div>
-    <button class="btn btn-accent" onclick="App.loginProductor()" style="margin:0 auto;">Ingresar</button>
+  <!-- Login -->
+  <div id="productor-gate" class="card fu" style="text-align:center;padding:30px 20px;margin-top:20px;max-width:360px;margin-left:auto;margin-right:auto;">
+    <div style="font-family:var(--title);font-size:16px;color:var(--navy);text-transform:uppercase;margin-bottom:6px;">Seguimiento de Lotes</div>
+    <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Ingresá con tu usuario y contraseña</div>
+    <input type="text" id="login-user" class="inp" placeholder="Usuario" autocomplete="username" style="margin-bottom:8px;display:block;">
+    <input type="password" id="login-pass" class="inp" placeholder="Contraseña" autocomplete="current-password" style="margin-bottom:8px;display:block;">
+    <label style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--text-sec);margin-bottom:14px;cursor:pointer;">
+      <input type="checkbox" id="login-remember" checked> Recordar sesión
+    </label>
+    <div id="login-error" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-bottom:10px;"></div>
+    <button class="btn btn-accent" onclick="App.loginProductor()" style="margin:0 auto;width:100%;">Ingresar</button>
   </div>
 
   <div id="app-main" style="display:none;">
@@ -446,7 +450,8 @@ const Cloud = {
 /* ══════════════════════════════════════
    PRODUCTOR LOGIN
    ══════════════════════════════════════ */
-let currentProductor = localStorage.getItem('sc_productor') || '';
+let currentProductor = '';
+const savedSession = JSON.parse(localStorage.getItem('sc_session') || 'null');
 
 function migrateData(d) {
   if (!d) return Storage.defaults();
@@ -489,27 +494,56 @@ document.addEventListener('click', e => { if (e.target.id === 'modal-overlay') c
    APP
    ══════════════════════════════════════ */
 const App = {
-  async loginProductor(name) {
-    const inp = $('productor-input');
-    const nombre = name || inp.value.trim();
-    if (!nombre) { inp.style.borderColor = 'var(--red)'; return; }
-
+  async loginProductor(fromSaved) {
     const loginBtn = document.querySelector('#productor-gate .btn-accent');
-    const originalText = loginBtn ? loginBtn.textContent : '';
-    if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Cargando...'; }
+    const errEl = $('login-error');
+    let user, pass, nombre, productor;
+
+    if (fromSaved && savedSession) {
+      user = savedSession.user;
+      pass = savedSession.pass;
+      nombre = savedSession.nombre;
+      productor = savedSession.productor;
+    } else {
+      user = $('login-user').value.trim();
+      pass = $('login-pass').value.trim();
+      if (!user || !pass) {
+        if (errEl) { errEl.textContent = 'Completá usuario y contraseña'; errEl.style.display = 'block'; }
+        return;
+      }
+      if (errEl) errEl.style.display = 'none';
+    }
+
+    if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Verificando...'; }
 
     try {
-      currentProductor = nombre;
-      localStorage.setItem('sc_productor', nombre);
+      // Validate against Sheets (skip if resuming saved session)
+      if (!fromSaved) {
+        const res = await fetch(API_URL + '?action=loginCampana&user=' + encodeURIComponent(user) + '&pass=' + encodeURIComponent(pass), { redirect: 'follow' });
+        const result = await res.json();
+        if (!result.ok) {
+          if (errEl) { errEl.textContent = result.error || 'Credenciales incorrectas'; errEl.style.display = 'block'; }
+          return;
+        }
+        nombre = result.nombre;
+        productor = result.productor || nombre;
+
+        // Save session if "Recordar" is checked
+        if ($('login-remember') && $('login-remember').checked) {
+          localStorage.setItem('sc_session', JSON.stringify({ user, pass, nombre, productor }));
+        }
+      }
+
+      currentProductor = productor;
+      localStorage.setItem('sc_productor', productor);
 
       // Try to load from cloud first
       const cloudData = await Cloud.loadFromCloud();
       if (cloudData) {
         data = migrateData(cloudData);
-        Storage.save(data); // cache locally (won't re-trigger cloud sync because we clear timer)
+        Storage.save(data);
         if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
       } else {
-        // Load from localStorage
         data = migrateData(Storage.load());
       }
 
@@ -518,32 +552,28 @@ const App = {
       $('productor-label').textContent = nombre + ' ▾';
 
       App.init();
+    } catch(e) {
+      if (errEl) { errEl.textContent = 'Error de conexión. Intentá de nuevo.'; errEl.style.display = 'block'; }
     } finally {
-      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = originalText; }
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Ingresar'; }
     }
   },
 
   logoutProductor() {
     if (formDirty && !confirm('Hay cambios sin guardar. Salir?')) return;
-    // Force sync before leaving
     if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
     Cloud.saveToCloud();
     currentProductor = '';
     localStorage.removeItem('sc_productor');
+    localStorage.removeItem('sc_session');
     $('productor-gate').style.display = '';
     $('app-main').style.display = 'none';
-    $('productor-input').value = '';
+    $('login-user').value = '';
+    $('login-pass').value = '';
+    if ($('login-error')) $('login-error').style.display = 'none';
     formDirty = false;
-    App._loadProductorList();
   },
 
-  async _loadProductorList() {
-    const list = await Cloud.loadProductores();
-    const el = $('productor-list');
-    if (!list.length) { el.innerHTML = ''; return; }
-    el.innerHTML = '<div style="font-size:11px;color:var(--text-mut);margin-bottom:6px;">Productores existentes:</div>' +
-      list.map(p => `<button style="display:inline-block;margin:3px;padding:6px 14px;border:1.5px solid var(--accent);border-radius:20px;background:var(--accent-bg);color:var(--navy);font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font);" onclick="App.loginProductor('${esc(p)}')">${esc(p)}</button>`).join('');
-  },
 
   init() {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -1701,15 +1731,15 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Enter key on productor input
-  $('productor-input').addEventListener('keydown', e => { if (e.key === 'Enter') App.loginProductor(); });
+  // Enter key on login inputs
+  ['login-user', 'login-pass'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') App.loginProductor(); });
+  });
 
-  // If already logged in, auto-login
-  if (currentProductor) {
-    App.loginProductor(currentProductor);
-  } else {
-    // Show gate, load existing productores
-    App._loadProductorList();
+  // Auto-login from saved session
+  if (savedSession) {
+    App.loginProductor(true);
   }
 
   // Delegated listeners (always active)

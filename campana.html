@@ -1753,10 +1753,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `<button data-uid="${u.id}" onclick="App.loginProductor('${u.id}')" style="padding:12px 20px;border:1.5px solid var(--accent);border-radius:12px;background:var(--accent-bg);color:var(--navy);font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font);min-width:80px;">${u.nombre}</button>`
   ).join('');
 
-  // Auto-login from saved user
-  if (savedUserId && USUARIOS.find(u => u.id === savedUserId)) {
-    App.loginProductor(savedUserId);
-  }
+  // Always show user selection — no auto-login
 
   // Delegated listeners (always active)
   $('ordenes-list').addEventListener('click', e => { const btn = e.target.closest('[data-oid][data-estado]'); if (btn) { e.stopPropagation(); App.cambiarEstadoOrden(btn.dataset.oid, btn.dataset.estado); } });

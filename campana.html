@@ -1188,13 +1188,13 @@ const App = {
       variedad: $('m-plan-variedad').value.trim(),
       fechaSiembra: $('m-plan-fecha').value
     };
-    Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan guardado');
+    Storage.save(data); closeModal(); App.renderPlanos(); App.renderLotes(); showToast('Plan guardado');
   },
   clearPlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
     const campPlan = campOverride || $('plan-campana')?.value || '26/27';
     if (l.planes) delete l.planes[campPlan];
-    Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan eliminado');
+    Storage.save(data); closeModal(); App.renderPlanos(); App.renderLotes(); showToast('Plan eliminado');
   },
 
   openLoteModal(lid) {

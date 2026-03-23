@@ -701,7 +701,15 @@ input, select, button { font-family: inherit; font-size: inherit; }
         <button class="btn-add-app" onclick="App.addAplicacion()">+ Agregar Aplicación</button>
         <div id="resumen-consolidado" style="display:none;"></div>
 
-        <!-- status moved to header -->
+        <!-- ACCIONES (inline, debajo del resumen) -->
+        <div id="acciones-inline" style="display:none;margin-top:10px;display:none;">
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-green" style="flex:1;" onclick="App.compartirPDF('cotizacion')">📤 Compartir Cotización</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="App.compartirPDF('receta')">📋 Compartir Receta</button>
+            <button id="btnSaveAgroInline" class="btn" style="flex:1;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;" onclick="App.guardarCotizacion()">💾 Guardar</button>
+          </div>
+        </div>
+
       </div>
 
 
@@ -742,12 +750,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
 </main>
 
-<!-- Action bar -->
-<div class="wa-bar" id="wa-bar" style="display:none;">
-  <button class="btn btn-green" onclick="App.compartirPDF('cotizacion')">📤 Compartir Cotización</button>
-  <button class="btn btn-outline" onclick="App.compartirPDF('receta')">📋 Compartir Receta</button>
-  <button id="btnSaveAgro" class="btn" onclick="App.guardarCotizacion()" style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;">💾 Guardar</button>
-</div>
+<!-- wa-bar removed: actions are now inline below resumen -->
 
 
 <script>
@@ -1713,7 +1716,7 @@ const App = {
 
     // Show/hide WA bar
     const anyRows = aplicaciones.some(a => a.rows.length > 0);
-    $('wa-bar').style.display = anyRows ? 'flex' : 'none';
+    $('acciones-inline').style.display = anyRows ? 'block' : 'none';
 
     // Render consolidated summary
     App.renderConsolidado();
@@ -1862,7 +1865,7 @@ const App = {
     const allRows = aplicaciones.flatMap(a => a.rows);
     if (!allRows.length) { alert('Sin productos cargados'); return; }
     if (!$('cliente').value.trim()) { alert('Falta cliente'); return; }
-    const btn = $('btnSaveAgro');
+    const btn = $('btnSaveAgroInline');
     const orig = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = '⏳ Guardando...';
     try {
@@ -2100,8 +2103,9 @@ const App = {
   async compartirPDF(modo) {
     if (!aplicaciones.some(a => a.rows.length > 0)) return;
     const esReceta = modo === 'receta';
-    const btnSelector = esReceta ? '#wa-bar .btn-outline' : '#wa-bar .btn-green';
+    const btnSelector = esReceta ? '#acciones-inline .btn-outline' : '#acciones-inline .btn-green';
     const btn = document.querySelector(btnSelector);
+    if (!btn) return;
     const origText = btn.textContent;
     btn.textContent = 'Generando...';
     btn.disabled = true;

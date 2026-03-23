@@ -1074,7 +1074,7 @@ const App = {
           appInsHa += costoHa;
           return `<tr>
             <td>${esc(p.producto)}</td>
-            <td style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-sec);">$${fmt(p.precio)}</td>
+            <td style="text-align:right;font-family:var(--mono);font-size:10px;${p.precio > 0 ? 'color:var(--text-sec);' : 'color:var(--red);font-weight:700;'}"><input type="number" inputmode="decimal" value="${p.precio}" step="0.01" min="0" style="width:50px;border:1px solid ${p.precio > 0 ? 'var(--border)' : 'var(--red)'};border-radius:6px;padding:3px 4px;font-size:10px;font-family:var(--mono);text-align:right;color:inherit;background:${p.precio > 0 ? '#fff' : '#fef2f2'};" onchange="App.updateOrdenPrecio('${esc(o.id)}','${esc(p.producto)}',this.value)"></td>
             <td style="text-align:right;">${p.dosis} ${esc(p.unidad || 'L')}/ha</td>
             <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--accent);">$${fmt(costoHa)}</td>
             <td style="text-align:right;">${vol}</td>
@@ -1714,6 +1714,19 @@ const App = {
     } catch(err) {
       if (err.name !== 'AbortError') doc.save(fn);
     }
+  },
+
+  updateOrdenPrecio(oid, producto, valor) {
+    const o = data.ordenes.find(x => x.id === oid);
+    if (!o) return;
+    const precio = parseFloat(valor) || 0;
+    (o.aplicaciones || []).forEach(a => {
+      (a.productos || []).forEach(p => {
+        if (p.producto === producto) p.precio = precio;
+      });
+    });
+    Storage.save(data);
+    App.renderOrdenes();
   },
 
   duplicarOrden(oid) {

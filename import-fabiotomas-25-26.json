@@ -3,86 +3,226 @@
     {
       "id": "lt_ft_gs1",
       "nombre": "GS1",
-      "hectareas": 30.0,
+      "hectareas": 32.0,
       "cultivo": "Maiz",
       "establecimiento": "Guazone"
     },
     {
       "id": "lt_ft_gs4",
       "nombre": "GS4",
-      "hectareas": 30.0,
+      "hectareas": 32.0,
       "cultivo": "Maiz",
       "establecimiento": "Guazone"
     },
     {
       "id": "lt_ft_fm4",
       "nombre": "FM4",
-      "hectareas": 40.0,
+      "hectareas": 50.0,
       "cultivo": "Maiz",
       "establecimiento": "Fito Mateos"
     },
     {
       "id": "lt_ft_ms5",
       "nombre": "MS5",
-      "hectareas": 20.0,
+      "hectareas": 21.0,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia"
     },
     {
       "id": "lt_ft_es1",
       "nombre": "ES1",
-      "hectareas": 100.0,
+      "hectareas": 152.56,
       "cultivo": "Girasol",
       "establecimiento": "El Socorro"
     },
     {
       "id": "lt_ft_ms3",
       "nombre": "MS3",
-      "hectareas": 35.0,
+      "hectareas": 52.0,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia"
     },
     {
       "id": "lt_ft_ms4",
       "nombre": "MS4",
-      "hectareas": 15.0,
+      "hectareas": 22.0,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia"
     },
     {
       "id": "lt_ft_pm1",
       "nombre": "PM1",
-      "hectareas": 30.0,
+      "hectareas": 47.5,
       "cultivo": "Girasol",
       "establecimiento": "PM"
     },
     {
       "id": "lt_ft_pm2",
       "nombre": "PM2",
-      "hectareas": 30.0,
+      "hectareas": 39.0,
       "cultivo": "Girasol",
       "establecimiento": "PM"
     },
     {
       "id": "lt_ft_pm3",
       "nombre": "PM3",
-      "hectareas": 10.0,
+      "hectareas": 39.0,
       "cultivo": "Girasol",
       "establecimiento": "PM"
     },
     {
       "id": "lt_ft_ss1",
       "nombre": "SS1",
-      "hectareas": 30.0,
+      "hectareas": 35.0,
       "cultivo": "Girasol",
       "establecimiento": "San Salvador"
     },
     {
       "id": "lt_ft_ss4",
       "nombre": "SS4",
-      "hectareas": 40.0,
+      "hectareas": 55.0,
       "cultivo": "Girasol",
       "establecimiento": "San Salvador"
+    },
+    {
+      "id": "lt_ft_pm4",
+      "nombre": "PM4",
+      "hectareas": 30.0,
+      "cultivo": "",
+      "establecimiento": "PM"
+    },
+    {
+      "id": "lt_ft_pm5",
+      "nombre": "PM5",
+      "hectareas": 28.0,
+      "cultivo": "",
+      "establecimiento": "PM"
+    },
+    {
+      "id": "lt_ft_pm6",
+      "nombre": "PM6",
+      "hectareas": 37.0,
+      "cultivo": "",
+      "establecimiento": "PM"
+    },
+    {
+      "id": "lt_ft_gs2",
+      "nombre": "GS2",
+      "hectareas": 35.0,
+      "cultivo": "",
+      "establecimiento": "Guazone"
+    },
+    {
+      "id": "lt_ft_gs3",
+      "nombre": "GS3",
+      "hectareas": 35.0,
+      "cultivo": "",
+      "establecimiento": "Guazone"
+    },
+    {
+      "id": "lt_ft_ss2",
+      "nombre": "SS2",
+      "hectareas": 7.0,
+      "cultivo": "",
+      "establecimiento": "San Salvador"
+    },
+    {
+      "id": "lt_ft_ss3",
+      "nombre": "SS3",
+      "hectareas": 15.0,
+      "cultivo": "",
+      "establecimiento": "San Salvador"
+    },
+    {
+      "id": "lt_ft_ss5",
+      "nombre": "SS5",
+      "hectareas": 57.0,
+      "cultivo": "",
+      "establecimiento": "San Salvador"
+    },
+    {
+      "id": "lt_ft_ss6",
+      "nombre": "SS6",
+      "hectareas": 44.0,
+      "cultivo": "",
+      "establecimiento": "San Salvador"
+    },
+    {
+      "id": "lt_ft_sm1",
+      "nombre": "SM1",
+      "hectareas": 26.0,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm2",
+      "nombre": "SM2",
+      "hectareas": 24.5,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm3",
+      "nombre": "SM3",
+      "hectareas": 21.3,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm4",
+      "nombre": "SM4",
+      "hectareas": 27.5,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm5",
+      "nombre": "SM5",
+      "hectareas": 31.0,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm6",
+      "nombre": "SM6",
+      "hectareas": 15.0,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm7",
+      "nombre": "SM7",
+      "hectareas": 14.4,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm8",
+      "nombre": "SM8",
+      "hectareas": 28.0,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_sm9",
+      "nombre": "SM9",
+      "hectareas": 27.0,
+      "cultivo": "",
+      "establecimiento": "Santa Maria"
+    },
+    {
+      "id": "lt_ft_ms1",
+      "nombre": "MS1",
+      "hectareas": 24.0,
+      "cultivo": "",
+      "establecimiento": "Masceroni-Coscia"
+    },
+    {
+      "id": "lt_ft_ms2",
+      "nombre": "MS2",
+      "hectareas": 33.0,
+      "cultivo": "",
+      "establecimiento": "Masceroni-Coscia"
     }
   ],
   "ordenes": [

@@ -654,7 +654,8 @@ function loadCampana(productor) {
         ordenes: ordenes,
         aplicadores: meta.aplicadores || [],
         campana: meta.campana || '2025/26',
-        tiposLabor: meta.tiposLabor || []
+        tiposLabor: meta.tiposLabor || [],
+        planoPos: meta.planoPos || {}
       }
     };
   } catch(err) {
@@ -686,7 +687,8 @@ function saveCampana(payload) {
   var meta = {
     campana: campData.campana || '2025/26',
     aplicadores: campData.aplicadores || [],
-    tiposLabor: campData.tiposLabor || []
+    tiposLabor: campData.tiposLabor || [],
+    planoPos: campData.planoPos || {}
   };
   rows.push(['META', JSON.stringify(meta), new Date().toISOString()]);
 

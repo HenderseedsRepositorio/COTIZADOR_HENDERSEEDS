@@ -750,16 +750,18 @@ input, select, button { font-family: inherit; font-size: inherit; }
       <div id="condTable"><p style="color:var(--text-mut);font-size:.75rem;">Cargando condiciones...</p></div>
     </div>
     <!-- Hidden card for sharing -->
-    <div id="cond-share-card" style="position:absolute;left:-9999px;z-index:-1;background:#fff;padding:24px;width:600px;">
-      <div id="cond-share-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <div>
-            <h2 style="font-size:16px;color:var(--navy);margin:0;">Condiciones Comerciales</h2>
-            <p style="font-size:11px;color:var(--text-mut);margin:2px 0 0;" id="cond-share-date"></p>
+    <div id="cond-share-card" style="position:absolute;left:-9999px;top:0;width:400px;">
+      <div id="cond-share-content" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.3);">
+        <div style="background:linear-gradient(90deg,var(--navy),#2d6fc4,#e8f0fe);height:6px;"></div>
+        <div style="padding:22px 22px 18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--border);">
+            <img src="assets/logo-henderseeds.png" alt="HenderSeeds" style="height:32px;">
+            <span style="font-size:.7rem;color:var(--text-mut);" id="cond-share-fecha"></span>
           </div>
-          <img id="cond-share-logo" src="assets/logo-henderseeds.png" style="height:30px;" alt="Henderseeds">
+          <p style="margin:0 0 12px;font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;">Condiciones Comerciales</p>
+          <div id="cond-share-table"></div>
         </div>
-        <div id="condTableShare"></div>
+        <div style="background:linear-gradient(90deg,var(--navy),#e8f0fe);height:4px;"></div>
       </div>
     </div>
   </section>
@@ -774,6 +776,36 @@ const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+async function captureAndShare(el, filename, opts={}) {
+  const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
+  if(opts.pdf) {
+    const imgData = canvas.toDataURL('image/png');
+    const pxW = canvas.width, pxH = canvas.height;
+    const mmW = (pxW / 3) * 25.4 / 96, mmH = (pxH / 3) * 25.4 / 96;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
+    pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
+    const pdfBlob = pdf.output('blob');
+    const pdfFile = new File([pdfBlob], filename.replace(/\.png$/i,'.pdf'), {type:'application/pdf'});
+    if(opts.share && navigator.canShare && navigator.canShare({files:[pdfFile]})) {
+      await navigator.share({files:[pdfFile], title:opts.title||filename});
+      return;
+    }
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a'); a.href=url; a.download=pdfFile.name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    return;
+  }
+  const blob = await new Promise(r => canvas.toBlob(r,'image/png',1.0));
+  if(opts.share && navigator.canShare) {
+    const file = new File([blob], filename, {type:'image/png'});
+    if(navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:opts.title||filename}); return; }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
 
 function debounce(fn, ms=150) { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
@@ -1318,7 +1350,7 @@ const Condiciones = {
     if (!this.data) return;
     const html = this.buildTableHTML(this.data);
     $('condTable').innerHTML = html;
-    const share = $('condTableShare');
+    const share = $('cond-share-table');
     if (share) share.innerHTML = html;
     const dateEl = $('cond-share-date');
     if (dateEl) dateEl.textContent = dateStr();
@@ -1326,32 +1358,14 @@ const Condiciones = {
   async share() {
     if (!this.data) { await this.load(); }
     if (!this.data) return;
-    this.renderTable();
+    $('cond-share-fecha').innerText = dateStr();
+    $('cond-share-table').innerHTML = this.buildTableHTML(this.data);
     const card = $('cond-share-card');
-    card.style.position = 'static';
-    card.style.left = '0';
-    card.style.zIndex = '9999';
+    card.style.position = 'fixed'; card.style.left = '0'; card.style.top = '0'; card.style.zIndex = '9999';
     try {
-      const canvas = await html2canvas($('cond-share-content'), { scale: 2, backgroundColor: '#fff' });
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      const pdfW = 190, pdfH = canvas.height * pdfW / canvas.width;
-      pdf.addImage(imgData, 'PNG', 10, 10, pdfW, pdfH);
-      const blob = pdf.output('blob');
-      const file = new File([blob], 'Condiciones_Henderseeds.pdf', { type: 'application/pdf' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try { await navigator.share({ files: [file], title: 'Condiciones Comerciales' }); } catch(e) {}
-      } else {
-        pdf.save('Condiciones_Henderseeds.pdf');
-      }
-    } catch(e) {
-      if (e.name !== 'AbortError') alert('Error al generar PDF');
-    } finally {
-      card.style.position = 'absolute';
-      card.style.left = '-9999px';
-      card.style.zIndex = '-1';
-    }
+      await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.pdf', {share:true, pdf:true, title:'Condiciones Comerciales — Henderseeds'});
+    } catch(e) { if (e.name !== 'AbortError') alert('Error al generar PDF'); }
+    finally { card.style.position = 'absolute'; card.style.left = '-9999px'; card.style.zIndex = ''; }
   }
 };
 

@@ -1055,17 +1055,15 @@ const Historial = {
     Historial.render();
   },
   render() {
-    const body = $('hist-body');
     const bodyInline = $('hist-body-inline');
+    if (!bodyInline) return;
     if (!Historial.items.length) {
-      const empty = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
-      body.innerHTML = empty;
-      if (bodyInline) bodyInline.innerHTML = empty;
+      bodyInline.innerHTML = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
       return;
     }
     const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
     const estadoColors = {Pendiente:'#f59e0b', Enviada:'#3b82f6', 'Venta cargada':'#22c55e'};
-    body.innerHTML = Historial.items.map((h, idx) => {
+    bodyInline.innerHTML = Historial.items.map((h, idx) => {
       const tipoTag = h.tipo === 'Receta'
         ? `<span style="font-size:10px; background:var(--bg); color:var(--text-sec); padding:1px 6px; border-radius:4px;">Receta</span>`
         : `<span style="font-size:10px; background:var(--accent-bg); color:var(--accent); padding:1px 6px; border-radius:4px;">Cotización</span>`;
@@ -1121,7 +1119,7 @@ const Historial = {
         </div>
       </div>`;
     }).join('');
-    if (bodyInline) bodyInline.innerHTML = body.innerHTML;
+    // bodyInline is the only target now (hist tab was replaced by condiciones)
   },
   setEstado(numero, estado) {
     const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');

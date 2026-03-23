@@ -702,6 +702,7 @@ const App = {
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
     App._migratePlanKeys();
+    App._migrateCultivoToPlans();
     App._initAplicaciones(); App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
     loadCatalog().then(() => App._assignCatalogPrices());
   },
@@ -741,6 +742,22 @@ const App = {
       if (lote.planes[long]) return lote.planes[long];
     }
     return {};
+  },
+
+  // Migrate lote.cultivo to plan 2025/26 (one-time migration)
+  _migrateCultivoToPlans() {
+    let changed = false;
+    data.lotes.forEach(l => {
+      if (l.cultivo && (!l.planes || !l.planes['2025/26'] || !l.planes['2025/26'].cultivo)) {
+        if (!l.planes) l.planes = {};
+        l.planes['2025/26'] = l.planes['2025/26'] || {};
+        l.planes['2025/26'].cultivo = l.planes['2025/26'].cultivo || l.cultivo;
+        l.planes['2025/26'].variedad = l.planes['2025/26'].variedad || l.variedad || '';
+        l.planes['2025/26'].densidad = l.planes['2025/26'].densidad || l.densidad || 0;
+        changed = true;
+      }
+    });
+    if (changed) Storage.save(data);
   },
 
   // Migrate plan keys from short to long format
@@ -792,7 +809,6 @@ const App = {
     data.lotes.forEach(l => {
       const g = App._getPlan(l, campPlan); const f = App._getPlan(l, finaKey);
       if (g.cultivo) gruesaCults[g.cultivo] = (gruesaCults[g.cultivo]||0) + (l.hectareas||0);
-      else if (l.cultivo) gruesaCults[l.cultivo] = (gruesaCults[l.cultivo]||0) + (l.hectareas||0);
       if (f.cultivo) finaCults[f.cultivo] = (finaCults[f.cultivo]||0) + (l.hectareas||0);
     });
 
@@ -830,7 +846,7 @@ const App = {
       lotes.forEach((l, i) => {
         const gruesa = App._getPlan(l, campPlan);
         const fina = App._getPlan(l, finaKey);
-        const gCult = gruesa.cultivo || l.cultivo || '';
+        const gCult = gruesa.cultivo || '';
         const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
         html += `<div style="display:grid;grid-template-columns:${gridCols};gap:4px;padding:8px 10px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
           <span style="font-weight:700;font-size:13px;color:var(--navy);">${esc(l.nombre)}</span>
@@ -937,9 +953,9 @@ const App = {
 
     // Helper: standard lote cell
     const cellHtml = (l) => {
-      const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
+      const cc = App._cultivoClass(l.plan.cultivo || '');
       const bg = bgMap[cc] || '#fff';
-      const cultivo = l.plan.cultivo || l.cultivo || '';
+      const cultivo = l.plan.cultivo || '';
       return `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;" onclick="App.openPlanModal('${esc(l.id)}')">
         <div style="font-family:var(--title);font-size:11px;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(l.nombre)}</div>
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${l.hectareas} <span style="font-size:9px;font-weight:400;">ha</span></div>
@@ -959,7 +975,7 @@ const App = {
       const sc3 = getLote('SC3') || lotes[2];
       const sc4 = getLote('SC4') || lotes[3];
 
-      const cellBg = (l) => bgMap[App._cultivoClass(l?.plan?.cultivo || l?.cultivo)] || '#fff';
+      const cellBg = (l) => bgMap[App._cultivoClass(l?.plan?.cultivo || '')] || '#fff';
       const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}')"` : '';
       const cellInfo = (l) => {
         if (!l) return '';

@@ -191,14 +191,15 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .lote-rect.cult-barbecho { background:#e2e8f0;border-color:#94a3b8; }
 .lote-rect.cult-empty { background:#ffffff;border-color:var(--border);border-style:dashed; }
 @media(max-width:639px){ .lotes-grid{flex-direction:column;} .lote-rect{flex:0 0 100%!important;min-height:56px;} .plano-kpi{min-width:65px;padding:6px 8px;} .plano-kpi .pk-val{font-size:.82rem;} }
-.plano-canvas { position:relative;width:100%;min-height:500px;background:#2a2a3a;border-radius:var(--radius);overflow:auto; }
+.plano-canvas { position:relative;width:100%;min-height:600px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);overflow:visible; }
 .plano-estab { position:absolute;cursor:grab;user-select:none;touch-action:none; }
 .plano-estab.dragging { opacity:.8;z-index:100;cursor:grabbing; }
-.plano-estab .pe-label { font-family:var(--title);font-size:10px;color:#ccc;text-align:center;margin-bottom:2px;pointer-events:none; }
-.plano-estab .pe-block { border:2.5px solid #444;overflow:hidden;pointer-events:none; }
+.plano-estab .pe-label { font-family:var(--title);font-size:11px;color:#333;text-align:center;margin-bottom:2px;pointer-events:none; }
+.plano-estab .pe-block { border:2.5px solid #333;overflow:hidden;pointer-events:none; }
 .plano-estab .pe-cell { display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3px;position:relative;cursor:pointer;pointer-events:auto; }
 .plano-estab .pe-cell:hover { filter:brightness(.88); }
-.pe-resize { position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;background:rgba(255,255,255,.15);border-radius:2px 0 0 0; }
+.pe-resize { position:absolute;width:12px;height:12px;background:rgba(45,111,196,.2);border-radius:2px;z-index:10;opacity:0;transition:opacity .2s; }
+.plano-estab:hover .pe-resize { opacity:1; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -757,29 +758,36 @@ const App = {
     const posKey = 'sc_plano_pos_' + currentProductor;
     const savedPos = JSON.parse(localStorage.getItem(posKey) || '{}');
 
-    // Default positions for known establishments (% based)
+    // Default positions matching the Excel plano reference (% based)
     const defaultPos = {
-      'San Clemente': {x:2,y:8,w:22,h:82}, '2 Hermanas': {x:52,y:5,w:20,h:22},
-      'La Porteña': {x:82,y:5,w:14,h:40}, 'El Parche 2': {x:40,y:28,w:14,h:22},
-      'El Parche': {x:28,y:56,w:27,h:38}, 'Doña Josefa': {x:57,y:56,w:28,h:38},
-      'Pirovano': {x:2,y:56,w:22,h:38}, 'Charterina': {x:87,y:56,w:11,h:38},
-      'Ginar': {x:30,y:5,w:18,h:45}, 'La Primavera': {x:2,y:5,w:26,h:90}
+      'San Clemente': {x:3,y:8,w:18,h:85},
+      '2 Hermanas':   {x:52,y:3,w:22,h:18},
+      'La Porteña':   {x:82,y:3,w:15,h:35},
+      'El Parche 2':  {x:42,y:24,w:12,h:20},
+      'El Parche':    {x:28,y:54,w:28,h:42},
+      'Doña Josefa':  {x:58,y:54,w:30,h:42},
+      'Pirovano':     {x:24,y:8,w:16,h:40},
+      'Charterina':   {x:88,y:54,w:10,h:35},
+      'Ginar':        {x:30,y:5,w:18,h:45},
+      'La Primavera': {x:2,y:5,w:26,h:90}
     };
 
     const getPos = (estab) => savedPos[estab] || defaultPos[estab] || {x:5,y:5,w:18,h:30};
 
     // Build canvas
-    let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:550px;padding:30px 10px 10px;">`;
-    mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:13px;color:#eee;text-transform:uppercase;letter-spacing:2px;z-index:5;">${esc(campPlan)}</div>`;
+    let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:600px;padding:30px 10px 10px;">`;
+    mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:14px;color:var(--navy);text-transform:uppercase;letter-spacing:2px;z-index:5;">CAMPAÑA ${esc(campPlan)}</div>`;
 
     Object.entries(groups).forEach(([estab, gd]) => {
       const pos = getPos(estab);
       const nL = gd.lotes.length;
-      const cols = nL<=1?1:nL<=2?2:nL<=4?2:3;
+      // Smart grid: vertical establishments get 2 cols, horizontal get more cols
+      const isVertical = pos.h > pos.w * 1.5;
+      const cols = nL<=1?1: isVertical?(nL<=2?1:2) : (nL<=2?2:nL<=3?3:nL<=5?Math.min(nL,3):4);
       const rows = Math.ceil(nL / cols);
 
       mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
-      mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#999;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
       mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
       gd.lotes.forEach(l => {
@@ -795,7 +803,10 @@ const App = {
       });
 
       mH += '</div>';
-      mH += '<div class="pe-resize"></div>';
+      mH += '<div class="pe-resize" data-corner="br" style="bottom:0;right:0;cursor:nwse-resize;"></div>';
+      mH += '<div class="pe-resize" data-corner="bl" style="bottom:0;left:0;cursor:nesw-resize;"></div>';
+      mH += '<div class="pe-resize" data-corner="tr" style="top:0;right:0;cursor:nesw-resize;"></div>';
+      mH += '<div class="pe-resize" data-corner="tl" style="top:0;left:0;cursor:nwse-resize;"></div>';
       mH += '</div>';
     });
 
@@ -844,10 +855,10 @@ const App = {
         App._savePlanoPositions();
       });
 
-      // Resize
-      const resizer = el.querySelector('.pe-resize');
-      if (resizer) {
-        let rStartX, rStartY, rStartW, rStartH, isResizing = false;
+      // Resize from 4 corners
+      el.querySelectorAll('.pe-resize').forEach(resizer => {
+        let rStartX, rStartY, rStartW, rStartH, rStartL, rStartT, isResizing = false;
+        const corner = resizer.dataset.corner;
         resizer.addEventListener('pointerdown', e => {
           e.preventDefault(); e.stopPropagation();
           isResizing = true;
@@ -855,20 +866,36 @@ const App = {
           const rect = canvas.getBoundingClientRect();
           rStartX = e.clientX; rStartY = e.clientY;
           rStartW = parseFloat(el.style.width); rStartH = parseFloat(el.style.height);
+          rStartL = parseFloat(el.style.left); rStartT = parseFloat(el.style.top);
         });
         resizer.addEventListener('pointermove', e => {
           if (!isResizing) return;
           const rect = canvas.getBoundingClientRect();
-          const dw = (e.clientX - rStartX) / rect.width * 100;
-          const dh = (e.clientY - rStartY) / rect.height * 100;
-          el.style.width = Math.max(8, rStartW + dw) + '%';
-          el.style.height = Math.max(8, rStartH + dh) + '%';
+          const dx = (e.clientX - rStartX) / rect.width * 100;
+          const dy = (e.clientY - rStartY) / rect.height * 100;
+          if (corner === 'br') {
+            el.style.width = Math.max(6, rStartW + dx) + '%';
+            el.style.height = Math.max(6, rStartH + dy) + '%';
+          } else if (corner === 'bl') {
+            el.style.left = Math.max(0, rStartL + dx) + '%';
+            el.style.width = Math.max(6, rStartW - dx) + '%';
+            el.style.height = Math.max(6, rStartH + dy) + '%';
+          } else if (corner === 'tr') {
+            el.style.top = Math.max(0, rStartT + dy) + '%';
+            el.style.width = Math.max(6, rStartW + dx) + '%';
+            el.style.height = Math.max(6, rStartH - dy) + '%';
+          } else if (corner === 'tl') {
+            el.style.left = Math.max(0, rStartL + dx) + '%';
+            el.style.top = Math.max(0, rStartT + dy) + '%';
+            el.style.width = Math.max(6, rStartW - dx) + '%';
+            el.style.height = Math.max(6, rStartH - dy) + '%';
+          }
         });
         resizer.addEventListener('pointerup', e => {
           isResizing = false;
           App._savePlanoPositions();
         });
-      }
+      });
     });
   },
 

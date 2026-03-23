@@ -725,13 +725,16 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
     </div>
 
-    <!-- HISTORIAL en Cotizar (auto-loads when scrolled into view) -->
-    <div id="hist-inline-card" class="card" style="padding:12px 15px;margin-top:16px;">
+    <!-- HISTORIAL en Cotizar -->
+    <div style="margin-top:16px;text-align:center;">
+      <button id="btn-ver-historial" onclick="Historial.toggle()" style="background:var(--accent-bg);color:var(--accent);font-size:.78rem;font-weight:700;padding:8px 20px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;">📋 Ver Historial</button>
+    </div>
+    <div id="hist-inline-card" class="card" style="padding:12px 15px;margin-top:10px;display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <p style="font-weight:700;font-size:.8rem;color:var(--navy);margin:0;">📋 Historial de Cotizaciones</p>
-        <button onclick="Historial.cargar()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
+        <button onclick="Historial.toggle()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">✕ Cerrar</button>
       </div>
-      <div id="hist-body-inline"><p style="color:var(--text-mut);font-size:.75rem;margin:0;">Cargando historial...</p></div>
+      <div id="hist-body-inline"></div>
     </div>
   </section>
 
@@ -1041,6 +1044,18 @@ const Market = {
 /* ── Historial ── */
 const Historial = {
   items: JSON.parse(localStorage.getItem('hs_agro_historial_cache') || '[]'),
+  toggle() {
+    const card = $('hist-inline-card');
+    const btn = $('btn-ver-historial');
+    if (card.style.display === 'none') {
+      card.style.display = 'block';
+      btn.style.display = 'none';
+      Historial.cargar();
+    } else {
+      card.style.display = 'none';
+      btn.style.display = 'inline-flex';
+    }
+  },
   async cargar() {
     // Show cached immediately, then refresh
     if (Historial.items.length) Historial.render();
@@ -1420,18 +1435,6 @@ const App = {
     App.renderLista(plazoActual);
     Market.init();
 
-    // Auto-load historial when scrolled into view
-    const histCard = $('hist-inline-card');
-    if (histCard) {
-      let histLoaded = false;
-      const obs = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && !histLoaded) {
-          histLoaded = true;
-          Historial.cargar();
-        }
-      }, { threshold: 0.1 });
-      obs.observe(histCard);
-    }
   },
 
   /* ── Render plazos dinámicos (si vienen de Sheets) ── */

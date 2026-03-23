@@ -778,10 +778,93 @@ const App = {
     let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:600px;padding:30px 10px 10px;">`;
     mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:14px;color:var(--navy);text-transform:uppercase;letter-spacing:2px;z-index:5;">CAMPAÑA ${esc(campPlan)}</div>`;
 
+    // Helper: standard lote cell
+    const cellHtml = (l) => {
+      const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
+      const bg = bgMap[cc] || '#fff';
+      const cultivo = l.plan.cultivo || l.cultivo || '';
+      return `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}')">
+        <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
+        <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
+        <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
+        ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
+      </div>`;
+    };
+
+    // Helper: San Clemente special layout with diagonal road
+    const renderSanClemente = (estab, gd, pos) => {
+      // SC has 4 lotes: SC1(girasol, top-left), SC2(maíz, top-right), SC3(maíz, mid-right), SC4(girasol, bottom)
+      // A diagonal road goes from ~top-left to ~bottom-center-right
+      const lotes = gd.lotes;
+      const getLote = (name) => lotes.find(l => l.nombre.includes(name)) || lotes[0];
+      const sc1 = getLote('SC1') || lotes[0];
+      const sc2 = getLote('SC2') || lotes[1];
+      const sc3 = getLote('SC3') || lotes[2];
+      const sc4 = getLote('SC4') || lotes[3];
+
+      const cellBg = (l) => bgMap[App._cultivoClass(l?.plan?.cultivo || l?.cultivo)] || '#fff';
+      const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}')"` : '';
+      const cellInfo = (l, align) => {
+        if (!l) return '';
+        const cultivo = l.plan?.cultivo || l.cultivo || '';
+        return `<div style="position:absolute;${align};padding:4px;pointer-events:none;">
+          <div style="font-size:8px;font-weight:700;color:rgba(0,0,0,.35);">${esc(l.nombre)}</div>
+          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>
+        </div>`;
+      };
+
+      let h = `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      h += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      h += `<div class="pe-block" style="position:relative;height:calc(100% - 26px);">`;
+
+      // 4 zones using clip-path or positioned divs
+      // Top row: SC1 (left ~40%) + SC2 (right ~60%)
+      h += `<div style="position:absolute;top:0;left:0;width:40%;height:45%;background:${cellBg(sc1)};border-bottom:1.5px solid rgba(0,0,0,.2);border-right:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc1)}>
+        ${cellInfo(sc1,'top:0;left:0')}
+        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc1?.hectareas||''}</div>
+      </div>`;
+      h += `<div style="position:absolute;top:0;left:40%;width:60%;height:45%;background:${cellBg(sc2)};border-bottom:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc2)}>
+        ${cellInfo(sc2,'top:0;right:0')}
+        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc2?.hectareas||''}</div>
+      </div>`;
+
+      // Middle: SC3 (right side, smaller)
+      h += `<div style="position:absolute;top:45%;right:0;width:55%;height:20%;background:${cellBg(sc3)};border-bottom:1.5px solid rgba(0,0,0,.2);cursor:pointer;" ${cellClick(sc3)}>
+        ${cellInfo(sc3,'top:0;right:0')}
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc3?.hectareas||''}</div>
+      </div>`;
+
+      // Bottom: SC4 (full width, large)
+      h += `<div style="position:absolute;bottom:0;left:0;width:100%;height:35%;background:${cellBg(sc4)};cursor:pointer;" ${cellClick(sc4)}>
+        ${cellInfo(sc4,'top:4px;right:4px')}
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${sc4?.hectareas||''}</div>
+      </div>`;
+
+      // Diagonal road line (SVG overlay)
+      h += `<svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;">
+        <line x1="0%" y1="45%" x2="55%" y2="65%" stroke="#555" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="20%" y="58%" fill="#666" font-size="7" font-family="var(--mono)" transform="rotate(-20,20%,58%)">calle</text>
+      </svg>`;
+
+      h += '</div>';
+      h += '<div class="pe-resize" data-corner="br" style="bottom:0;right:0;cursor:nwse-resize;"></div>';
+      h += '<div class="pe-resize" data-corner="bl" style="bottom:0;left:0;cursor:nesw-resize;"></div>';
+      h += '<div class="pe-resize" data-corner="tr" style="top:0;right:0;cursor:nesw-resize;"></div>';
+      h += '<div class="pe-resize" data-corner="tl" style="top:0;left:0;cursor:nwse-resize;"></div>';
+      h += '</div>';
+      return h;
+    };
+
     Object.entries(groups).forEach(([estab, gd]) => {
       const pos = getPos(estab);
+
+      // Special render for San Clemente
+      if (estab.toLowerCase().includes('clemente') && gd.lotes.length >= 4) {
+        mH += renderSanClemente(estab, gd, pos);
+        return;
+      }
+
       const nL = gd.lotes.length;
-      // Smart grid: vertical establishments get 2 cols, horizontal get more cols
       const isVertical = pos.h > pos.w * 1.5;
       const cols = nL<=1?1: isVertical?(nL<=2?1:2) : (nL<=2?2:nL<=3?3:nL<=5?Math.min(nL,3):4);
       const rows = Math.ceil(nL / cols);
@@ -790,17 +873,7 @@ const App = {
       mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
       mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
-      gd.lotes.forEach(l => {
-        const cc = App._cultivoClass(l.plan.cultivo || l.cultivo);
-        const bg = bgMap[cc] || '#fff';
-        const cultivo = l.plan.cultivo || l.cultivo || '';
-        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}')">
-          <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
-          <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
-          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
-          ${l.plan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(l.plan.variedad)}</div>` : ''}
-        </div>`;
-      });
+      gd.lotes.forEach(l => { mH += cellHtml(l); });
 
       mH += '</div>';
       mH += '<div class="pe-resize" data-corner="br" style="bottom:0;right:0;cursor:nwse-resize;"></div>';

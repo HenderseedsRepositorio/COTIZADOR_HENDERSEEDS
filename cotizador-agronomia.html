@@ -725,13 +725,13 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
     </div>
 
-    <!-- HISTORIAL en Cotizar -->
-    <div class="card" style="padding:12px 15px;margin-top:16px;">
+    <!-- HISTORIAL en Cotizar (auto-loads when scrolled into view) -->
+    <div id="hist-inline-card" class="card" style="padding:12px 15px;margin-top:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <p style="font-weight:700;font-size:.8rem;color:var(--navy);margin:0;">📋 Historial de Cotizaciones</p>
         <button onclick="Historial.cargar()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);">↻ Actualizar</button>
       </div>
-      <div id="hist-body-inline"><p style="color:var(--text-mut);font-size:.75rem;margin:0;">Tocá "Actualizar" para cargar el historial</p></div>
+      <div id="hist-body-inline"><p style="color:var(--text-mut);font-size:.75rem;margin:0;">Cargando historial...</p></div>
     </div>
   </section>
 
@@ -1421,6 +1421,19 @@ const App = {
     // Render lista immediately with cached data, refresh in background
     App.renderLista(plazoActual);
     Market.init();
+
+    // Auto-load historial when scrolled into view
+    const histCard = $('hist-inline-card');
+    if (histCard) {
+      let histLoaded = false;
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && !histLoaded) {
+          histLoaded = true;
+          Historial.cargar();
+        }
+      }, { threshold: 0.1 });
+      obs.observe(histCard);
+    }
   },
 
   /* ── Render plazos dinámicos (si vienen de Sheets) ── */
@@ -2366,11 +2379,11 @@ const App = {
             <div class="lista-name">${p.producto}</div>
             <div class="lista-unit">${p.categoria} · ${p.unidad}${p.formulacion ? ' · '+p.formulacion : ''}</div>
           </div>
-          <span style="text-align:right;font-family:var(--mono);font-size:11px;color:#475569;">$${fmt(costo)}</span>
-          <span style="text-align:center;font-family:var(--mono);font-size:11px;font-weight:700;color:${mgColor};">${mg}%</span>
-          <span style="text-align:right;font-family:var(--mono);font-size:11px;color:#475569;">$${fmt(pSug)}</span>
+          <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(costo)}</span>
+          <span style="text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#16a34a;">${mg}%</span>
+          <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(pSug)}</span>
           <span style="text-align:right;">
-            <span class="lista-price" style="font-size:12px;">$${fmt(precio)}</span>
+            <span class="lista-price" style="font-size:13px;">$${fmt(precio)}</span>
             ${diffTxt}
           </span>
         </div>`;

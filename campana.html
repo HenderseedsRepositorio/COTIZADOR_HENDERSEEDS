@@ -701,6 +701,7 @@ const App = {
     });
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
+    App._migratePlanKeys();
     App._initAplicaciones(); App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
     loadCatalog().then(() => App._assignCatalogPrices());
   },
@@ -724,6 +725,43 @@ const App = {
       });
     });
     if (updated) Storage.save(data);
+  },
+
+  // Helper: get plan for a campaign, handling both '2025/26' and '25/26' key formats
+  _getPlan(lote, campKey) {
+    if (!lote.planes) return {};
+    // Try exact key first
+    if (lote.planes[campKey]) return lote.planes[campKey];
+    // Try short format: '2025/26' → '25/26'
+    const short = campKey.replace(/^\d{2}/, '');
+    if (lote.planes[short]) return lote.planes[short];
+    // Try long format: '25/26' → '2025/26'
+    if (campKey.length <= 5) {
+      const long = '20' + campKey;
+      if (lote.planes[long]) return lote.planes[long];
+    }
+    return {};
+  },
+
+  // Migrate plan keys from short to long format
+  _migratePlanKeys() {
+    let changed = false;
+    data.lotes.forEach(l => {
+      if (!l.planes) return;
+      const keys = Object.keys(l.planes);
+      keys.forEach(k => {
+        // Convert '25/26' to '2025/26', 'fina_25/26' to 'fina_2025/26'
+        let newKey = k;
+        if (/^\d{2}\/\d{2}$/.test(k)) { newKey = '20' + k; }
+        else if (/^fina_\d{2}\/\d{2}$/.test(k)) { newKey = 'fina_20' + k.slice(5); }
+        if (newKey !== k) {
+          l.planes[newKey] = l.planes[k];
+          delete l.planes[k];
+          changed = true;
+        }
+      });
+    });
+    if (changed) Storage.save(data);
   },
 
   /* ── LOTES CRUD ── */
@@ -752,7 +790,7 @@ const App = {
     // Summary KPIs
     const gruesaCults = {}, finaCults = {};
     data.lotes.forEach(l => {
-      const g = (l.planes && l.planes[campPlan]) || {}; const f = (l.planes && l.planes[finaKey]) || {};
+      const g = App._getPlan(l, campPlan); const f = App._getPlan(l, finaKey);
       if (g.cultivo) gruesaCults[g.cultivo] = (gruesaCults[g.cultivo]||0) + (l.hectareas||0);
       else if (l.cultivo) gruesaCults[l.cultivo] = (gruesaCults[l.cultivo]||0) + (l.hectareas||0);
       if (f.cultivo) finaCults[f.cultivo] = (finaCults[f.cultivo]||0) + (l.hectareas||0);
@@ -790,8 +828,8 @@ const App = {
       </div>`;
 
       lotes.forEach((l, i) => {
-        const gruesa = (l.planes && l.planes[campPlan]) || {};
-        const fina = (l.planes && l.planes[finaKey]) || {};
+        const gruesa = App._getPlan(l, campPlan);
+        const fina = App._getPlan(l, finaKey);
         const gCult = gruesa.cultivo || l.cultivo || '';
         const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
         html += `<div style="display:grid;grid-template-columns:${gridCols};gap:4px;padding:8px 10px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
@@ -841,7 +879,7 @@ const App = {
     data.lotes.forEach(l => {
       const estab = l.establecimiento || 'Sin establecimiento';
       if (!groups[estab]) groups[estab] = { lotes:[], totalHas:0 };
-      const plan = (l.planes && l.planes[campPlan]) || {};
+      const plan = App._getPlan(l, campPlan);
       groups[estab].lotes.push({ ...l, plan });
       groups[estab].totalHas += l.hectareas || 0;
     });
@@ -850,7 +888,7 @@ const App = {
     const byCultivo = {};
     let totalPlan = 0, totalSinPlan = 0;
     data.lotes.forEach(l => {
-      const plan = (l.planes && l.planes[campPlan]) || {};
+      const plan = App._getPlan(l, campPlan);
       if (plan.cultivo) { byCultivo[plan.cultivo] = (byCultivo[plan.cultivo]||0) + (l.hectareas||0); totalPlan += l.hectareas||0; }
       else { totalSinPlan += l.hectareas||0; }
     });
@@ -1024,7 +1062,7 @@ const App = {
     const byFinaCultivo = {};
     let finaTotal = 0, finaSinPlan = 0;
     data.lotes.forEach(l => {
-      const fp = (l.planes && l.planes[finaKey]) || {};
+      const fp = App._getPlan(l, finaKey);
       if (fp.cultivo) { byFinaCultivo[fp.cultivo] = (byFinaCultivo[fp.cultivo]||0) + (l.hectareas||0); finaTotal += l.hectareas||0; }
       else { finaSinPlan += l.hectareas||0; }
     });
@@ -1050,7 +1088,7 @@ const App = {
       // For San Clemente custom layout — use same structure but with fina plans
       if (estab.toLowerCase().includes('clemente') && gd.lotes.length >= 4) {
         // Reuse same renderSanClemente but with fina campaign key
-        const finaLotes = gd.lotes.map(l => ({...l, plan: (l.planes && l.planes['fina_'+campPlan]) || {}}));
+        const finaLotes = gd.lotes.map(l => ({...l, plan: App._getPlan(l, 'fina_'+campPlan)}));
         const gdFina = {...gd, lotes: finaLotes};
         mH += renderSanClemente(estab, gdFina, pos).replace(/openPlanModal\('/g, "openPlanModal('fina_" + campPlan + "','");
         return;
@@ -1062,7 +1100,7 @@ const App = {
 
       gd.lotes.forEach(l => {
         const finaKey = 'fina_' + campPlan;
-        const finaPlan = (l.planes && l.planes[finaKey]) || {};
+        const finaPlan = App._getPlan(l, finaKey);
         const cc = App._cultivoClass(finaPlan.cultivo || '');
         const bg = bgMap[cc] || '#fff';
         const cultivo = finaPlan.cultivo || '';
@@ -1226,7 +1264,7 @@ const App = {
     if (!l) return;
     const campPlan = campOverride || data.campana || '2025/26';
     const isFina = campPlan.startsWith('fina_');
-    const plan = (l.planes && l.planes[campPlan]) || {};
+    const plan = App._getPlan(l, campPlan);
     const cultivosFina = ['Trigo','Cebada','Avena','Barbecho'];
     const cultivosGruesa = ['Maiz tardio','Maiz','Maiz 2da','Soja','Soja 2da','Girasol','Sorgo','Barbecho'];
     const cultivos = isFina ? cultivosFina : cultivosGruesa;

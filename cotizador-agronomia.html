@@ -1106,11 +1106,7 @@ const Historial = {
     alert('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
   },
   async compartir(idx) {
-    // Load into cotizador, generate receta PDF and share
-    Historial.modificar(idx);
-    // Small delay to let renderAplicaciones finish
-    await new Promise(r => setTimeout(r, 100));
-    App.compartirPDF('receta');
+    await Historial.exportar(idx);
   },
   async eliminar(idx) {
     const h = Historial.items[idx];

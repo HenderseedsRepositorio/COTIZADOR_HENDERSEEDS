@@ -279,7 +279,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
         <button class="chip" data-estado="completada" onclick="App.setEstado(this)">Completada</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn btn-accent" style="flex:1;" onclick="App.saveOrden()">Guardar Orden</button>
+        <button class="btn btn-accent" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="App.saveOrden()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar Orden</button>
+        <button class="btn btn-green" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="App.compartirWA()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir</button>
         <button class="btn btn-outline" id="ot-cancel-btn" style="display:none;" onclick="App.cancelEdit()">Cancelar</button>
       </div>
     </div>
@@ -327,11 +328,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 </div> <!-- .main -->
 </div> <!-- #app-main -->
 
-<div class="wa-bar" id="wa-bar">
-  <span id="wa-draft" style="display:none;font-size:10px;color:var(--orange);font-weight:700;position:absolute;top:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;">Borrador sin guardar</span>
-  <button class="btn btn-green" onclick="App.compartirWA()">Enviar Orden</button>
-  <button class="btn btn-outline" onclick="App.exportarPDF()">PDF</button>
-</div>
+<!-- wa-bar removed: actions are now inline in the form -->
 
 <script>
 const $ = id => document.getElementById(id);
@@ -817,7 +814,7 @@ const App = {
     App._renderResumen(); App._renderTotales();
     currentOTRows = aplicaciones[currentAppIdx]?.productos || [];
     const hasProds = aplicaciones.some(a => a.productos.length > 0);
-    $('wa-bar').style.display = hasProds ? 'flex' : 'none';
+    // wa-bar removed, actions are inline
     const draftEl = $('wa-draft'); if (draftEl) draftEl.style.display = (hasProds && !editingOrdenId && formDirty) ? '' : 'none';
   },
 
@@ -903,7 +900,7 @@ const App = {
         <span class="row-val">${vol ? fmt(vol) : '--'}</span><span class="row-val costo">${fmt(ch)}</span><span class="row-val">${monto ? fmt(monto) : '--'}</span>
         <button class="row-rm" onclick="App.setActiveApp(${appIdx});App.removeOTRow(${r.id})">&times;</button>
       </div></div>`);
-    $('wa-bar').style.display = 'flex';
+    // wa-bar removed, actions are inline
   },
   _focusDosis(rid) { const row = document.querySelector(`.row-item[data-rowid="${rid}"]`); if (row) { const d = row.querySelectorAll('.row-inp')[1]; if (d) { d.focus(); d.select(); } } },
   hideDropdown() { $('ot-dropdown').classList.remove('show'); $('ot-dropdown').style.display = 'none'; highlightIdx = -1; },
@@ -1106,7 +1103,6 @@ const App = {
         <div class="ot-actions" style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
           <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
           <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:#25d366;color:white;" onclick="App.compartirOrdenWA('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--navy);color:white;" onclick="App.exportarOrdenPDF('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
           <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:#e2e8f0;color:var(--text-sec);" onclick="App.duplicarOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
           <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--red);color:white;" onclick="App.deleteOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
         </div></div>`;

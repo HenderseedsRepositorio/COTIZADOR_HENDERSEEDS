@@ -1347,22 +1347,25 @@ const Quote = {
    TECH FICHA — fichas técnicas dinámicas desde Sheets
    ══════════════════════════════════════════════════════════════════ */
 const TechFicha = {
-  _cache: null,
+  _cache: JSON.parse(localStorage.getItem('hs_tech_cache') || 'null'),
   _loaded: false,
 
   async load() {
     if(this._loaded){ return; }
-    if(!CONFIG.APPS_SCRIPT_URL){ $('techCards').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">Sin conexión a Sheets</p>'; return; }
-    $('techCards').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando datos técnicos...</p>';
+    // Show cached immediately
+    if(this._cache){ this._loaded=true; this.render(); }
+    if(!CONFIG.APPS_SCRIPT_URL){ if(!this._cache) $('techCards').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">Sin conexión a Sheets</p>'; return; }
+    if(!this._cache) $('techCards').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando datos técnicos...</p>';
     try {
       const r=await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getDatosTecnicos',{redirect:'follow'});
       const d=await r.json();
       if(d.error) throw new Error(d.error);
       this._cache=d;
+      localStorage.setItem('hs_tech_cache',JSON.stringify(d));
       this._loaded=true;
       this.render();
     } catch(e) {
-      $('techCards').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error: '+esc(e.message)+'</p>';
+      if(!this._cache) $('techCards').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error: '+esc(e.message)+'</p>';
     }
   },
 
@@ -1571,7 +1574,7 @@ const Historial = {
       btn.style.display='inline-flex';
     }
   },
-  _cache: null,
+  _cache: JSON.parse(localStorage.getItem('hs_historial_cache') || 'null'),
   _page: 0,
   _perPage: 10,
   async load() {
@@ -1589,17 +1592,19 @@ const Historial = {
       });
       localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load())" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.7rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
     }
+    this._localHtml=localHtml;
 
-    if(!CONFIG.APPS_SCRIPT_URL){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
-    $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">⏳ Cargando...</p>';
+    // Show cached immediately
+    if(this._cache) { this._page=0; this.render(); }
+
+    if(!CONFIG.APPS_SCRIPT_URL){ if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
+    if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">⏳ Cargando...</p>';
     try {
       const r=await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getHistorial',{redirect:'follow'});
       const data=await r.json();
-      if(!Array.isArray(data)||!data.length){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin cotizaciones registradas</p>'; return; }
-      this._cache=data; this._page=0;
-      this._localHtml=localHtml;
-      this.render();
-    } catch(e) { $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+esc(e.message)+'</p>'; }
+      if(Array.isArray(data)&&data.length){ this._cache=data; localStorage.setItem('hs_historial_cache',JSON.stringify(data)); this._page=0; this.render(); }
+      else if(!this._cache){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin cotizaciones registradas</p>'; }
+    } catch(e) { if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+esc(e.message)+'</p>'; }
   },
   goPage(delta) { this._page+=delta; this.render(); },
   render() {

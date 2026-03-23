@@ -1051,7 +1051,7 @@ const Historial = {
           </div>` : ''}
           <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
             <button style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);" onclick="Historial.modificar(${idx})">📋 Modificar</button>
-            <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);" onclick="Historial.compartir(${idx})">📤</button>
+            <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;" onclick="Historial.compartir(${idx})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
             <button onclick="Historial.eliminar(${idx})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button>
           </div>
         </div>

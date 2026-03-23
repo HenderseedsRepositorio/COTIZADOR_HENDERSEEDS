@@ -155,10 +155,17 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .bar-fill { height: 100%; border-radius: 6px; transition: width .4s ease; display: flex; align-items: center; padding-left: 6px; }
 .bar-fill span { font-size: 10px; font-weight: 700; color: white; white-space: nowrap; }
 .bar-amount { font-family: var(--mono); font-size: 12px; font-weight: 600; width: 80px; text-align: right; flex-shrink: 0; }
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
-.stat-val { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; color: var(--navy); }
-.stat-lbl { font-size: .7rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; margin-top: 2px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.stat-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--navy); }
+.stat-lbl { font-size: .62rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; margin-top: 1px; }
+.lote-compare { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.lote-card-an { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; }
+.lote-card-an .lc-name { font-weight: 700; font-size: 13px; color: var(--navy); }
+.lote-card-an .lc-detail { font-size: 11px; color: var(--text-sec); }
+.lote-card-an .lc-cost { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--accent); text-align: right; }
+.lote-card-an .lc-bar { height: 4px; border-radius: 2px; margin-top: 6px; background: var(--border); overflow: hidden; }
+.lote-card-an .lc-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--navy)); }
 .wa-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 936px; background: white; border-top: 1px solid var(--border); padding: 10px 8px; display: none; gap: 8px; z-index: 90; }
 .wa-bar .btn { flex: 1; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
@@ -1231,14 +1238,12 @@ const App = {
     // ── Build HTML ──
     let html = '';
 
-    // KPIs
+    // KPIs (4 compactos)
     html += `<div class="card fu"><div class="stat-grid" style="margin-bottom:0;">
-      <div class="stat-box"><div class="stat-val">USD ${fmt(totalCost)}</div><div class="stat-lbl">Inversion total</div></div>
-      <div class="stat-box"><div class="stat-val" style="color:var(--green);">USD ${fmt(costoHa)}</div><div class="stat-lbl">Costo / ha</div></div>
-      <div class="stat-box"><div class="stat-val">${fmtInt(totalHas)}</div><div class="stat-lbl">Hectareas</div></div>
-      <div class="stat-box"><div class="stat-val">${totalApps}</div><div class="stat-lbl">Aplicaciones</div></div>
-      <div class="stat-box"><div class="stat-val">USD ${fmt(insumosHa)}</div><div class="stat-lbl">Insumos / ha</div></div>
-      <div class="stat-box"><div class="stat-val">USD ${fmt(laborHa)}</div><div class="stat-lbl">Labor / ha</div></div>
+      <div class="stat-box"><div class="stat-val" style="color:var(--green);">$${fmt(costoHa)}</div><div class="stat-lbl">Costo / ha</div></div>
+      <div class="stat-box"><div class="stat-val">$${fmt(totalCost)}</div><div class="stat-lbl">Inversion total</div></div>
+      <div class="stat-box"><div class="stat-val">${fmtInt(totalHas)} ha</div><div class="stat-lbl">${totalApps} aplicaciones</div></div>
+      <div class="stat-box"><div class="stat-val">${totalProdsUsed}</div><div class="stat-lbl">Productos</div></div>
     </div></div>`;
 
     // ── Desglose por categoría ──
@@ -1256,19 +1261,41 @@ const App = {
       html += '</div></div>';
     }
 
-    // ── Comparativa por lote (only when "Todos") ──
+    // ── Comparativa por lote (principal) ──
     const loteEntries = Object.values(byLote);
-    if (!filtLote && loteEntries.length > 1) {
+    if (!filtLote && loteEntries.length > 0) {
       const maxLoteCost = Math.max(...loteEntries.map(l => (l.costoInsumos + l.costoLabor) / (l.has || 1)), 1);
-      html += `<div class="card fu"><div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin-bottom:10px;">Costo/ha por lote</div><div class="bar-chart" style="margin:0;">`;
-      loteEntries.sort((a, b) => ((b.costoInsumos + b.costoLabor) / (b.has || 1)) - ((a.costoInsumos + a.costoLabor) / (a.has || 1))).forEach(l => {
+      loteEntries.sort((a, b) => ((b.costoInsumos + b.costoLabor) / (b.has || 1)) - ((a.costoInsumos + a.costoLabor) / (a.has || 1)));
+      html += `<div class="card fu"><div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin-bottom:10px;">Analisis por lote</div><div class="lote-compare">`;
+      loteEntries.forEach(l => {
         const costHa = l.has > 0 ? (l.costoInsumos + l.costoLabor) / l.has : 0;
+        const insHa = l.has > 0 ? l.costoInsumos / l.has : 0;
+        const labHa = l.has > 0 ? l.costoLabor / l.has : 0;
+        const totalLote = l.costoInsumos + l.costoLabor;
         const w = (costHa / maxLoteCost * 100).toFixed(0);
-        html += `<div class="bar-row"><span class="bar-label">${esc(l.nombre)}</span>
-          <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:var(--navy-sky);"><span>${l.apps} apps</span></div></div>
-          <span class="bar-amount">$${fmt(costHa)}/ha</span></div>`;
+        const loteData = data.lotes.find(x => x.nombre === l.nombre);
+        const cultivo = loteData?.cultivo || '';
+        html += `<div class="lote-card-an">
+          <div style="flex:1;min-width:0;">
+            <div class="lc-name">${esc(l.nombre)} <span style="font-weight:400;font-size:11px;color:var(--text-mut);">${l.has} ha${cultivo ? ' · ' + esc(cultivo) : ''}</span></div>
+            <div class="lc-detail">Insumos $${fmt(insHa)}/ha · Labor $${fmt(labHa)}/ha · ${l.apps} apps · Total $${fmt(totalLote)}</div>
+            <div class="lc-bar"><div class="lc-bar-fill" style="width:${w}%;"></div></div>
+          </div>
+          <div class="lc-cost">$${fmt(costHa)}<div style="font-size:9px;font-weight:600;color:var(--text-mut);">por ha</div></div>
+        </div>`;
       });
       html += '</div></div>';
+    } else if (filtLote && loteEntries.length === 1) {
+      const l = loteEntries[0];
+      const costHa = l.has > 0 ? (l.costoInsumos + l.costoLabor) / l.has : 0;
+      const insHa = l.has > 0 ? l.costoInsumos / l.has : 0;
+      const labHa = l.has > 0 ? l.costoLabor / l.has : 0;
+      const loteData = data.lotes.find(x => x.nombre === l.nombre);
+      html += `<div class="card fu"><div style="font-family:var(--title);font-size:11px;text-transform:uppercase;color:var(--text-sec);margin-bottom:8px;">Detalle ${esc(l.nombre)}</div>
+        <div class="stat-grid"><div class="stat-box"><div class="stat-val" style="color:var(--green);">$${fmt(costHa)}</div><div class="stat-lbl">Total / ha</div></div>
+        <div class="stat-box"><div class="stat-val">$${fmt(insHa)}</div><div class="stat-lbl">Insumos / ha</div></div>
+        <div class="stat-box"><div class="stat-val">$${fmt(labHa)}</div><div class="stat-lbl">Labor / ha</div></div>
+        <div class="stat-box"><div class="stat-val">${l.apps}</div><div class="stat-lbl">Aplicaciones</div></div></div></div>`;
     }
 
     // ── Por tipo de labor ──

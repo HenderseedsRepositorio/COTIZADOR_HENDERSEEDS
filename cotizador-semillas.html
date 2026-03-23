@@ -1496,7 +1496,7 @@ const TechFicha = {
    CONDITIONS — condiciones comerciales
    ══════════════════════════════════════════════════════════════════ */
 const Conditions = {
-  data: null,
+  data: JSON.parse(localStorage.getItem('hs_condiciones_cache') || 'null'),
   fmtRate(v) {
     if(!v) return '—';
     const s=String(v).trim(), n=parseFloat(s.replace(',','.'));
@@ -1506,18 +1506,19 @@ const Conditions = {
     return n.toFixed(1)+'%';
   },
   async load() {
-    if(this.data){ this.renderTable(); return; }
-    if(!CONFIG.APPS_SCRIPT_URL){ $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">Sin conexión a Sheets</p>'; return; }
-    $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando condiciones...</p>';
+    // Show cached immediately
+    if(this.data){ this.renderTable(); }
+    if(!CONFIG.APPS_SCRIPT_URL){ if(!this.data) $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">Sin conexión a Sheets</p>'; return; }
+    if(!this.data) $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando condiciones...</p>';
     try {
       const r=await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCondiciones',{redirect:'follow'});
       const raw=await r.json();
-      this.data=Array.isArray(raw)?raw:[];
-      if(!this.data.length){ $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">No hay condiciones cargadas en Sheets</p>'; return; }
-      this.renderTable();
+      const fresh=Array.isArray(raw)?raw:[];
+      if(fresh.length){ this.data=fresh; localStorage.setItem('hs_condiciones_cache',JSON.stringify(fresh)); this.renderTable(); }
+      else if(!this.data){ $('condTable').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">No hay condiciones cargadas en Sheets</p>'; }
     } catch(e) {
       console.error('Condiciones error:',e);
-      $('condTable').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error al cargar: '+esc(e.message)+'</p>';
+      if(!this.data) $('condTable').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error al cargar: '+esc(e.message)+'</p>';
     }
   },
   buildTableHTML(data) {

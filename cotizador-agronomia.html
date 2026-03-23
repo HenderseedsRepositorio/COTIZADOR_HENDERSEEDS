@@ -664,7 +664,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   <nav style="display:flex;border-bottom:2px solid var(--border);margin-bottom:8px;">
     <button class="tab-btn active" data-tab="cotizar">🧪 Cotizar</button>
     <button class="tab-btn" data-tab="lista">📋 Lista</button>
-    <button class="tab-btn" data-tab="historial">📊 Historial</button>
+    <button class="tab-btn" data-tab="condiciones">🏦 Condiciones</button>
   </nav>
 
 <main style="max-width:920px;margin:0 auto;">
@@ -737,13 +737,26 @@ input, select, button { font-family: inherit; font-size: inherit; }
     <div id="lista-body"></div>
   </section>
 
-  <!-- ═══ TAB HISTORIAL ═══ -->
-  <section id="tab-historial" class="tab-content">
-    <div id="hist-body">
-      <div class="hist-empty">
-        <p style="font-size:32px; margin-bottom:8px;">&#128203;</p>
-        <p>Sin cotizaciones registradas</p>
-        <p style="font-size:12px; margin-top:4px;">Aparecerán aquí al compartir por WhatsApp</p>
+  <!-- ═══ TAB CONDICIONES ═══ -->
+  <section id="tab-condiciones" class="tab-content">
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <p style="font-weight:700;font-size:.85rem;color:var(--navy);margin:0;">Condiciones Comerciales</p>
+        <button onclick="Condiciones.share()" style="background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir</button>
+      </div>
+      <div id="condTable"><p style="color:var(--text-mut);font-size:.75rem;">Cargando condiciones...</p></div>
+    </div>
+    <!-- Hidden card for sharing -->
+    <div id="cond-share-card" style="position:absolute;left:-9999px;z-index:-1;background:#fff;padding:24px;width:600px;">
+      <div id="cond-share-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:16px;color:var(--navy);margin:0;">Condiciones Comerciales</h2>
+            <p style="font-size:11px;color:var(--text-mut);margin:2px 0 0;" id="cond-share-date"></p>
+          </div>
+          <img id="cond-share-logo" src="assets/logo-henderseeds.png" style="height:30px;" alt="Henderseeds">
+        </div>
+        <div id="condTableShare"></div>
       </div>
     </div>
   </section>
@@ -1254,6 +1267,91 @@ const Historial = {
 };
 
 /* ══════════════════════════════════════
+   CONDICIONES
+   ══════════════════════════════════════ */
+const Condiciones = {
+  data: JSON.parse(localStorage.getItem('hs_condiciones_cache') || 'null'),
+  fmtRate(v) {
+    if (v === null || v === undefined || v === '') return '—';
+    const n = Number(v);
+    if (isNaN(n)) return String(v);
+    if (n < 1) return (n * 100).toFixed(1) + '%';
+    return n.toFixed(1) + '%';
+  },
+  async load() {
+    if (this.data) { this.renderTable(); }
+    if (!API_URL) return;
+    try {
+      const r = await fetch(API_URL + '?action=getCondiciones&_t=' + Date.now(), { cache: 'no-store' });
+      const d = await r.json();
+      if (Array.isArray(d) && d.length) {
+        this.data = d;
+        localStorage.setItem('hs_condiciones_cache', JSON.stringify(d));
+        this.renderTable();
+      } else if (!this.data) {
+        $('condTable').innerHTML = '<p style="color:var(--text-mut);font-size:.75rem;">Sin condiciones disponibles</p>';
+      }
+    } catch(e) {
+      if (!this.data) $('condTable').innerHTML = '<p style="color:var(--text-mut);font-size:.75rem;">Error al cargar condiciones</p>';
+    }
+  },
+  buildTableHTML(data) {
+    const groups = {};
+    data.forEach(r => { const m = r.moneda || 'USD'; if (!groups[m]) groups[m] = []; groups[m].push(r); });
+    let html = '';
+    Object.keys(groups).forEach(moneda => {
+      html += `<p style="font-weight:700;font-size:.78rem;color:var(--navy);margin:12px 0 6px;text-transform:uppercase;">${moneda}</p>`;
+      html += '<table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:8px;">';
+      html += '<thead><tr style="background:var(--navy);color:#fff;"><th style="padding:6px 8px;text-align:left;font-size:.65rem;">Detalle</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">TNA</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">TEA</th><th style="padding:6px 8px;text-align:right;font-size:.65rem;">Plazo</th></tr></thead><tbody>';
+      groups[moneda].forEach((r, i) => {
+        const bg = i % 2 === 0 ? '#f8fafc' : '#fff';
+        html += `<tr style="background:${bg};"><td style="padding:5px 8px;">${r.detalle || ''}</td><td style="padding:5px 8px;text-align:right;font-family:var(--mono);">${this.fmtRate(r.tna)}</td><td style="padding:5px 8px;text-align:right;font-family:var(--mono);">${this.fmtRate(r.tea)}</td><td style="padding:5px 8px;text-align:right;">${r.plazo || ''}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    });
+    return html;
+  },
+  renderTable() {
+    if (!this.data) return;
+    const html = this.buildTableHTML(this.data);
+    $('condTable').innerHTML = html;
+    const share = $('condTableShare');
+    if (share) share.innerHTML = html;
+    const dateEl = $('cond-share-date');
+    if (dateEl) dateEl.textContent = dateStr();
+  },
+  async share() {
+    if (!this.data) { await this.load(); }
+    if (!this.data) return;
+    this.renderTable();
+    const card = $('cond-share-card');
+    card.style.position = 'static';
+    card.style.left = '0';
+    card.style.zIndex = '9999';
+    try {
+      const html2canvas = window.html2canvas;
+      if (!html2canvas) { alert('html2canvas no cargado'); return; }
+      const canvas = await html2canvas($('cond-share-content'), { scale: 2, backgroundColor: '#fff' });
+      canvas.toBlob(async blob => {
+        const file = new File([blob], 'Condiciones_Henderseeds.png', { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: 'Condiciones Comerciales' }); } catch(e) {}
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'Condiciones_Henderseeds.png';
+          a.click();
+        }
+      }, 'image/png');
+    } finally {
+      card.style.position = 'absolute';
+      card.style.left = '-9999px';
+      card.style.zIndex = '-1';
+    }
+  }
+};
+
+/* ══════════════════════════════════════
    APP
    ══════════════════════════════════════ */
 let vendor = '';
@@ -1277,7 +1375,7 @@ const App = {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
         $('tab-' + btn.dataset.tab).classList.add('active');
-        if (btn.dataset.tab === 'historial') Historial.cargar();
+        if (btn.dataset.tab === 'condiciones') Condiciones.load();
       });
     });
 

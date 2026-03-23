@@ -299,13 +299,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
   <section id="tab-planos" class="tab-content">
     <div class="card" style="padding:8px 14px;margin-bottom:8px;">
       <div class="form-row" style="margin-bottom:0;">
-        <div><label class="form-lbl">Campaña a planificar</label>
-          <select id="plan-campana" class="inp inp-sm" onchange="App.renderPlanos()">
-            <option value="26/27">26/27</option>
-            <option value="25/26">25/26</option>
-            <option value="27/28">27/28</option>
-          </select>
-        </div>
+        <div><label class="form-lbl">Campaña seleccionada: <strong id="plan-campana-label"></strong></label></div>
       </div>
     </div>
     <div id="planos-kpis"></div>
@@ -693,10 +687,18 @@ const App = {
       else if (e.key === 'Escape') App.hideAplicadorDD();
     });
     const cs = $('campana-select');
-    const y = new Date().getFullYear();
-    for (let i = y - 3; i <= y + 1; i++) { const v = `${i}/${String(i+1).slice(2)}`; const o = document.createElement('option'); o.value = v; o.textContent = v; cs.appendChild(o); }
-    if (data.campana && !cs.querySelector(`option[value="${data.campana}"]`)) { const o = document.createElement('option'); o.value = data.campana; o.textContent = data.campana; cs.appendChild(o); }
-    cs.value = data.campana; cs.addEventListener('change', function() { data.campana = this.value; Storage.save(data); });
+    // Only show: previous, current (25/26), next
+    const campanas = ['2024/25', '2025/26', '2026/27'];
+    campanas.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; cs.appendChild(o); });
+    if (!data.campana) data.campana = '2025/26';
+    if (!campanas.includes(data.campana)) { const o = document.createElement('option'); o.value = data.campana; o.textContent = data.campana; cs.appendChild(o); }
+    cs.value = data.campana;
+    cs.addEventListener('change', function() {
+      data.campana = this.value;
+      Storage.save(data);
+      // Re-render all tabs for the new campaign
+      App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
+    });
     $('ot-fecha').value = dateISO();
     window.addEventListener('beforeunload', e => { if (formDirty) { e.preventDefault(); e.returnValue = ''; } });
     App._initAplicaciones(); App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
@@ -728,7 +730,7 @@ const App = {
   renderLotes() {
     const el = $('lotes-list');
     if (!data.lotes.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🌾</div><p>Sin lotes registrados</p><p style="font-size:12px;margin-top:4px;">Agrega tu primer lote para empezar</p></div>'; return; }
-    const campPlan = $('plan-campana')?.value || '26/27';
+    const campPlan = data.campana || '2025/26';
     const finaKey = 'fina_' + campPlan;
     const cColor = (c) => ({'cult-maiz':'#d97706','cult-girasol':'#7c3aed','cult-soja':'#16a34a','cult-trigo':'#ea580c','cult-barbecho':'#94a3b8'}[App._cultivoClass(c)] || '#94a3b8');
     const cBg = (c) => ({'cult-maiz':'#fef3c7','cult-girasol':'#f3e8ff','cult-soja':'#dcfce7','cult-trigo':'#ffedd5','cult-barbecho':'#f1f5f9'}[App._cultivoClass(c)] || '');
@@ -829,7 +831,8 @@ const App = {
     return map[App._cultivoClass(c)] || '#cbd5e1';
   },
   renderPlanos() {
-    const campPlan = $('plan-campana')?.value || '26/27';
+    const campPlan = data.campana || '2025/26';
+    const lbl = $('plan-campana-label'); if (lbl) lbl.textContent = campPlan;
     const kpiEl = $('planos-kpis'), mapEl = $('planos-map');
     if (!data.lotes.length) { kpiEl.innerHTML=''; mapEl.innerHTML='<div class="empty"><div class="empty-icon">🗺️</div><p>Sin lotes</p></div>'; return; }
 
@@ -1221,7 +1224,7 @@ const App = {
   openPlanModal(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid);
     if (!l) return;
-    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || data.campana || '2025/26';
     const isFina = campPlan.startsWith('fina_');
     const plan = (l.planes && l.planes[campPlan]) || {};
     const cultivosFina = ['Trigo','Cebada','Avena','Barbecho'];
@@ -1253,7 +1256,7 @@ const App = {
   },
   savePlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
-    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || data.campana || '2025/26';
     if (!l.planes) l.planes = {};
     l.planes[campPlan] = {
       cultivo: $('m-plan-cultivo').value,
@@ -1265,7 +1268,7 @@ const App = {
   },
   clearPlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
-    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || data.campana || '2025/26';
     if (l.planes) delete l.planes[campPlan];
     Storage.save(data); closeModal(); App.renderPlanos(); App.renderLotes(); showToast('Plan eliminado');
   },

@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seguimiento de Campaña — Henderseeds</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -98,8 +99,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
   padding:4px 8px; font-size:12px; font-weight:600; color:var(--navy);
 }
 .app-lote-chip .chip-has {
-  font-family:var(--mono); font-size:11px; color:var(--accent-dark);
-  width:52px; padding:2px 4px; border:1px solid var(--accent); border-radius:4px;
+  font-family:var(--mono); color:var(--accent-dark);
+  width:62px; padding:4px 6px; font-size:13px; border:1px solid var(--accent); border-radius:4px;
   text-align:right; background:white; outline:none;
 }
 .app-lote-chip .chip-has:focus { border-color:var(--navy); background:var(--accent-bg); }
@@ -128,7 +129,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .row-prod-meta { font-size: 10px; color: var(--text-mut); }
 .row-val { font-family: var(--mono); font-size: 12px; font-weight: 500; text-align: right; }
 .row-val.costo { color: var(--accent); font-weight: 700; font-size: 13px; }
-.row-rm { background: none; border: none; color: var(--text-mut); font-size: 16px; cursor: pointer; padding: 2px; line-height: 1; text-align: center; }
+.row-rm { background: none; border: none; color: var(--text-mut); font-size: 16px; cursor: pointer; padding: 2px; line-height: 1; text-align: center; min-width:34px; min-height:34px; display:flex; align-items:center; justify-content:center; }
 .row-rm:hover { color: var(--red); }
 .ot-totales { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--navy-sky) 100%); color: white; border-radius: var(--radius); padding: 14px 18px; margin-top: 8px; }
 .ot-tot-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: .78rem; }
@@ -300,7 +301,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
         <input type="date" id="ord-hasta" class="inp inp-sm" onchange="App.renderOrdenes()" style="flex:1;" title="Hasta">
       </div>
     </div>
-    <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off" oninput="App.renderOrdenes()" style="margin-bottom:8px;">
+    <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off" oninput="debouncedRenderOrdenes()" style="margin-bottom:8px;">
     <div id="ordenes-summary" style="font-size:12px;color:var(--text-sec);padding:4px 0 8px;font-weight:600;"></div>
     <div id="ordenes-list"></div>
   </section>
@@ -356,10 +357,12 @@ const Storage = {
 };
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_kcpTVtGKSlDH9WHmVlRGNo-jt-QbLqlg5BNY5RGAhHV8kw/exec';
-let catalogo = {};
+function debounce(fn, ms) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+const debouncedRenderOrdenes = debounce(() => App.renderOrdenes(), 200);
+let catalogo = JSON.parse(localStorage.getItem('sc_catalogo_cache') || 'null') || {};
 async function loadCatalog() {
   try { const res = await fetch(API_URL + '?action=getCatalogoAgro&_t=' + Date.now(), { cache: 'no-store' }); const d = await res.json();
-    if (d.ok && d.catalogo) { catalogo = d.catalogo; }
+    if (d.ok && d.catalogo) { catalogo = d.catalogo; localStorage.setItem('sc_catalogo_cache', JSON.stringify(catalogo)); }
   } catch(e) {}
 }
 
@@ -613,8 +616,8 @@ const App = {
       <div style="flex:1;min-width:0;"><div style="font-family:var(--title);font-size:14px;color:var(--navy);text-transform:uppercase;">${esc(l.nombre)}</div>
       <div style="font-size:12px;color:var(--text-sec);margin-top:2px;">${esc(String(l.hectareas))} has${l.cultivo ? ' · ' + esc(l.cultivo) : ''}</div></div>
       <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="btn btn-sm btn-accent" style="font-size:10px;padding:4px 8px;" onclick="App.openLoteModal('${esc(l.id)}')">✏️</button>
-        <button class="btn btn-sm btn-danger" style="font-size:10px;padding:4px 8px;" onclick="App.removeLote('${esc(l.id)}')">&times;</button>
+        <button class="btn btn-sm btn-accent" style="font-size:12px;padding:8px 12px;min-height:36px;border-radius:8px;" onclick="App.openLoteModal('${esc(l.id)}')">✏️</button>
+        <button class="btn btn-sm btn-danger" style="font-size:12px;padding:8px 12px;min-height:36px;border-radius:8px;" onclick="App.removeLote('${esc(l.id)}')">&times;</button>
       </div></div></div>`).join('');
   },
   openLoteModal(lid) {
@@ -1101,11 +1104,11 @@ const App = {
           <button class="st-comp${o.estado === 'completada' ? ' active' : ''}" data-oid="${esc(o.id)}" data-estado="completada">Comp.</button>
         </div></div>
         <div class="ot-actions" style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg);">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="App.compartirOrdenWA('${esc(o.id)}')">WA</button>
-          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="App.exportarOrdenPDF('${esc(o.id)}')">PDF</button>
-          <button class="btn btn-sm" style="background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')">Editar</button>
-          <button class="btn btn-sm" style="background:var(--navy-light);color:white;" onclick="App.duplicarOrden('${esc(o.id)}')">Duplicar</button>
-          <button class="btn btn-sm btn-danger" onclick="App.deleteOrden('${esc(o.id)}')">Eliminar</button>
+          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--accent);color:white;" onclick="App.editOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:#25d366;color:white;" onclick="App.compartirOrdenWA('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--navy);color:white;" onclick="App.exportarOrdenPDF('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
+          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:#e2e8f0;color:var(--text-sec);" onclick="App.duplicarOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          <button style="display:flex;align-items:center;justify-content:center;padding:7px;border-radius:8px;cursor:pointer;border:none;background:var(--red);color:white;" onclick="App.deleteOrden('${esc(o.id)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
         </div></div>`;
     }).join('');
 
@@ -1717,8 +1720,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('ordenes-list').addEventListener('click', e => { const btn = e.target.closest('[data-oid][data-estado]'); if (btn) { e.stopPropagation(); App.cambiarEstadoOrden(btn.dataset.oid, btn.dataset.estado); } });
   $('ot-costo-labor').addEventListener('input', () => App._renderTotales());
 
-  // Load product catalog
-  loadCatalog();
 });
 </script>
 </body>

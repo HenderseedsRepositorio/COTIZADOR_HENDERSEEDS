@@ -1629,7 +1629,7 @@ const Historial = {
         h+=`<tr><td style="font-size:.7rem;">${i.hibrido}</td><td style="font-family:var(--mono);">${i.banda}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.pre)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cont)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cre)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cro)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.vol)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.zonal)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.hend)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(+i.precio)}</td><td style="font-family:var(--mono);">${+i.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(+i.siva)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(civa)}</td></tr>`;
       });
       h+=`</tbody><tfoot><tr><td colspan="12" style="text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);">Total c/IVA</td><td style="font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--c-navy);">USD ${fmt(totalCiva)}</td></tr></tfoot></table></div>`;
-      h+=`<div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">📋 Modificar</button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button></div>`;
+      h+=`<div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modificar</button><button onclick="Historial.compartir(${q.numero})" style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div>`;
       h+=`</div>`;
       // Right: status buttons
       h+=`<div style="display:flex;flex-direction:column;gap:4px;min-width:70px;">`;
@@ -1677,6 +1677,13 @@ const Historial = {
     // Scroll to top
     window.scrollTo({top:0,behavior:'smooth'});
     Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y guardá con 💾 o compartí.');
+  },
+  async compartir(numero) {
+    // Load the quote then share
+    Historial.cargar(numero);
+    await new Promise(r => setTimeout(r, 200));
+    Calc.run();
+    await Quote.shareDirect();
   },
   async eliminar(numero) {
     if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;

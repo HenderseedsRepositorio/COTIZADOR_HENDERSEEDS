@@ -1044,15 +1044,15 @@ const Historial = {
   async cargar() {
     // Show cached immediately, then refresh
     if (Historial.items.length) Historial.render();
-    if (!API_URL) return;
+    if (!API_URL) { if (!Historial.items.length) Historial.render(); return; }
     try {
       const res = await Market.fetch('getHistorialAgro');
       if (res.ok && res.historial) {
         Historial.items = res.historial;
         localStorage.setItem('hs_agro_historial_cache', JSON.stringify(res.historial));
-        Historial.render();
       }
     } catch(e) { console.error('Error cargando historial:', e); }
+    Historial.render();
   },
   render() {
     const body = $('hist-body');

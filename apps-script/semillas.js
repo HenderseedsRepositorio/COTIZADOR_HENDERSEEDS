@@ -250,20 +250,26 @@ function registrarCotizacion(data) {
 function deleteCotizacion(data) {
   var numero = Number(data.numero);
   if (!numero) return { ok: false, error: 'Número inválido' };
-  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName('Cotizaciones');
-  if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
-  var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
-  var rowsToDelete = [];
-  for (var i = values.length - 1; i >= 0; i--) {
-    if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName('Cotizaciones');
+    if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
+    var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+    var rowsToDelete = [];
+    for (var i = values.length - 1; i >= 0; i--) {
+      if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+    }
+    if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
+    // Delete from bottom to top so row indices don't shift
+    for (var j = 0; j < rowsToDelete.length; j++) {
+      sheet.deleteRow(rowsToDelete[j]);
+    }
+    return { ok: true, deleted: rowsToDelete.length };
+  } finally {
+    lock.releaseLock();
   }
-  if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
-  // Delete from bottom to top so row indices don't shift
-  for (var j = 0; j < rowsToDelete.length; j++) {
-    sheet.deleteRow(rowsToDelete[j]);
-  }
-  return { ok: true, deleted: rowsToDelete.length };
 }
 
 function updateCotizacion(data) {
@@ -492,19 +498,25 @@ function getNextNumberAgro() {
 function deleteCotizacionAgro(data) {
   var numero = Number(data.numero);
   if (!numero) return { ok: false, error: 'Número inválido' };
-  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName('Historial Cotizaciones');
-  if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
-  var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
-  var rowsToDelete = [];
-  for (var i = values.length - 1; i >= 0; i--) {
-    if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName('Historial Cotizaciones');
+    if (!sheet) return { ok: false, error: 'Hoja no encontrada' };
+    var values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+    var rowsToDelete = [];
+    for (var i = values.length - 1; i >= 0; i--) {
+      if (Number(values[i][0]) === numero) rowsToDelete.push(i + 1);
+    }
+    if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
+    for (var j = 0; j < rowsToDelete.length; j++) {
+      sheet.deleteRow(rowsToDelete[j]);
+    }
+    return { ok: true, deleted: rowsToDelete.length };
+  } finally {
+    lock.releaseLock();
   }
-  if (!rowsToDelete.length) return { ok: false, error: 'Cotización no encontrada' };
-  for (var j = 0; j < rowsToDelete.length; j++) {
-    sheet.deleteRow(rowsToDelete[j]);
-  }
-  return { ok: true, deleted: rowsToDelete.length };
 }
 
 function registrarCotizacionAgro(data) {
@@ -533,7 +545,7 @@ function registrarCotizacionAgro(data) {
     lineas.forEach(function(l) {
       var costoHa = (Number(l.precio) || 0) * (Number(l.dosis) || 0);
       var iva = costoHa * ((Number(l.iva_pct) || 21) / 100);
-      totalCotiz += (costoHa + iva) * (Number(data.hectareas) || 1);
+      totalCotiz += (costoHa + iva) * (Number(data.hectareas) || 0);
     });
 
     var rows = [];

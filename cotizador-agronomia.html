@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cotizador Agroinsumos — Henderseeds v3</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -169,7 +170,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   outline: none;
   transition: border-color .15s, box-shadow .15s;
 }
-.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,111,196,.12); }
 .inp-sm { padding: 6px 8px; font-size: 13px; }
 .inp-xs { padding: 4px 6px; font-size: 12px; width: 70px; text-align: right; font-family: var(--mono); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -215,7 +216,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 .row-inp {
   width: 100%;
-  padding: 3px 4px;
+  padding: 6px 5px;
   border: 1px solid var(--border);
   border-radius: 4px;
   font-family: var(--mono);
@@ -286,9 +287,11 @@ input, select, button { font-family: inherit; font-size: inherit; }
   color: var(--text-mut);
   font-size: 16px;
   cursor: pointer;
-  padding: 2px;
-  line-height: 1;
-  text-align: center;
+  min-width: 34px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .row-rm:hover { color: var(--red); }
 
@@ -319,7 +322,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   background: var(--bg);
 }
 .dd-item {
-  padding: 4px 12px;
+  padding: 10px 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -360,7 +363,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   font-family: var(--font);
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
-.plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(217,119,6,.2); }
+.plazo-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(45,111,196,.2); }
 .plazo-chip small { display: block; font-weight: 400; font-size: .7rem; opacity: .7; margin-top: 1px; }
 
 /* ── Totales ── */
@@ -499,7 +502,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .app-title { font-family: var(--title); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-dark); }
 .app-header-actions { display: flex; gap: 6px; align-items: center; }
-.app-toggle, .app-delete { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-mut); padding: 2px 4px; }
+.app-toggle, .app-delete { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-mut); padding: 2px 4px; min-width:34px;min-height:34px; }
 .app-toggle:hover, .app-delete:hover { color: var(--navy); }
 .app-body { }
 .app-block.collapsed .app-body { display: none; }
@@ -640,9 +643,23 @@ input, select, button { font-family: inherit; font-size: inherit; }
   .card { padding: 10px; }
   .app-block { padding: 10px; }
 }
+/* Toast notifications */
+.toast-container{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:400px}
+.toast{pointer-events:auto;padding:12px 16px;border-radius:10px;font-family:var(--body);font-size:.78rem;font-weight:600;line-height:1.4;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:flex-start;gap:10px;animation:toastIn .3s ease-out;transition:opacity .3s,transform .3s}
+.toast.hiding{opacity:0;transform:translateY(-10px)}
+.toast-ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.toast-err{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5}
+.toast-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.toast-body{flex:1}
+.toast-title{display:block;font-weight:700;margin-bottom:2px}
+.toast-action{background:none;border:1px solid currentColor;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:inherit;cursor:pointer;white-space:nowrap;margin-top:4px}
+.toast-action:hover{opacity:.8}
+.toast-close{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:1rem;padding:0 0 0 4px;line-height:1}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
+<div id="toastContainer" class="toast-container"></div>
 
 <!-- ══════════ VENDOR OVERLAY ══════════ -->
 <div id="vendor-overlay">
@@ -792,6 +809,25 @@ const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+const Toast = {
+  show(type, title, body, opts={}) {
+    const c=$('toastContainer');
+    const el=document.createElement('div');
+    el.className=`toast toast-${type}`;
+    let html=`<div class="toast-body"><span class="toast-title">${esc(title)}</span>${body?esc(body):''}`;
+    if(opts.action) html+=`<br><button class="toast-action" id="toast-action-${Date.now()}">${opts.actionLabel||'Reintentar'}</button>`;
+    html+=`</div><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+    el.innerHTML=html;
+    c.appendChild(el);
+    if(opts.action) el.querySelector('.toast-action').onclick=()=>{ el.remove(); opts.action(); };
+    const dur=opts.duration||(type==='ok'?4000:8000);
+    setTimeout(()=>{ el.classList.add('hiding'); setTimeout(()=>el.remove(),300); },dur);
+  },
+  ok(title,body,opts){this.show('ok',title,body,opts)},
+  err(title,body,opts){this.show('err',title,body,opts)},
+  warn(title,body,opts){this.show('warn',title,body,opts)}
+};
 
 async function captureAndShare(el, filename, opts={}) {
   const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
@@ -973,15 +1009,19 @@ const Market = {
   },
 
   async fetch(action) {
-    const res = await fetch(API_URL + '?action=' + action + '&_t=' + Date.now(), { cache: 'no-store' });
+    const res = await fetch(API_URL + '?action=' + action + '&_t=' + Date.now(), { cache: 'no-store', redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   },
 
   async post(data) {
     const res = await fetch(API_URL, {
       method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(data)
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   },
 
@@ -1088,40 +1128,40 @@ const Historial = {
       </div>`;
       const trows = (h.lineas || []).map(l =>
         `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:3px 0; border-bottom:1px solid var(--bg); font-size:11px;">
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.producto}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.dosis}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.vol || '—'}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.precio || '—'}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.costoHa}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${l.monto || '—'}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(l.producto)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.dosis)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.vol || '—')}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.precio || '—')}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.costoHa)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${esc(l.monto || '—')}</span>
         </div>`
       ).join('');
       // Status buttons
       const statusHtml = ['Pendiente','Enviada','Venta cargada'].map(s => {
         const active = est === s;
-        return `<button onclick="Historial.setEstado('${h.numero}','${s}')" style="padding:5px 4px;font-size:10px;font-weight:${active?'800':'600'};border-radius:6px;border:1.5px solid ${estadoColors[s]};cursor:pointer;font-family:var(--font);background:${active?estadoColors[s]:'#fff'};color:${active?'#fff':estadoColors[s]};white-space:nowrap;">${s}</button>`;
+        return `<button onclick="Historial.setEstado('${h.numero}','${s}')" style="padding:8px 6px;font-size:11px;font-weight:${active?'800':'600'};border-radius:6px;border:1.5px solid ${estadoColors[s]};cursor:pointer;font-family:var(--font);background:${active?estadoColors[s]:'#fff'};color:${active?'#fff':estadoColors[s]};white-space:nowrap;">${s}</button>`;
       }).join('');
       return `<div class="card" style="margin-bottom:10px;display:flex;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
             <div style="display:flex; gap:6px; align-items:center;">
-              <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${h.numero || '—'}</span>
+              <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${esc(h.numero || '—')}</span>
               ${tipoTag}
             </div>
-            <span style="font-size:11px; color:var(--text-mut);">${h.fecha} · ${h.vendedor || ''} · ${h.plazo || ''}</span>
+            <span style="font-size:11px; color:var(--text-mut);">${esc(h.fecha)} · ${esc(h.vendedor || '')} · ${esc(h.plazo || '')}</span>
           </div>
-          <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${h.cliente || 'Sin nombre'}</div>
-          ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${h.establecimiento || ''}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? h.hectareas + ' has' : ''}</div>` : ''}
+          <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${esc(h.cliente || 'Sin nombre')}</div>
+          ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${esc(h.establecimiento || '')}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? esc(h.hectareas) + ' has' : ''}</div>` : ''}
           <div style="margin-top:4px; overflow-x:auto;">
             ${thead}${trows}
           </div>
           <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid var(--border);">
             <span style="font-weight:700; font-size:12px;">Total/ha</span>
-            <span style="font-family:var(--mono); font-weight:700; font-size:12px; color:var(--accent);">USD ${h.total}</span>
+            <span style="font-family:var(--mono); font-weight:700; font-size:12px; color:var(--accent);">USD ${esc(h.total)}</span>
           </div>
           ${h.hectareas ? `<div style="display:flex; justify-content:space-between;">
-            <span style="font-size:11px; color:var(--text-sec);">Total ${h.hectareas} has</span>
-            <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
+            <span style="font-size:11px; color:var(--text-sec);">Total ${esc(h.hectareas)} has</span>
+            <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${esc(h.totalHas || '—')}</span>
           </div>` : ''}
           <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
             <button style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:5px;" onclick="Historial.modificar(${idx})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modificar</button>
@@ -1177,7 +1217,7 @@ const Historial = {
     document.querySelector('[data-tab="cotizar"]').classList.add('active');
     $('tab-cotizar').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
+    Toast.ok('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
   },
   async compartir(idx) {
     await Historial.exportar(idx);
@@ -1195,9 +1235,9 @@ const Historial = {
         Historial.items.splice(idx, 1);
         localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
         Historial.render();
-        alert('Eliminada', 'Cotización eliminada.');
-      } else { alert('Error', d.error || 'No se pudo eliminar'); }
-    } catch(e) { alert('Error de conexión', e.message); }
+        Toast.ok('Eliminada', 'Cotización eliminada.');
+      } else { Toast.err('Error', d.error || 'No se pudo eliminar'); }
+    } catch(e) { Toast.err('Error de conexión', e.message); }
   },
   async recargar() {
     await Historial.cargar();
@@ -1382,7 +1422,7 @@ const Condiciones = {
     card.style.position = 'fixed'; card.style.left = '0'; card.style.top = '0'; card.style.zIndex = '9999';
     try {
       await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.pdf', {share:true, pdf:true, title:'Condiciones Comerciales — Henderseeds'});
-    } catch(e) { if (e.name !== 'AbortError') alert('Error al generar PDF'); }
+    } catch(e) { if (e.name !== 'AbortError') Toast.err('Error al generar PDF'); }
     finally { card.style.position = 'absolute'; card.style.left = '-9999px'; card.style.zIndex = ''; }
   }
 };
@@ -2001,16 +2041,16 @@ const App = {
 
   async guardarCotizacion() {
     const allRows = aplicaciones.flatMap(a => a.rows);
-    if (!allRows.length) { alert('Sin productos cargados'); return; }
-    if (!$('cliente').value.trim()) { alert('Falta cliente'); return; }
+    if (!allRows.length) { Toast.warn('Sin productos cargados'); return; }
+    if (!$('cliente').value.trim()) { Toast.warn('Falta cliente'); return; }
     const btn = $('btnSaveAgroInline');
     const orig = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = '⏳ Guardando...';
     try {
       await App._registrarYGuardar('cotizacion');
-      alert('Cotización guardada en Sheets');
+      Toast.ok('Cotización guardada en Sheets');
     } catch(e) {
-      alert('Error: ' + e.message);
+      Toast.err('Error: ' + e.message);
     } finally {
       btn.disabled = false; btn.innerHTML = orig;
     }
@@ -2331,6 +2371,7 @@ const App = {
     if (!nombre) return;
     $('cliente-dd').classList.remove('show');
     clientes.push({ nombre, localidad: '' });
+    localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
     if (API_URL) {
       try {
         await Market.post({ action: 'addCliente', nombre });

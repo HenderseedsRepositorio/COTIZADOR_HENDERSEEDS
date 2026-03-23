@@ -769,21 +769,27 @@ const App = {
     if (!data.planoPos) data.planoPos = {};
     const savedPos = data.planoPos;
 
-    // Default positions matching the Excel plano reference (% based)
+    // Default positions + layout matching the Excel plano reference
+    // layout: 'h'=horizontal (lotes side by side), 'v'=vertical (lotes stacked), 'g'=grid (auto)
     const defaultPos = {
-      'San Clemente': {x:3,y:8,w:18,h:85},
-      '2 Hermanas':   {x:52,y:3,w:22,h:18},
-      'La Porteña':   {x:82,y:3,w:15,h:35},
-      'El Parche 2':  {x:42,y:24,w:12,h:20},
-      'El Parche':    {x:28,y:54,w:28,h:42},
-      'Doña Josefa':  {x:58,y:54,w:30,h:42},
-      'Pirovano':     {x:24,y:8,w:16,h:40},
-      'Charterina':   {x:88,y:54,w:10,h:35},
-      'Ginar':        {x:30,y:5,w:18,h:45},
-      'La Primavera': {x:2,y:5,w:26,h:90}
+      'San Clemente':  {x:3,y:8,w:17,h:85,layout:'custom'},
+      '2 Hermanas':    {x:55,y:3,w:20,h:16,layout:'h'},
+      'La Porteña':    {x:82,y:3,w:12,h:38,layout:'v'},
+      'El Parche 2':   {x:44,y:24,w:10,h:18,layout:'h'},
+      'El Parche':     {x:28,y:54,w:26,h:42,layout:'g'},
+      'Doña josefa':   {x:56,y:54,w:32,h:42,layout:'h'},
+      'Pirovano':      {x:22,y:8,w:14,h:40,layout:'h'},
+      'Charterina':    {x:88,y:54,w:10,h:35,layout:'v'},
+      'Ginar':         {x:30,y:5,w:18,h:45,layout:'g'},
+      'La Primavera':  {x:2,y:5,w:26,h:90,layout:'h'}
     };
 
-    const getPos = (estab) => savedPos[estab] || defaultPos[estab] || {x:5,y:5,w:18,h:30};
+    const getPos = (estab) => {
+      const saved = savedPos[estab];
+      const def = defaultPos[estab] || {x:5,y:5,w:18,h:25,layout:'g'};
+      if (saved) { if (!saved.layout) saved.layout = def.layout || 'g'; return saved; }
+      return def;
+    };
 
     // Build canvas
     let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:600px;padding:30px 10px 10px;">`;
@@ -876,9 +882,15 @@ const App = {
       }
 
       const nL = gd.lotes.length;
-      const isVertical = pos.h > pos.w * 1.5;
-      const cols = nL<=1?1: isVertical?(nL<=2?1:2) : (nL<=2?2:nL<=3?3:nL<=5?Math.min(nL,3):4);
-      const rows = Math.ceil(nL / cols);
+      const layout = pos.layout || 'g';
+      let cols, rows;
+      if (layout === 'h') { cols = nL; rows = 1; } // horizontal: all side by side
+      else if (layout === 'v') { cols = 1; rows = nL; } // vertical: all stacked
+      else { // grid: auto
+        const isVert = pos.h > pos.w * 1.5;
+        cols = nL<=1?1: isVert?(nL<=2?1:2) : (nL<=2?2:nL<=3?3:Math.min(nL,4));
+        rows = Math.ceil(nL / cols);
+      }
 
       mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
       mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
@@ -989,11 +1001,13 @@ const App = {
     if (!data.planoPos) data.planoPos = {};
     canvas.querySelectorAll('.plano-estab').forEach(el => {
       const estab = el.dataset.estab;
+      const prev = data.planoPos[estab] || {};
       data.planoPos[estab] = {
         x: parseFloat(el.style.left) || 0,
         y: parseFloat(el.style.top) || 0,
         w: parseFloat(el.style.width) || 20,
-        h: parseFloat(el.style.height) || 30
+        h: parseFloat(el.style.height) || 30,
+        layout: prev.layout || 'g'
       };
     });
     Storage.save(data);
@@ -1088,6 +1102,20 @@ const App = {
           <input type="number" id="m-lote-densidad" class="inp inp-sm" value="${l?.densidad || ''}" placeholder="65000" inputmode="numeric">
         </div>
       </div>
+      ${!lid ? `<div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:var(--radius-sm);">
+        <label class="form-lbl">Disposición de lotes en el plano</label>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <label style="flex:1;display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+            <input type="radio" name="m-lote-layout" value="h" checked> Horizontal ↔
+          </label>
+          <label style="flex:1;display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+            <input type="radio" name="m-lote-layout" value="v"> Vertical ↕
+          </label>
+          <label style="flex:1;display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+            <input type="radio" name="m-lote-layout" value="g"> Grilla ⊞
+          </label>
+        </div>
+      </div>` : ''}
       <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-accent" onclick="App.saveLote('${lid || ''}')">Guardar</button></div>`);
   },
   saveLote(lid) {
@@ -1104,6 +1132,14 @@ const App = {
       if (l) { l.nombre = nombre; l.hectareas = has; l.cultivo = cultivo; l.establecimiento = establecimiento; l.variedad = variedad; l.densidad = densidad; }
     } else {
       data.lotes.push({ id: Storage.nextId('l'), nombre, hectareas: has, cultivo, establecimiento, variedad, densidad });
+      // Save layout for new/existing establishment in plano positions
+      const layoutRadio = document.querySelector('input[name="m-lote-layout"]:checked');
+      if (layoutRadio && establecimiento) {
+        if (!data.planoPos) data.planoPos = {};
+        const existing = data.planoPos[establecimiento];
+        if (existing) { existing.layout = layoutRadio.value; }
+        else { data.planoPos[establecimiento] = {x:5,y:5,w:20,h:25,layout:layoutRadio.value}; }
+      }
     }
     Storage.save(data); closeModal(); App.renderLotes(); App.refreshSelectors();
     // Re-render planos if on that tab

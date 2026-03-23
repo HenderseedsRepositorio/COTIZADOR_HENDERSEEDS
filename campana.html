@@ -965,7 +965,7 @@ const App = {
     };
 
     // Helper: San Clemente special layout with diagonal road
-    const renderSanClemente = (estab, gd, pos) => {
+    const renderSanClemente = (estab, gd, pos, campOverride) => {
       // SC has 4 lotes: SC1(girasol, top-left), SC2(maíz, top-right), SC3(maíz, mid-right), SC4(girasol, bottom)
       // A diagonal road goes from ~top-left to ~bottom-center-right
       const lotes = gd.lotes;
@@ -976,7 +976,7 @@ const App = {
       const sc4 = getLote('SC4') || lotes[3];
 
       const cellBg = (l) => bgMap[App._cultivoClass(l?.plan?.cultivo || '')] || '#fff';
-      const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}')"` : '';
+      const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}'${campOverride ? `,'${esc(campOverride)}'` : ''})"` : '';
       const cellInfo = (l) => {
         if (!l) return '';
         const cultivo = l.plan?.cultivo || l.cultivo || '';
@@ -1106,7 +1106,7 @@ const App = {
         // Reuse same renderSanClemente but with fina campaign key
         const finaLotes = gd.lotes.map(l => ({...l, plan: App._getPlan(l, 'fina_'+campPlan)}));
         const gdFina = {...gd, lotes: finaLotes};
-        mH += renderSanClemente(estab, gdFina, pos).replace(/openPlanModal\('/g, "openPlanModal('fina_" + campPlan + "','");
+        mH += renderSanClemente(estab, gdFina, pos, 'fina_'+campPlan);
         return;
       }
 

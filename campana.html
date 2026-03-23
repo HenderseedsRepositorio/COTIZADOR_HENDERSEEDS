@@ -765,9 +765,9 @@ const App = {
     // Map — drag & drop field planner
     const bgMap = {'cult-maiz':'#f0d060','cult-girasol':'#d4b0e8','cult-soja':'#90dba0','cult-trigo':'#f0c090','cult-barbecho':'#d0d0d0','cult-empty':'#ffffff'};
 
-    // Load saved positions (per user)
-    const posKey = 'sc_plano_pos_' + currentProductor;
-    const savedPos = JSON.parse(localStorage.getItem(posKey) || '{}');
+    // Load saved positions from data (syncs to Sheets)
+    if (!data.planoPos) data.planoPos = {};
+    const savedPos = data.planoPos;
 
     // Default positions matching the Excel plano reference (% based)
     const defaultPos = {
@@ -986,23 +986,22 @@ const App = {
   _savePlanoPositions() {
     const canvas = $('plano-canvas');
     if (!canvas) return;
-    const posKey = 'sc_plano_pos_' + currentProductor;
-    const positions = {};
+    if (!data.planoPos) data.planoPos = {};
     canvas.querySelectorAll('.plano-estab').forEach(el => {
       const estab = el.dataset.estab;
-      positions[estab] = {
+      data.planoPos[estab] = {
         x: parseFloat(el.style.left) || 0,
         y: parseFloat(el.style.top) || 0,
         w: parseFloat(el.style.width) || 20,
         h: parseFloat(el.style.height) || 30
       };
     });
-    localStorage.setItem(posKey, JSON.stringify(positions));
+    Storage.save(data);
   },
 
   resetPlanoPositions() {
-    const posKey = 'sc_plano_pos_' + currentProductor;
-    localStorage.removeItem(posKey);
+    data.planoPos = {};
+    Storage.save(data);
     App.renderPlanos();
     showToast('Posiciones reseteadas');
   },
@@ -1050,22 +1049,65 @@ const App = {
 
   openLoteModal(lid) {
     const l = lid ? data.lotes.find(x => x.id === lid) : null;
+    // Build cultivo options
+    const cultivos = ['Maiz tardio','Maiz','Maiz 2da','Soja','Soja 2da','Girasol','Trigo','Cebada','Sorgo','Barbecho'];
+    const cultivoOpts = cultivos.map(c => `<option value="${esc(c)}" ${l?.cultivo===c?'selected':''}>${esc(c)}</option>`).join('');
+    // Build establecimiento options from existing
+    const establecimientos = [...new Set(data.lotes.map(x => x.establecimiento).filter(Boolean))];
+    const estabOpts = establecimientos.map(e => `<option value="${esc(e)}" ${l?.establecimiento===e?'selected':''}>${esc(e)}</option>`).join('');
+    // Build variedad options (Nidera hybrids from catalogo if available + free text)
+    let variedadOpts = '<option value="">-- Opcional --</option>';
+    const cat = typeof catalogo === 'object' ? catalogo : {};
+    // From agro catalogo (if loaded)
+    const semillasCat = JSON.parse(localStorage.getItem('hs_catalogo_cache') || 'null');
+    if (semillasCat) {
+      if (semillasCat.maiz) semillasCat.maiz.forEach(h => { variedadOpts += `<option value="${esc(h.id)}">${esc(h.id)}</option>`; });
+      if (semillasCat.girasol) semillasCat.girasol.forEach(h => { variedadOpts += `<option value="${esc(h.id)}">${esc(h.id)}</option>`; });
+    }
+
     openModal(`<div class="modal-title">${l ? 'Editar Lote' : 'Nuevo Lote'}</div>
-      <div style="margin-bottom:10px;"><label class="form-lbl" for="m-lote-nombre">Nombre *</label><input type="text" id="m-lote-nombre" class="inp inp-sm" value="${esc(l?.nombre || '')}" placeholder="Ej: LT1, DP3..."></div>
       <div class="form-row" style="margin-bottom:10px;">
-        <div><label class="form-lbl" for="m-lote-has">Hectareas *</label><input type="number" id="m-lote-has" class="inp inp-sm" value="${l?.hectareas || ''}" placeholder="0" min="0" step="1" style="font-family:var(--mono);"></div>
-        <div><label class="form-lbl" for="m-lote-cultivo">Cultivo</label><input type="text" id="m-lote-cultivo" class="inp inp-sm" value="${esc(l?.cultivo || '')}" placeholder="Ej: Soja 1ra"></div>
+        <div><label class="form-lbl">Nombre *</label><input type="text" id="m-lote-nombre" class="inp inp-sm" value="${esc(l?.nombre || '')}" placeholder="Ej: LT1, SC5..."></div>
+        <div><label class="form-lbl">Hectáreas *</label><input type="number" id="m-lote-has" class="inp inp-sm" value="${l?.hectareas || ''}" placeholder="0" min="0" step="1" inputmode="numeric"></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div><label class="form-lbl">Establecimiento</label>
+          <input type="text" id="m-lote-estab" class="inp inp-sm" list="estab-list" value="${esc(l?.establecimiento || '')}" placeholder="Ej: San Clemente">
+          <datalist id="estab-list">${estabOpts}</datalist>
+        </div>
+        <div><label class="form-lbl">Cultivo</label>
+          <select id="m-lote-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${cultivoOpts}</select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div><label class="form-lbl">Variedad / Híbrido</label>
+          <input type="text" id="m-lote-variedad" class="inp inp-sm" list="var-list" value="${esc(l?.variedad || '')}" placeholder="Ej: AX7784, NK860">
+          <datalist id="var-list">${variedadOpts}</datalist>
+        </div>
+        <div><label class="form-lbl">Densidad (pl/ha)</label>
+          <input type="number" id="m-lote-densidad" class="inp inp-sm" value="${l?.densidad || ''}" placeholder="65000" inputmode="numeric">
+        </div>
       </div>
       <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-accent" onclick="App.saveLote('${lid || ''}')">Guardar</button></div>`);
   },
   saveLote(lid) {
     const nombre = $('m-lote-nombre').value.trim();
     if (!nombre) { $('m-lote-nombre').style.borderColor = 'var(--red)'; return; }
-    const has = parseFloat($('m-lote-has').value) || 0, cultivo = $('m-lote-cultivo').value.trim();
-    if (has <= 0 && !confirm('Las hectareas estan en 0. Los calculos de volumen y monto no funcionaran.\n\nGuardar de todos modos?')) return;
-    if (lid) { const l = data.lotes.find(x => x.id === lid); if (l) { l.nombre = nombre; l.hectareas = has; l.cultivo = cultivo; } }
-    else data.lotes.push({ id: Storage.nextId('l'), nombre, hectareas: has, cultivo });
+    const has = parseFloat($('m-lote-has').value) || 0;
+    const cultivo = $('m-lote-cultivo').value;
+    const establecimiento = $('m-lote-estab').value.trim();
+    const variedad = $('m-lote-variedad').value.trim();
+    const densidad = parseFloat($('m-lote-densidad').value) || 0;
+    if (has <= 0 && !confirm('Las hectáreas están en 0. Guardar de todos modos?')) return;
+    if (lid) {
+      const l = data.lotes.find(x => x.id === lid);
+      if (l) { l.nombre = nombre; l.hectareas = has; l.cultivo = cultivo; l.establecimiento = establecimiento; l.variedad = variedad; l.densidad = densidad; }
+    } else {
+      data.lotes.push({ id: Storage.nextId('l'), nombre, hectareas: has, cultivo, establecimiento, variedad, densidad });
+    }
     Storage.save(data); closeModal(); App.renderLotes(); App.refreshSelectors();
+    // Re-render planos if on that tab
+    if (document.querySelector('[data-tab="planos"].active')) App.renderPlanos();
   },
   removeLote(lid) {
     const linkedOrders = data.ordenes.filter(o => (o.aplicaciones || []).some(a => (a.lotes || []).some(l => l.loteId === lid)));

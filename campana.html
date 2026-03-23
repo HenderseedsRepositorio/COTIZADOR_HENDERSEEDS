@@ -908,9 +908,70 @@ const App = {
 
     mH += '</div>';
     mH += `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+      <button class="btn btn-accent btn-sm" onclick="App._savePlanoPositions();showToast('Plano guardado')" style="font-size:12px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar plano</button>
       <button class="btn btn-outline btn-sm" onclick="App.openLoteModal()" style="font-size:12px;">+ Agregar lote</button>
-      <button class="btn btn-outline btn-sm" onclick="App.resetPlanoPositions()" style="font-size:12px;color:var(--text-mut);">Resetear posiciones</button>
     </div>`;
+
+    // ── FINA: duplicate plano for winter crops ──
+    const campFina = campPlan.includes('/') ? (parseInt(campPlan) - 1) + '/' + campPlan.split('/')[0] : campPlan;
+    // FINA KPIs
+    const finaKey = 'fina_' + campPlan;
+    const byFinaCultivo = {};
+    let finaTotal = 0, finaSinPlan = 0;
+    data.lotes.forEach(l => {
+      const fp = (l.planes && l.planes[finaKey]) || {};
+      if (fp.cultivo) { byFinaCultivo[fp.cultivo] = (byFinaCultivo[fp.cultivo]||0) + (l.hectareas||0); finaTotal += l.hectareas||0; }
+      else { finaSinPlan += l.hectareas||0; }
+    });
+    mH += `<div style="margin-top:24px;"><div style="font-family:var(--title);font-size:14px;color:var(--navy);text-align:center;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">FINA ${esc(campPlan)}</div>`;
+    // Fina KPI bar
+    mH += '<div class="planos-kpi-bar">';
+    Object.entries(byFinaCultivo).sort((a,b)=>b[1]-a[1]).forEach(([c,h])=>{
+      mH += `<div class="plano-kpi" style="border-top-color:${App._cultivoColor(c)};"><div class="pk-val">${fmtInt(h)}</div><div class="pk-lbl">${esc(c)}</div></div>`;
+    });
+    if (finaSinPlan > 0) mH += `<div class="plano-kpi" style="border-top-color:var(--border);"><div class="pk-val">${fmtInt(finaSinPlan)}</div><div class="pk-lbl">Sin asignar</div></div>`;
+    mH += '</div>';
+    mH += `<div style="position:relative;width:100%;min-height:600px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:30px 10px 10px;">`;
+
+    Object.entries(groups).forEach(([estab, gd]) => {
+      const pos = getPos(estab);
+      const nL = gd.lotes.length;
+      const layout = pos.layout || 'g';
+      let cols, rows;
+      if (layout === 'h') { cols = nL; rows = 1; }
+      else if (layout === 'v') { cols = 1; rows = nL; }
+      else { cols = nL<=1?1:nL<=2?2:Math.min(nL,3); rows = Math.ceil(nL / cols); }
+
+      // For San Clemente custom layout — use same structure but with fina plans
+      if (estab.toLowerCase().includes('clemente') && gd.lotes.length >= 4) {
+        // Reuse same renderSanClemente but with fina campaign key
+        const finaLotes = gd.lotes.map(l => ({...l, plan: (l.planes && l.planes['fina_'+campPlan]) || {}}));
+        const gdFina = {...gd, lotes: finaLotes};
+        mH += renderSanClemente(estab, gdFina, pos).replace(/openPlanModal\('/g, "openPlanModal('fina_" + campPlan + "','");
+        return;
+      }
+
+      mH += `<div style="position:absolute;left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      mH += `<div style="font-family:var(--title);font-size:11px;color:#333;text-align:center;margin-bottom:2px;">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      mH += `<div style="border:2.5px solid #333;overflow:hidden;display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
+
+      gd.lotes.forEach(l => {
+        const finaKey = 'fina_' + campPlan;
+        const finaPlan = (l.planes && l.planes[finaKey]) || {};
+        const cc = App._cultivoClass(finaPlan.cultivo || '');
+        const bg = bgMap[cc] || '#fff';
+        const cultivo = finaPlan.cultivo || '';
+        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">
+          <div style="position:absolute;top:1px;right:3px;font-size:8px;font-weight:700;color:rgba(0,0,0,.3);">${esc(l.nombre)}</div>
+          <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas}</div>
+          <div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(cultivo || '')}</div>
+          ${finaPlan.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);">${esc(finaPlan.variedad)}</div>` : ''}
+        </div>`;
+      });
+      mH += '</div></div>';
+    });
+
+    mH += '</div></div>';
 
     mapEl.innerHTML = mH;
     App._initPlanoDrag();
@@ -1020,15 +1081,19 @@ const App = {
     showToast('Posiciones reseteadas');
   },
 
-  openPlanModal(lid) {
+  openPlanModal(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid);
     if (!l) return;
-    const campPlan = $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
+    const isFina = campPlan.startsWith('fina_');
     const plan = (l.planes && l.planes[campPlan]) || {};
-    const cultivos = ['Maiz tardio','Maiz','Maiz 2da','Soja','Soja 2da','Girasol','Trigo','Cebada','Barbecho'];
+    const cultivosFina = ['Trigo','Cebada','Avena','Barbecho'];
+    const cultivosGruesa = ['Maiz tardio','Maiz','Maiz 2da','Soja','Soja 2da','Girasol','Sorgo','Barbecho'];
+    const cultivos = isFina ? cultivosFina : cultivosGruesa;
     const opts = cultivos.map(c => `<option value="${esc(c)}" ${plan.cultivo===c?'selected':''}>${esc(c)}</option>`).join('');
+    const campLabel = isFina ? 'FINA ' + campPlan.replace('fina_','') : 'GRUESA ' + campPlan;
     openModal(`<div class="modal-title">Planificar ${esc(l.nombre)}</div>
-      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has · ${esc(l.establecimiento||'')} · Campaña ${esc(campPlan)}</div>
+      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has · ${esc(l.establecimiento||'')} · ${esc(campLabel)}</div>
       <div style="margin-bottom:10px;"><label class="form-lbl">Cultivo</label>
         <select id="m-plan-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${opts}</select></div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -1038,13 +1103,13 @@ const App = {
       <div style="margin-bottom:10px;"><label class="form-lbl">Fecha de siembra</label><input type="date" id="m-plan-fecha" class="inp inp-sm" value="${plan.fechaSiembra||''}"></div>
       <div class="modal-actions">
         <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-        ${plan.cultivo?'<button class="btn btn-outline" style="color:var(--red);border-color:var(--red);" onclick="App.clearPlan(\''+esc(lid)+'\')">Limpiar</button>':''}
-        <button class="btn btn-accent" onclick="App.savePlan('${esc(lid)}')">Guardar</button>
+        ${plan.cultivo?'<button class="btn btn-outline" style="color:var(--red);border-color:var(--red);" onclick="App.clearPlan(\''+esc(lid)+'\',\''+esc(campPlan)+'\')">Limpiar</button>':''}
+        <button class="btn btn-accent" onclick="App.savePlan('${esc(lid)}','${esc(campPlan)}')">Guardar</button>
       </div>`);
   },
-  savePlan(lid) {
+  savePlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
-    const campPlan = $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
     if (!l.planes) l.planes = {};
     l.planes[campPlan] = {
       cultivo: $('m-plan-cultivo').value,
@@ -1054,9 +1119,9 @@ const App = {
     };
     Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan guardado');
   },
-  clearPlan(lid) {
+  clearPlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
-    const campPlan = $('plan-campana')?.value || '26/27';
+    const campPlan = campOverride || $('plan-campana')?.value || '26/27';
     if (l.planes) delete l.planes[campPlan];
     Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan eliminado');
   },

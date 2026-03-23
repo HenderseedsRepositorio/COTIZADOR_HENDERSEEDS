@@ -195,7 +195,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .plano-estab { position:absolute;cursor:grab;user-select:none;touch-action:none; }
 .plano-estab.dragging { opacity:.8;z-index:100;cursor:grabbing; }
 .plano-estab .pe-label { font-family:var(--title);font-size:11px;color:#333;text-align:center;margin-bottom:2px;pointer-events:none; }
-.plano-estab .pe-block { border:2.5px solid #333;overflow:hidden;pointer-events:none; }
+.plano-estab .pe-block { border:2.5px solid #333;overflow:hidden; }
 .plano-estab .pe-cell { display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3px;position:relative;cursor:pointer;pointer-events:auto; }
 .plano-estab .pe-cell:hover { filter:brightness(.88); }
 .pe-resize { position:absolute;width:12px;height:12px;background:rgba(45,111,196,.2);border-radius:2px;z-index:10;opacity:0;transition:opacity .2s; }
@@ -913,7 +913,7 @@ const App = {
 
       // Drag
       el.addEventListener('pointerdown', e => {
-        if (e.target.closest('.pe-cell') || e.target.closest('.pe-resize')) return;
+        if (e.target.closest('.pe-cell') || e.target.closest('.pe-resize') || e.target.closest('.pe-block')) return;
         e.preventDefault();
         isDragging = true;
         el.classList.add('dragging');

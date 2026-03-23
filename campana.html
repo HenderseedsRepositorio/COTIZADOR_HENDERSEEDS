@@ -451,16 +451,22 @@ const Cloud = {
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
+        redirect: 'follow',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveCampana', productor: currentProductor, data })
       });
-      const result = await res.json();
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      let result;
+      try { result = JSON.parse(text); } catch(e) { throw new Error('Respuesta no JSON'); }
       if (result.ok) {
-        Cloud.setStatus('Guardado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+        Cloud.setStatus('Sincronizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+        const dot = $('status-dot'); if (dot) dot.style.background = 'var(--green)';
       } else {
         Cloud.setStatus('Error: ' + (result.error || '?'), true);
       }
     } catch(e) {
+      console.error('Cloud save error:', e);
       Cloud.setStatus('Sin conexion (local OK)', true);
     }
     Cloud._syncing = false;
@@ -470,7 +476,7 @@ const Cloud = {
     if (!currentProductor) return null;
     Cloud.setStatus('Cargando...');
     try {
-      const res = await fetch(API_URL + '?action=loadCampana&productor=' + encodeURIComponent(currentProductor) + '&_t=' + Date.now(), { cache: 'no-store' });
+      const res = await fetch(API_URL + '?action=loadCampana&productor=' + encodeURIComponent(currentProductor) + '&_t=' + Date.now(), { cache: 'no-store', redirect: 'follow' });
       const result = await res.json();
       if (result.ok && result.data) {
         Cloud.setStatus('Datos cargados');
@@ -1156,15 +1162,21 @@ const App = {
     Storage.save(data);
   },
 
-  guardarPlanoCompleto() {
+  async guardarPlanoCompleto() {
+    // Save positions from canvas
     App._savePlanoPositions();
-    // Force immediate cloud sync
+    // Disable button while saving
+    const btn = document.querySelector('.btn-accent[onclick*="guardarPlanoCompleto"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Guardando...'; }
+    // Force immediate cloud sync (cancel any pending)
     if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
-    Cloud.saveToCloud().then(() => {
+    try {
+      await Cloud.saveToCloud();
       showToast('Plano guardado y sincronizado');
-    }).catch(() => {
+    } catch(e) {
       showToast('Guardado local. Se sincronizará cuando haya conexión.');
-    });
+    }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar todo'; }
   },
 
   resetPlanoPositions() {

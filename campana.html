@@ -689,10 +689,14 @@ const App = {
       else if (e.key === 'Escape') App.hideAplicadorDD();
     });
     const cs = $('campana-select');
-    // Only show: previous, current (25/26), next
-    const campanas = ['2024/25', '2025/26', '2026/27'];
+    // Dynamic: current campaign year (Jul-Jun cycle) + previous + next
+    const now = new Date(), campYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+    const currentCamp = campYear + '/' + String(campYear + 1).slice(2);
+    const prevCamp = (campYear - 1) + '/' + String(campYear).slice(2);
+    const nextCamp = (campYear + 1) + '/' + String(campYear + 2).slice(2);
+    const campanas = [prevCamp, currentCamp, nextCamp];
     campanas.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; cs.appendChild(o); });
-    if (!data.campana) data.campana = '2025/26';
+    if (!data.campana) data.campana = currentCamp;
     if (!campanas.includes(data.campana)) { const o = document.createElement('option'); o.value = data.campana; o.textContent = data.campana; cs.appendChild(o); }
     cs.value = data.campana;
     cs.addEventListener('change', function() {
@@ -1382,7 +1386,7 @@ const App = {
     reader.onload = function(e) {
       try {
         const imp = JSON.parse(e.target.result);
-        if (!imp.ordenes) { alert('Archivo no valido.'); return; }
+        if (!imp.ordenes) { showToast('Archivo no válido'); return; }
         if (!confirm('Esto reemplazara todos los datos actuales. Continuar?')) return;
         data = imp;
         if (data.campos && !data.lotes) { data.lotes = []; data.campos.forEach(c => (c.lotes || []).forEach(l => data.lotes.push({ id: l.id, nombre: c.nombre + ', ' + l.nombre, hectareas: l.hectareas || 0, cultivo: l.cultivo || '' }))); delete data.campos; }
@@ -1397,9 +1401,9 @@ const App = {
           const opt = document.createElement('option'); opt.value = data.campana; opt.textContent = data.campana; cs.appendChild(opt);
         }
         cs.value = data.campana;
-        App.renderLotes(); App.refreshSelectors();
-        alert('Datos restaurados: ' + (data.lotes?.length || 0) + ' lotes, ' + (data.ordenes?.length || 0) + ' ordenes.');
-      } catch(err) { alert('Error al leer el archivo: ' + err.message); }
+        App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
+        showToast('Restaurado: ' + (data.lotes?.length || 0) + ' lotes, ' + (data.ordenes?.length || 0) + ' ordenes');
+      } catch(err) { showToast('Error: ' + err.message); }
     };
     reader.readAsText(file); input.value = '';
   },
@@ -1680,7 +1684,7 @@ const App = {
   saveOrden() {
     if (App._saving) return;
     const valid = aplicaciones.some(a => a.lotes.length && a.productos.length);
-    if (!valid) { alert('Agrega al menos un lote con productos.'); return; }
+    if (!valid) { showToast('Agrega al menos un lote con productos'); return; }
     App._saving = true;
     const saveBtn = document.querySelector('#tab-nueva-ot .btn-accent[onclick="App.saveOrden()"]');
     if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '.5'; }

@@ -747,8 +747,8 @@ input, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <input type="text" id="lista-search" class="inp inp-sm" placeholder="🔍 Buscar producto..." autocomplete="off"
       oninput="App.renderLista()" style="margin-bottom:8px;">
-    <div style="display:grid;grid-template-columns:1fr 62px 46px 62px 72px;gap:8px;padding:6px 8px;font-size:.65rem;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border);">
-      <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:center;">Margen</span><span style="text-align:right;">P.Sugerido</span><span style="text-align:right;">P.Final</span>
+    <div style="display:grid;grid-template-columns:1fr 62px 46px 72px;gap:8px;padding:6px 8px;font-size:.65rem;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border);">
+      <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:center;">Margen</span><span style="text-align:right;">P.Contado</span>
     </div>
     <div id="lista-body"></div>
   </section>
@@ -2370,23 +2370,16 @@ const App = {
       porProveedor[prov].forEach(p => {
         const precio = Calc.precioConRecargo(p.precio_usd, plazo);
         const mg = Number(p.margen_pct) || 0;
-        const mgColor = mg >= 25 ? '#16a34a' : mg >= 15 ? '#d97706' : '#dc2626';
         const costo = Number(p.costo_usd) || 0;
         const pSug = Number(p.precio_usd) || 0;
-        const diff = precio - pSug;
-        const diffTxt = diff > 0.01 ? `<span style="font-size:9px;color:#16a34a;">+${fmt(diff)}</span>` : diff < -0.01 ? `<span style="font-size:9px;color:#dc2626;">${fmt(diff)}</span>` : '';
-        html += `<div class="lista-row" style="display:grid;grid-template-columns:1fr 62px 46px 62px 72px;gap:8px;align-items:center;">
+        html += `<div class="lista-row" style="display:grid;grid-template-columns:1fr 62px 46px 72px;gap:8px;align-items:center;">
           <div style="min-width:0;">
             <div class="lista-name">${p.producto}</div>
             <div class="lista-unit">${p.categoria} · ${p.unidad}${p.formulacion ? ' · '+p.formulacion : ''}</div>
           </div>
           <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(costo)}</span>
           <span style="text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#16a34a;">${mg}%</span>
-          <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(pSug)}</span>
-          <span style="text-align:right;">
-            <span class="lista-price" style="font-size:13px;">$${fmt(precio)}</span>
-            ${diffTxt}
-          </span>
+          <span class="lista-price" style="text-align:right;font-size:13px;">$${fmt(pSug)}</span>
         </div>`;
       });
     });

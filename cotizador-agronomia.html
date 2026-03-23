@@ -1050,9 +1050,9 @@ const Historial = {
             <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
           </div>` : ''}
           <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
-            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:5px 8px;" onclick="Historial.modificar(${idx})">Modificar en cotizador</button>
-            <button class="btn btn-green btn-sm" style="font-size:11px; padding:5px 8px;" onclick="Historial.exportar(${idx})">PDF</button>
-            <button onclick="Historial.eliminar(${idx})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button>
+            <button style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);" onclick="Historial.modificar(${idx})">📋 Modificar</button>
+            <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);" onclick="Historial.compartir(${idx})">📤</button>
+            <button onclick="Historial.eliminar(${idx})" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">🗑</button>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:70px;">
@@ -1104,6 +1104,13 @@ const Historial = {
     $('tab-cotizar').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     alert('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
+  },
+  async compartir(idx) {
+    // Load into cotizador, generate receta PDF and share
+    Historial.modificar(idx);
+    // Small delay to let renderAplicaciones finish
+    await new Promise(r => setTimeout(r, 100));
+    App.compartirPDF('receta');
   },
   async eliminar(idx) {
     const h = Historial.items[idx];

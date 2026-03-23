@@ -355,10 +355,10 @@ textarea.inp { resize: vertical; min-height: 60px; }
       <button class="chip" data-filtro="completada" onclick="App.setFiltroOT(this)">Completadas</button>
     </div>
     <div class="form-row" style="margin-bottom:8px;">
-      <select id="ord-lote" class="inp inp-sm" onchange="App.renderOrdenes()"><option value="">Todos los lotes</option></select>
+      <select id="ord-lote" class="inp inp-sm" onchange="debouncedRenderOrdenes()"><option value="">Todos los lotes</option></select>
       <div style="display:flex;gap:4px;">
-        <input type="date" id="ord-desde" class="inp inp-sm" onchange="App.renderOrdenes()" style="flex:1;" title="Desde">
-        <input type="date" id="ord-hasta" class="inp inp-sm" onchange="App.renderOrdenes()" style="flex:1;" title="Hasta">
+        <input type="date" id="ord-desde" class="inp inp-sm" onchange="debouncedRenderOrdenes()" style="flex:1;" title="Desde">
+        <input type="date" id="ord-hasta" class="inp inp-sm" onchange="debouncedRenderOrdenes()" style="flex:1;" title="Hasta">
       </div>
     </div>
     <input type="text" id="ordenes-search" class="inp inp-sm" placeholder="Buscar orden..." autocomplete="off" oninput="debouncedRenderOrdenes()" style="margin-bottom:8px;">
@@ -408,14 +408,14 @@ const Storage = {
     try { const d = JSON.parse(localStorage.getItem('sc_data')); if (d && (d.lotes || d.campos)) return d; } catch(e) {}
     return this.defaults();
   },
-  save(d) { localStorage.setItem(this._productorKey(), JSON.stringify(d)); Cloud.queueSync(); },
+  save(d) { try { localStorage.setItem(this._productorKey(), JSON.stringify(d)); } catch(e) { console.error('localStorage full:', e); showToast('Error: almacenamiento lleno'); } Cloud.queueSync(); },
   nextId(prefix) { return prefix + '_' + Date.now() + '_' + (++this._counter); }
 };
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_kcpTVtGKSlDH9WHmVlRGNo-jt-QbLqlg5BNY5RGAhHV8kw/exec';
 function debounce(fn, ms) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
 const debouncedRenderOrdenes = debounce(() => App.renderOrdenes(), 200);
-let catalogo = JSON.parse(localStorage.getItem('sc_catalogo_cache') || 'null') || {};
+let catalogo = (() => { try { return JSON.parse(localStorage.getItem('sc_catalogo_cache') || 'null') || {}; } catch(e) { return {}; } })();
 async function loadCatalog() {
   try { const res = await fetch(API_URL + '?action=getCatalogoAgro&_t=' + Date.now(), { cache: 'no-store' }); const d = await res.json();
     if (d.ok && d.catalogo) { catalogo = d.catalogo; localStorage.setItem('sc_catalogo_cache', JSON.stringify(catalogo)); }
@@ -452,11 +452,13 @@ const Cloud = {
     if (!currentProductor || Cloud._syncing) return;
     Cloud._syncing = true;
     Cloud.setStatus('Guardando...');
+    const timeout = setTimeout(() => { Cloud._syncing = false; }, 15000); // Safety: reset after 15s
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'saveCampana', productor: currentProductor, data })
       });
+      clearTimeout(timeout);
       const result = await res.json();
       if (result.ok) {
         Cloud.setStatus('Sincronizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
@@ -584,7 +586,7 @@ const App = {
       // Auto-import initial data — only if user has NO data at all
       const initialMap = { JAM: typeof JAM_INITIAL_DATA !== 'undefined' ? JAM_INITIAL_DATA : null, Ginar: typeof GINAR_INITIAL_DATA !== 'undefined' ? GINAR_INITIAL_DATA : null, DMyAG: typeof DMAG_INITIAL_DATA !== 'undefined' ? DMAG_INITIAL_DATA : null };
       const importData = initialMap[userId];
-      if (importData && (!data.ordenes || !data.ordenes.length)) {
+      if (importData && (!data.ordenes || !data.ordenes.length) && (!data.lotes || !data.lotes.length)) {
         data = JSON.parse(JSON.stringify(importData));
         Storage.save(data);
         Cloud.saveToCloud();
@@ -695,6 +697,8 @@ const App = {
     cs.value = data.campana;
     cs.addEventListener('change', function() {
       data.campana = this.value;
+      // Clear pending sync before switching campaign
+      if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
       Storage.save(data);
       // Re-render all tabs for the new campaign
       App.renderLotes(); App.renderPlanos(); App.renderOrdenes(); App.renderAnalisis(); App.refreshSelectors();
@@ -1078,7 +1082,7 @@ const App = {
     </div>`;
 
     // ── FINA: duplicate plano for winter crops ──
-    const campFina = campPlan.includes('/') ? (parseInt(campPlan) - 1) + '/' + campPlan.split('/')[0] : campPlan;
+    const campFina = campPlan.replace(/(\d{4})\/(\d{2})/, (m,y,s) => (parseInt(y)-1)+'/'+(parseInt(y)%100));
     // FINA KPIs
     const finaKey = 'fina_' + campPlan;
     const byFinaCultivo = {};
@@ -1144,82 +1148,45 @@ const App = {
   _initPlanoDrag() {
     const canvas = $('plano-canvas');
     if (!canvas) return;
-    const posKey = 'sc_plano_pos_' + currentProductor;
+    // Event delegation: single set of listeners on canvas (no leak)
+    if (canvas._planoInit) return;
+    canvas._planoInit = true;
 
-    canvas.querySelectorAll('.plano-estab').forEach(el => {
-      let startX, startY, startLeft, startTop, isDragging = false;
+    let activeEl = null, mode = null, sX, sY, sL, sT, sW, sH, cn;
 
-      // Drag
-      el.addEventListener('pointerdown', e => {
-        if (e.target.closest('.pe-cell') || e.target.closest('.pe-resize') || e.target.closest('.pe-block')) return;
-        e.preventDefault();
-        isDragging = true;
-        el.classList.add('dragging');
-        el.setPointerCapture(e.pointerId);
-        const rect = canvas.getBoundingClientRect();
-        startX = e.clientX; startY = e.clientY;
-        startLeft = parseFloat(el.style.left); startTop = parseFloat(el.style.top);
-      });
-
-      el.addEventListener('pointermove', e => {
-        if (!isDragging) return;
-        const rect = canvas.getBoundingClientRect();
-        const dx = (e.clientX - startX) / rect.width * 100;
-        const dy = (e.clientY - startY) / rect.height * 100;
-        el.style.left = Math.max(0, Math.min(90, startLeft + dx)) + '%';
-        el.style.top = Math.max(0, Math.min(90, startTop + dy)) + '%';
-      });
-
-      el.addEventListener('pointerup', e => {
-        if (!isDragging) return;
-        isDragging = false;
-        el.classList.remove('dragging');
-        App._savePlanoPositions();
-        App._syncFinaPositions();
-      });
-
-      // Resize from 4 corners
-      el.querySelectorAll('.pe-resize').forEach(resizer => {
-        let rStartX, rStartY, rStartW, rStartH, rStartL, rStartT, isResizing = false;
-        const corner = resizer.dataset.corner;
-        resizer.addEventListener('pointerdown', e => {
-          e.preventDefault(); e.stopPropagation();
-          isResizing = true;
-          resizer.setPointerCapture(e.pointerId);
-          const rect = canvas.getBoundingClientRect();
-          rStartX = e.clientX; rStartY = e.clientY;
-          rStartW = parseFloat(el.style.width); rStartH = parseFloat(el.style.height);
-          rStartL = parseFloat(el.style.left); rStartT = parseFloat(el.style.top);
-        });
-        resizer.addEventListener('pointermove', e => {
-          if (!isResizing) return;
-          const rect = canvas.getBoundingClientRect();
-          const dx = (e.clientX - rStartX) / rect.width * 100;
-          const dy = (e.clientY - rStartY) / rect.height * 100;
-          if (corner === 'br') {
-            el.style.width = Math.max(6, rStartW + dx) + '%';
-            el.style.height = Math.max(6, rStartH + dy) + '%';
-          } else if (corner === 'bl') {
-            el.style.left = Math.max(0, rStartL + dx) + '%';
-            el.style.width = Math.max(6, rStartW - dx) + '%';
-            el.style.height = Math.max(6, rStartH + dy) + '%';
-          } else if (corner === 'tr') {
-            el.style.top = Math.max(0, rStartT + dy) + '%';
-            el.style.width = Math.max(6, rStartW + dx) + '%';
-            el.style.height = Math.max(6, rStartH - dy) + '%';
-          } else if (corner === 'tl') {
-            el.style.left = Math.max(0, rStartL + dx) + '%';
-            el.style.top = Math.max(0, rStartT + dy) + '%';
-            el.style.width = Math.max(6, rStartW - dx) + '%';
-            el.style.height = Math.max(6, rStartH - dy) + '%';
-          }
-        });
-        resizer.addEventListener('pointerup', e => {
-          isResizing = false;
-          App._savePlanoPositions();
-          App._syncFinaPositions();
-        });
-      });
+    canvas.addEventListener('pointerdown', e => {
+      const resizer = e.target.closest('.pe-resize');
+      const estab = e.target.closest('.plano-estab');
+      if (!estab) return;
+      if (e.target.closest('.pe-cell') || e.target.closest('.pe-block')) return;
+      e.preventDefault();
+      activeEl = estab;
+      sX = e.clientX; sY = e.clientY;
+      sL = parseFloat(estab.style.left); sT = parseFloat(estab.style.top);
+      sW = parseFloat(estab.style.width); sH = parseFloat(estab.style.height);
+      if (resizer) { mode = 'resize'; cn = resizer.dataset.corner; }
+      else { mode = 'drag'; estab.classList.add('dragging'); }
+    });
+    document.addEventListener('pointermove', e => {
+      if (!activeEl) return;
+      const rect = canvas.getBoundingClientRect();
+      const dx = (e.clientX - sX) / rect.width * 100;
+      const dy = (e.clientY - sY) / rect.height * 100;
+      if (mode === 'drag') {
+        activeEl.style.left = Math.max(0, Math.min(90, sL + dx)) + '%';
+        activeEl.style.top = Math.max(0, Math.min(90, sT + dy)) + '%';
+      } else {
+        if (cn==='br'){activeEl.style.width=Math.max(6,sW+dx)+'%';activeEl.style.height=Math.max(6,sH+dy)+'%';}
+        else if(cn==='bl'){activeEl.style.left=Math.max(0,sL+dx)+'%';activeEl.style.width=Math.max(6,sW-dx)+'%';activeEl.style.height=Math.max(6,sH+dy)+'%';}
+        else if(cn==='tr'){activeEl.style.top=Math.max(0,sT+dy)+'%';activeEl.style.width=Math.max(6,sW+dx)+'%';activeEl.style.height=Math.max(6,sH-dy)+'%';}
+        else if(cn==='tl'){activeEl.style.left=Math.max(0,sL+dx)+'%';activeEl.style.top=Math.max(0,sT+dy)+'%';activeEl.style.width=Math.max(6,sW-dx)+'%';activeEl.style.height=Math.max(6,sH-dy)+'%';}
+      }
+    });
+    document.addEventListener('pointerup', e => {
+      if (!activeEl) return;
+      if (mode==='drag') activeEl.classList.remove('dragging');
+      activeEl = null; mode = null;
+      App._savePlanoPositions(); App._syncFinaPositions();
     });
   },
 

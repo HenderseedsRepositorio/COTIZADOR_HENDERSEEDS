@@ -519,15 +519,13 @@ const App = {
         data = migrateData(Storage.load());
       }
 
-      // Auto-import initial data for JAM if empty
-      // Auto-import initial data for users without existing data
-      if (!data.ordenes || !data.ordenes.length) {
-        const initialMap = { JAM: typeof JAM_INITIAL_DATA !== 'undefined' ? JAM_INITIAL_DATA : null, Ginar: typeof GINAR_INITIAL_DATA !== 'undefined' ? GINAR_INITIAL_DATA : null };
-        if (initialMap[userId]) {
-          data = initialMap[userId];
-          Storage.save(data);
-          Cloud.saveToCloud();
-        }
+      // Auto-import initial data if user has fewer ordenes than the import
+      const initialMap = { JAM: typeof JAM_INITIAL_DATA !== 'undefined' ? JAM_INITIAL_DATA : null, Ginar: typeof GINAR_INITIAL_DATA !== 'undefined' ? GINAR_INITIAL_DATA : null };
+      const importData = initialMap[userId];
+      if (importData && (!data.ordenes || data.ordenes.length < importData.ordenes.length)) {
+        data = JSON.parse(JSON.stringify(importData));
+        Storage.save(data);
+        Cloud.saveToCloud();
       }
 
       $('productor-gate').style.display = 'none';

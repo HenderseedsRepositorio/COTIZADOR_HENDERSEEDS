@@ -168,6 +168,30 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .lote-card-an .lc-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--navy)); }
 .wa-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 936px; background: white; border-top: 1px solid var(--border); padding: 10px 8px; display: none; gap: 8px; z-index: 90; }
 .wa-bar .btn { flex: 1; }
+/* ── PLANOS ── */
+.planos-kpi-bar { display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px; }
+.plano-kpi { flex:0 0 auto;min-width:75px;background:var(--card);border-radius:var(--radius-sm);padding:8px 10px;text-align:center;box-shadow:var(--shadow);border-top:3px solid var(--text-mut); }
+.plano-kpi .pk-val { font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--navy); }
+.plano-kpi .pk-lbl { font-size:.58rem;color:var(--text-sec);text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-top:1px; }
+.estab-group { background:var(--card);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:var(--shadow); }
+.estab-header { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px; }
+.estab-name { font-family:var(--title);font-size:13px;color:var(--navy);text-transform:uppercase; }
+.estab-has { font-family:var(--mono);font-size:12px;color:var(--text-sec);font-weight:600; }
+.lotes-grid { display:flex;flex-wrap:wrap;gap:6px; }
+.lote-rect { position:relative;border-radius:var(--radius-sm);border:2px solid rgba(0,0,0,.12);min-height:70px;padding:8px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center; }
+.lote-rect:hover { transform:scale(1.03);box-shadow:0 4px 16px rgba(0,0,0,.15); }
+.lote-rect .lr-code { font-family:var(--title);font-size:12px;color:rgba(0,0,0,.7); }
+.lote-rect .lr-has { font-family:var(--mono);font-size:11px;color:rgba(0,0,0,.5);margin-top:2px; }
+.lote-rect .lr-cultivo { font-size:10px;font-weight:600;color:rgba(0,0,0,.6);margin-top:3px; }
+.lote-rect .lr-variedad { font-size:9px;color:rgba(0,0,0,.4);margin-top:1px; }
+.lote-rect.cult-maiz { background:#fde68a;border-color:#d97706; }
+.lote-rect.cult-girasol { background:#e9d5ff;border-color:#7c3aed; }
+.lote-rect.cult-soja { background:#bbf7d0;border-color:#16a34a; }
+.lote-rect.cult-trigo { background:#fed7aa;border-color:#ea580c; }
+.lote-rect.cult-barbecho { background:#e2e8f0;border-color:#94a3b8; }
+.lote-rect.cult-empty { background:#ffffff;border-color:var(--border);border-style:dashed; }
+@media(max-width:639px){ .lotes-grid{flex-direction:column;} .lote-rect{flex:0 0 100%!important;min-height:56px;} .plano-kpi{min-width:65px;padding:6px 8px;} .plano-kpi .pk-val{font-size:.82rem;} }
+
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
 .modal { background: var(--card); border-radius: var(--radius); padding: 20px; width: 100%; max-width: 420px; box-shadow: 0 16px 48px rgba(0,0,0,.25); animation: fadeUp .2s ease both; max-height: 90vh; overflow-y: auto; }
@@ -237,6 +261,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
 
   <nav class="tabs">
     <button class="tab-btn active" data-tab="lotes">Lotes</button>
+    <button class="tab-btn" data-tab="planos">Planos</button>
     <button class="tab-btn" data-tab="nueva-ot">Nueva OT</button>
     <button class="tab-btn" data-tab="ordenes">Ordenes</button>
     <button class="tab-btn" data-tab="analisis">Analisis</button>
@@ -250,6 +275,22 @@ textarea.inp { resize: vertical; min-height: 60px; }
     </div>
     <div id="lotes-list"></div>
     <button class="btn-add" onclick="App.openLoteModal()">+ Agregar Lote</button>
+  </section>
+
+  <section id="tab-planos" class="tab-content">
+    <div class="card" style="padding:8px 14px;margin-bottom:8px;">
+      <div class="form-row" style="margin-bottom:0;">
+        <div><label class="form-lbl">Campaña a planificar</label>
+          <select id="plan-campana" class="inp inp-sm" onchange="App.renderPlanos()">
+            <option value="26/27">26/27</option>
+            <option value="25/26">25/26</option>
+            <option value="27/28">27/28</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="planos-kpis"></div>
+    <div id="planos-map"></div>
   </section>
 
   <section id="tab-nueva-ot" class="tab-content">
@@ -566,6 +607,7 @@ const App = {
       btn.classList.add('active'); $('tab-' + btn.dataset.tab).classList.add('active');
       if (btn.dataset.tab === 'ordenes') App.renderOrdenes();
       if (btn.dataset.tab === 'analisis') App.renderAnalisis();
+      if (btn.dataset.tab === 'planos') App.renderPlanos();
       if (btn.dataset.tab === 'nueva-ot') App.refreshSelectors();
     }));
     document.addEventListener('click', e => {
@@ -652,6 +694,113 @@ const App = {
         <button class="btn btn-sm btn-danger" style="font-size:12px;padding:8px 12px;min-height:36px;border-radius:8px;" onclick="App.removeLote('${esc(l.id)}')">&times;</button>
       </div></div></div>`).join('');
   },
+  /* ── PLANOS ── */
+  _cultivoClass(c) {
+    if (!c) return 'cult-empty';
+    const cl = c.toLowerCase();
+    if (cl.includes('maiz') || cl.includes('maíz')) return 'cult-maiz';
+    if (cl.includes('girasol')) return 'cult-girasol';
+    if (cl.includes('soja')) return 'cult-soja';
+    if (cl.includes('trigo') || cl.includes('cebada')) return 'cult-trigo';
+    if (cl.includes('barbecho')) return 'cult-barbecho';
+    return 'cult-empty';
+  },
+  _cultivoColor(c) {
+    const map = {'cult-maiz':'#d97706','cult-girasol':'#7c3aed','cult-soja':'#16a34a','cult-trigo':'#ea580c','cult-barbecho':'#94a3b8','cult-empty':'#cbd5e1'};
+    return map[App._cultivoClass(c)] || '#cbd5e1';
+  },
+  renderPlanos() {
+    const campPlan = $('plan-campana')?.value || '26/27';
+    const kpiEl = $('planos-kpis'), mapEl = $('planos-map');
+    if (!data.lotes.length) { kpiEl.innerHTML=''; mapEl.innerHTML='<div class="empty"><div class="empty-icon">🗺️</div><p>Sin lotes</p></div>'; return; }
+
+    // Group by establecimiento
+    const groups = {};
+    data.lotes.forEach(l => {
+      const estab = l.establecimiento || 'Sin establecimiento';
+      if (!groups[estab]) groups[estab] = { lotes:[], totalHas:0 };
+      const plan = (l.planes && l.planes[campPlan]) || {};
+      groups[estab].lotes.push({ ...l, plan });
+      groups[estab].totalHas += l.hectareas || 0;
+    });
+
+    // KPIs
+    const byCultivo = {};
+    let totalPlan = 0, totalSinPlan = 0;
+    data.lotes.forEach(l => {
+      const plan = (l.planes && l.planes[campPlan]) || {};
+      if (plan.cultivo) { byCultivo[plan.cultivo] = (byCultivo[plan.cultivo]||0) + (l.hectareas||0); totalPlan += l.hectareas||0; }
+      else { totalSinPlan += l.hectareas||0; }
+    });
+
+    let kH = '<div class="planos-kpi-bar">';
+    kH += `<div class="plano-kpi" style="border-top-color:var(--navy);"><div class="pk-val">${fmtInt(totalPlan+totalSinPlan)}</div><div class="pk-lbl">Total has</div></div>`;
+    Object.entries(byCultivo).sort((a,b)=>b[1]-a[1]).forEach(([c,h])=>{
+      kH += `<div class="plano-kpi" style="border-top-color:${App._cultivoColor(c)};"><div class="pk-val">${fmtInt(h)}</div><div class="pk-lbl">${esc(c)}</div></div>`;
+    });
+    if (totalSinPlan > 0) kH += `<div class="plano-kpi" style="border-top-color:var(--border);border-style:dashed;"><div class="pk-val">${fmtInt(totalSinPlan)}</div><div class="pk-lbl">Sin asignar</div></div>`;
+    kH += '</div>';
+    kpiEl.innerHTML = kH;
+
+    // Map
+    let mH = '';
+    Object.entries(groups).forEach(([estab, g]) => {
+      mH += `<div class="estab-group"><div class="estab-header"><span class="estab-name">${esc(estab)}</span><span class="estab-has">${fmtInt(g.totalHas)} has</span></div><div class="lotes-grid">`;
+      g.lotes.forEach(l => {
+        const cc = App._cultivoClass(l.plan.cultivo);
+        const pct = g.totalHas > 0 ? Math.max((l.hectareas/g.totalHas)*100, 20) : 100;
+        mH += `<div class="lote-rect ${cc}" style="flex:0 0 calc(${pct.toFixed(0)}% - 6px);min-width:80px;" onclick="App.openPlanModal('${esc(l.id)}')">
+          <div class="lr-code">${esc(l.nombre)}</div>
+          <div class="lr-has">${l.hectareas} ha</div>
+          ${l.plan.cultivo ? `<div class="lr-cultivo">${esc(l.plan.cultivo)}</div>` : '<div class="lr-cultivo" style="color:var(--text-mut);">Toca para planificar</div>'}
+          ${l.plan.variedad ? `<div class="lr-variedad">${esc(l.plan.variedad)}${l.plan.densidad ? ' · '+fmtInt(l.plan.densidad)+' pl/ha' : ''}</div>` : ''}
+        </div>`;
+      });
+      mH += '</div></div>';
+    });
+    mapEl.innerHTML = mH;
+  },
+  openPlanModal(lid) {
+    const l = data.lotes.find(x => x.id === lid);
+    if (!l) return;
+    const campPlan = $('plan-campana')?.value || '26/27';
+    const plan = (l.planes && l.planes[campPlan]) || {};
+    const cultivos = ['Maiz tardio','Maiz','Maiz 2da','Soja','Soja 2da','Girasol','Trigo','Cebada','Barbecho'];
+    const opts = cultivos.map(c => `<option value="${esc(c)}" ${plan.cultivo===c?'selected':''}>${esc(c)}</option>`).join('');
+    openModal(`<div class="modal-title">Planificar ${esc(l.nombre)}</div>
+      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has · ${esc(l.establecimiento||'')} · Campaña ${esc(campPlan)}</div>
+      <div style="margin-bottom:10px;"><label class="form-lbl">Cultivo</label>
+        <select id="m-plan-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${opts}</select></div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div><label class="form-lbl">Densidad (pl/ha)</label><input type="number" id="m-plan-densidad" class="inp inp-sm" value="${plan.densidad||''}" placeholder="65000" inputmode="numeric"></div>
+        <div><label class="form-lbl">Variedad</label><input type="text" id="m-plan-variedad" class="inp inp-sm" value="${esc(plan.variedad||'')}" placeholder="AX7784"></div>
+      </div>
+      <div style="margin-bottom:10px;"><label class="form-lbl">Fecha de siembra</label><input type="date" id="m-plan-fecha" class="inp inp-sm" value="${plan.fechaSiembra||''}"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        ${plan.cultivo?'<button class="btn btn-outline" style="color:var(--red);border-color:var(--red);" onclick="App.clearPlan(\''+esc(lid)+'\')">Limpiar</button>':''}
+        <button class="btn btn-accent" onclick="App.savePlan('${esc(lid)}')">Guardar</button>
+      </div>`);
+  },
+  savePlan(lid) {
+    const l = data.lotes.find(x => x.id === lid); if (!l) return;
+    const campPlan = $('plan-campana')?.value || '26/27';
+    if (!l.planes) l.planes = {};
+    l.planes[campPlan] = {
+      cultivo: $('m-plan-cultivo').value,
+      densidad: parseFloat($('m-plan-densidad').value) || 0,
+      variedad: $('m-plan-variedad').value.trim(),
+      fechaSiembra: $('m-plan-fecha').value
+    };
+    Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan guardado');
+  },
+  clearPlan(lid) {
+    const l = data.lotes.find(x => x.id === lid); if (!l) return;
+    const campPlan = $('plan-campana')?.value || '26/27';
+    if (l.planes) delete l.planes[campPlan];
+    Storage.save(data); closeModal(); App.renderPlanos(); showToast('Plan eliminado');
+  },
+
   openLoteModal(lid) {
     const l = lid ? data.lotes.find(x => x.id === lid) : null;
     openModal(`<div class="modal-title">${l ? 'Editar Lote' : 'Nuevo Lote'}</div>

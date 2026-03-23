@@ -216,7 +216,7 @@ textarea.inp { resize: vertical; min-height: 60px; }
   <div id="productor-gate" class="card fu" style="text-align:center;padding:30px 20px;margin-top:20px;max-width:360px;margin-left:auto;margin-right:auto;">
     <div style="font-family:var(--title);font-size:16px;color:var(--navy);text-transform:uppercase;margin-bottom:6px;">Seguimiento de Lotes</div>
     <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Seleccioná tu usuario</div>
-    <div id="user-buttons" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
+    <div id="user-buttons" style="display:flex;flex-direction:column;gap:8px;max-width:240px;margin:0 auto;"></div>
   </div>
 
   <div id="app-main" style="display:none;">
@@ -446,12 +446,10 @@ const Cloud = {
    ══════════════════════════════════════ */
 let currentProductor = '';
 const USUARIOS = [
-  { id: 'JAM', nombre: 'Juan Augusto', productor: 'Juan Augusto' },
+  { id: 'JAM', nombre: 'JAM', productor: 'Juan Augusto' },
   { id: 'Ginar', nombre: 'Ginar', productor: 'Ginar' },
-  { id: 'DM', nombre: 'DM', productor: 'DM' },
-  { id: 'AG', nombre: 'AG', productor: 'AG' },
-  { id: 'Fabio', nombre: 'Fabio', productor: 'Fabio' },
-  { id: 'Tomas', nombre: 'Tomas', productor: 'Tomas' }
+  { id: 'DMyAG', nombre: 'DM y AG', productor: 'DMyAG' },
+  { id: 'FabioyTomas', nombre: 'Fabio y Tomas', productor: 'FabioyTomas' }
 ];
 const savedUserId = localStorage.getItem('sc_user_id');
 

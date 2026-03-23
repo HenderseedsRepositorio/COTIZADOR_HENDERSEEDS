@@ -663,7 +663,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   <!-- TABS -->
   <nav style="display:flex;border-bottom:2px solid var(--border);margin-bottom:8px;">
     <button class="tab-btn active" data-tab="cotizar">🧪 Cotizar</button>
-    <button class="tab-btn" data-tab="lista">📋 Lista</button>
+    <button class="tab-btn" data-tab="lista">📋 Lista de Precios</button>
     <button class="tab-btn" data-tab="condiciones">🏦 Condiciones</button>
   </nav>
 
@@ -734,6 +734,9 @@ input, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <input type="text" id="lista-search" class="inp inp-sm" placeholder="🔍 Buscar producto..." autocomplete="off"
       oninput="App.renderLista()" style="margin-bottom:8px;">
+    <div style="display:grid;grid-template-columns:1fr 52px 36px 52px 65px;gap:4px;padding:4px 8px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;border-bottom:1px solid var(--border);">
+      <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:right;">Mg%</span><span style="text-align:right;">P.Sug</span><span style="text-align:right;">Precio</span>
+    </div>
     <div id="lista-body"></div>
   </section>
 
@@ -2332,13 +2335,15 @@ const App = {
       html += `<div class="lista-cat">${prov}</div>`;
       porProveedor[prov].forEach(p => {
         const precio = Calc.precioConRecargo(p.precio_usd, plazo);
-        const form = p.formulacion ? `<span style="font-size:10px;color:var(--text-mut);margin-left:4px;">${p.formulacion}</span>` : '';
-        html += `<div class="lista-row">
+        html += `<div class="lista-row" style="display:grid;grid-template-columns:1fr 52px 36px 52px 65px;gap:4px;align-items:center;">
           <div style="min-width:0;">
             <div class="lista-name">${p.producto}</div>
-            <div class="lista-unit">${p.categoria} · ${p.unidad}${form ? ' · ' : ''}${p.formulacion || ''}</div>
+            <div class="lista-unit">${p.categoria} · ${p.unidad}${p.formulacion ? ' · '+p.formulacion : ''}</div>
           </div>
-          <span class="lista-price">$${fmt(precio)}/${p.unidad}</span>
+          <span style="text-align:right;font-family:var(--mono);font-size:9px;color:var(--text-mut);">$${fmt(p.costo_usd||0)}</span>
+          <span style="text-align:right;font-family:var(--mono);font-size:9px;color:var(--text-mut);">${p.margen_pct||0}%</span>
+          <span style="text-align:right;font-family:var(--mono);font-size:9px;color:var(--text-mut);">$${fmt(p.precio_usd||0)}</span>
+          <span class="lista-price">$${fmt(precio)}/${p.unidad||'U'}</span>
         </div>`;
       });
     });

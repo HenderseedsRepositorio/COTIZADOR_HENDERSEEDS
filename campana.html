@@ -1001,7 +1001,7 @@ const App = {
       const cellClick = (l) => l ? `onclick="App.openPlanModal('${esc(l.id)}'${campOverride ? `,'${esc(campOverride)}'` : ''})"` : '';
       const cellInfo = (l) => {
         if (!l) return '';
-        const cultivo = l.plan?.cultivo || l.cultivo || '';
+        const cultivo = l.plan?.cultivo || '';
         return `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%;">
           <div style="font-family:var(--title);font-size:10px;color:rgba(0,0,0,.5);letter-spacing:.5px;">${esc(l.nombre)}</div>
           <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas} <span style="font-size:8px;font-weight:400;">ha</span></div>

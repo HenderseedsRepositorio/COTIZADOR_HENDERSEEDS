@@ -798,12 +798,12 @@ const App = {
     const cColor = (c) => ({'cult-maiz':'#d97706','cult-girasol':'#7c3aed','cult-soja':'#16a34a','cult-trigo':'#ea580c','cult-barbecho':'#94a3b8'}[App._cultivoClass(c)] || '#94a3b8');
     const cBg = (c) => ({'cult-maiz':'#fef3c7','cult-girasol':'#f3e8ff','cult-soja':'#dcfce7','cult-trigo':'#ffedd5','cult-barbecho':'#f1f5f9'}[App._cultivoClass(c)] || '');
     const cultivoBadge = (cult, vari) => {
-      if (!cult) return '<span style="color:var(--text-mut);font-size:11px;">—</span>';
-      return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:${cBg(cult)};color:${cColor(cult)};border:1px solid ${cColor(cult)}30;">${esc(cult)}</span>${vari ? `<span style="font-size:9px;font-weight:600;color:var(--text-sec);margin-left:3px;">${esc(vari)}</span>` : ''}`;
+      if (!cult) return '<span style="color:var(--text-mut);font-size:12px;">—</span>';
+      return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;background:${cBg(cult)};color:${cColor(cult)};border:1px solid ${cColor(cult)}30;">${esc(cult)}</span>${vari ? `<span style="font-size:10px;font-weight:600;color:var(--text-sec);margin-left:3px;">${esc(vari)}</span>` : ''}`;
     };
-    const numCell = (d, unit) => d ? `<span style="font-family:var(--mono);font-size:10px;color:var(--text-sec);">${fmtInt(d)}${unit||''}</span>` : '<span style="color:var(--text-mut);font-size:10px;">—</span>';
-    const priceCell = (p) => p ? `<span style="font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600;">$${fmtInt(p)}</span>` : '<span style="color:var(--text-mut);font-size:10px;">—</span>';
-    const gridCols = '50px 70px 34px 22px 2px 88px 40px 32px 32px 20px 2px 88px 40px 32px 32px 20px';
+    const numCell = (d, unit) => d ? `<span style="font-family:var(--mono);font-size:12px;color:var(--text-sec);">${fmtInt(d)}${unit||''}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
+    const priceCell = (p) => p ? `<span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;">$${fmtInt(p)}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
+    const gridCols = '55px 80px 40px 24px 2px 95px 48px 38px 38px 22px 2px 95px 48px 38px 38px 22px';
 
     // Group by establecimiento
     const groups = {};
@@ -837,8 +837,8 @@ const App = {
     </div>`;
 
     // Table header
-    html += `<div style="overflow-x:auto;"><div style="min-width:820px;">`;
-    html += `<div style="display:grid;grid-template-columns:${gridCols};gap:2px;padding:6px 10px;font-size:7.5px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--navy);">
+    html += `<div style="overflow-x:auto;"><div style="min-width:920px;">`;
+    html += `<div style="display:grid;grid-template-columns:${gridCols};gap:3px;padding:8px 12px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--navy);">
       <span>Lote</span><span>Estab.</span><span style="text-align:right;">Ha</span><span></span>
       <span></span><span style="text-align:center;color:#ea580c;">Fina</span><span style="text-align:center;color:#ea580c;">Dens</span><span style="text-align:center;color:#ea580c;">Rde</span><span style="text-align:center;color:#ea580c;">USD</span><span></span>
       <span></span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens</span><span style="text-align:center;color:#d97706;">Rde</span><span style="text-align:center;color:#d97706;">USD</span><span></span>
@@ -846,9 +846,9 @@ const App = {
 
     Object.entries(groups).forEach(([est, lotes]) => {
       const estHas = lotes.reduce((s,l) => s + (l.hectareas||0), 0);
-      html += `<div style="padding:5px 8px;background:var(--navy);color:white;font-family:var(--title);font-size:10px;text-transform:uppercase;margin-top:4px;border-radius:4px;display:flex;align-items:center;gap:8px;white-space:nowrap;">
+      html += `<div style="padding:6px 12px;background:var(--navy);color:white;font-family:var(--title);font-size:12px;text-transform:uppercase;margin-top:4px;border-radius:4px;display:flex;align-items:center;gap:8px;white-space:nowrap;">
         <span>${esc(est)}</span>
-        <span style="font-family:var(--mono);font-weight:400;font-size:9px;opacity:.7;">${fmtInt(estHas)} ha</span>
+        <span style="font-family:var(--mono);font-weight:400;font-size:11px;opacity:.7;">${fmtInt(estHas)} ha</span>
       </div>`;
 
       lotes.forEach((l, i) => {
@@ -856,10 +856,10 @@ const App = {
         const fina = App._getPlan(l, finaKey);
         const gCult = gruesa.cultivo || '';
         const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
-        html += `<div style="display:grid;grid-template-columns:${gridCols};gap:2px;padding:5px 10px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
-          <span style="font-weight:700;font-size:11px;color:var(--navy);">${esc(l.nombre)}</span>
-          <span style="font-size:9px;color:var(--text-sec);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.establecimiento||'')}</span>
-          <span style="text-align:right;font-family:var(--mono);font-weight:700;font-size:11px;">${l.hectareas}</span>
+        html += `<div style="display:grid;grid-template-columns:${gridCols};gap:3px;padding:7px 12px;background:${bg};border-bottom:1px solid var(--border);align-items:center;">
+          <span style="font-weight:700;font-size:13px;color:var(--navy);">${esc(l.nombre)}</span>
+          <span style="font-size:11px;color:var(--text-sec);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.establecimiento||'')}</span>
+          <span style="text-align:right;font-family:var(--mono);font-weight:700;font-size:13px;">${l.hectareas}</span>
           <span style="display:flex;gap:1px;align-items:center;">
             <button style="background:none;border:none;cursor:pointer;padding:2px;" onclick="App.openLoteModal('${esc(l.id)}')" title="Editar lote"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
             <button style="background:none;border:none;cursor:pointer;padding:1px;opacity:.2;" onclick="if(confirm('Eliminar ${esc(l.nombre)}?'))App.removeLote('${esc(l.id)}')" title="Eliminar"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>

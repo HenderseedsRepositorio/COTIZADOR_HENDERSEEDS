@@ -200,6 +200,12 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .plano-estab .pe-cell:hover { filter:brightness(.88); }
 .pe-resize { position:absolute;width:12px;height:12px;background:rgba(45,111,196,.2);border-radius:2px;z-index:10;opacity:0;transition:opacity .2s; }
 .plano-estab:hover .pe-resize { opacity:1; }
+/* Custom per-lot plano */
+.plano-custom { position:relative;width:100%;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);overflow:visible; }
+.plano-lot { border-radius:2px;transition:box-shadow .15s,filter .15s; }
+.plano-lot:hover { filter:brightness(.92);box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:10 !important; }
+.plano-lot .pe-resize { opacity:0; }
+.plano-lot:hover .pe-resize { opacity:1; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -401,7 +407,7 @@ function showToast(msg) { const t = document.createElement('div'); t.className =
 const Storage = {
   _counter: 0,
   _productorKey() { return 'sc_data_' + (currentProductor || 'default'); },
-  defaults() { return { lotes: [], ordenes: [], aplicadores: [], campana: '2025/26' }; },
+  defaults() { return { lotes: [], ordenes: [], aplicadores: [], campana: '2025/26', planoLotPos: {}, planoLabels: {} }; },
   load() {
     try { const d = JSON.parse(localStorage.getItem(this._productorKey())); if (d && (d.lotes || d.campos || d.campolotes)) return d; } catch(e) {}
     // Fallback: try old key for migration
@@ -937,10 +943,11 @@ const App = {
     if (cl.includes('soja')) return 'cult-soja';
     if (cl.includes('trigo') || cl.includes('cebada')) return 'cult-trigo';
     if (cl.includes('barbecho')) return 'cult-barbecho';
+    if (cl.includes('pastura')) return 'cult-pastura';
     return 'cult-empty';
   },
   _cultivoColor(c) {
-    const map = {'cult-maiz':'#d97706','cult-girasol':'#7c3aed','cult-soja':'#16a34a','cult-trigo':'#ea580c','cult-barbecho':'#94a3b8','cult-empty':'#cbd5e1'};
+    const map = {'cult-maiz':'#d97706','cult-girasol':'#7c3aed','cult-soja':'#16a34a','cult-trigo':'#ea580c','cult-barbecho':'#94a3b8','cult-pastura':'#e11d48','cult-empty':'#cbd5e1'};
     return map[App._cultivoClass(c)] || '#cbd5e1';
   },
   renderPlanos() {
@@ -990,8 +997,51 @@ const App = {
     kH += '</div>';
     kpiEl.innerHTML = kH;
 
+    // === Custom per-lot plano mode ===
+    const hasCustomPlano = data.planoLotPos && Object.keys(data.planoLotPos).length > 0;
+    if (hasCustomPlano) {
+      let mH = '';
+      // GRUESA canvas
+      mH += App._renderCustomPlanoCanvas(campPlan, 'plano-canvas', 'GRUESA ' + campPlan);
+      // Controls
+      mH += `<div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:16px 0;padding:12px;background:var(--accent-bg);border-radius:var(--radius);border:1.5px dashed var(--accent);">
+        <button class="btn btn-accent" onclick="App.guardarPlanoCompleto()" style="font-size:13px;padding:10px 24px;display:flex;align-items:center;gap:6px;border-radius:99px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Guardar todo
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="App.clearCustomPlano()" style="font-size:12px;">Volver a vista estándar</button>
+      </div>`;
+      // FINA canvas
+      const finaKey = 'fina_' + campPlan;
+      const byFinaCultivo = {};
+      let finaTotal = 0, finaSinPlan = 0;
+      data.lotes.forEach(l => {
+        const fp = App._getPlan(l, finaKey);
+        if (fp.cultivo) { byFinaCultivo[fp.cultivo] = (byFinaCultivo[fp.cultivo]||0) + (l.hectareas||0); finaTotal += l.hectareas||0; }
+        else { finaSinPlan += l.hectareas||0; }
+      });
+      mH += '<div style="margin-top:24px;">';
+      mH += '<div class="planos-kpi-bar">';
+      Object.entries(byFinaCultivo).sort((a,b)=>b[1]-a[1]).forEach(([c,hh])=>{
+        mH += `<div class="plano-kpi" style="border-top-color:${App._cultivoColor(c)};"><div class="pk-val">${fmtInt(hh)}</div><div class="pk-lbl">${esc(c)}</div></div>`;
+      });
+      mH += '</div>';
+      mH += App._renderCustomPlanoCanvas(finaKey, 'plano-canvas-fina', 'FINA ' + campPlan);
+      mH += '</div>';
+
+      mapEl.innerHTML = mH;
+      App._initCustomPlanoDrag();
+      return; // skip standard plano rendering
+    }
+
+    // === Standard establishment-based plano ===
+    // Show button to init custom plano
+    const initBtn = `<div style="text-align:center;margin-bottom:12px;">
+      <button class="btn btn-outline btn-sm" onclick="App.initCustomPlano()" style="font-size:11px;">Activar plano custom (lotes individuales)</button>
+    </div>`;
+
     // Map — drag & drop field planner
-    const bgMap = {'cult-maiz':'#f0d060','cult-girasol':'#d4b0e8','cult-soja':'#90dba0','cult-trigo':'#f0c090','cult-barbecho':'#d0d0d0','cult-empty':'#ffffff'};
+    const bgMap = {'cult-maiz':'#f0d060','cult-girasol':'#d4b0e8','cult-soja':'#90dba0','cult-trigo':'#f0c090','cult-barbecho':'#d0d0d0','cult-pastura':'#f8b0b0','cult-empty':'#ffffff'};
 
     // Load saved positions from data (syncs to Sheets)
     if (!data.planoPos) data.planoPos = {};
@@ -1034,7 +1084,8 @@ const App = {
     };
 
     // Build canvas
-    let mH = `<div class="plano-canvas" id="plano-canvas" style="min-height:600px;padding:30px 10px 10px;">`;
+    let mH = initBtn;
+    mH += `<div class="plano-canvas" id="plano-canvas" style="min-height:600px;padding:30px 10px 10px;">`;
     mH += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:14px;color:var(--navy);text-transform:uppercase;letter-spacing:2px;z-index:5;">CAMPAÑA ${esc(campPlan)}</div>`;
 
     // Helper: standard lote cell
@@ -1303,8 +1354,9 @@ const App = {
   },
 
   async guardarPlanoCompleto() {
-    // Save positions from canvas
-    App._savePlanoPositions();
+    // Save positions from canvas (custom or standard)
+    if (document.querySelector('.plano-custom')) App._saveCustomPlanoPositions();
+    else App._savePlanoPositions();
     // Disable button while saving
     const btn = document.querySelector('.btn-accent[onclick*="guardarPlanoCompleto"]');
     if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Guardando...'; }
@@ -1324,6 +1376,196 @@ const App = {
     Storage.save(data);
     App.renderPlanos();
     showToast('Posiciones reseteadas');
+  },
+
+  // ── Custom per-lot plano ──
+  _dmLotDefaults: {
+    // AM: 4×2 grid, top-center
+    'AM5':{x:35,y:10,w:9,h:12},'AM6':{x:44,y:10,w:9,h:12},'AM7':{x:53,y:10,w:8,h:12},'AM8':{x:61,y:10,w:8,h:12},
+    'AM4':{x:35,y:22,w:9,h:12},'AM2':{x:44,y:22,w:9,h:12},'AM3':{x:53,y:22,w:8,h:12},'AM1':{x:61,y:22,w:8,h:12},
+    // EF: irregular layout, left — top row tall, bottom row 4 equal
+    'EF5':{x:0,y:10,w:8,h:24},'EF7':{x:8,y:10,w:8,h:12},
+    'EF6':{x:8,y:22,w:10,h:12},'EF8':{x:18,y:16,w:6,h:18},
+    'EF4':{x:0,y:34,w:8,h:14},'EF3':{x:8,y:34,w:8,h:14},'EF2':{x:16,y:34,w:8,h:14},'EF1':{x:24,y:34,w:8,h:14},
+    // SC: right side, 3 rows × 2 cols
+    'SC6':{x:70,y:10,w:10,h:14},'SC1':{x:80,y:10,w:10,h:14},
+    'SC5':{x:70,y:24,w:10,h:14},'SC4':{x:80,y:24,w:10,h:14},
+    'SC2':{x:80,y:38,w:10,h:12},'SC3':{x:90,y:38,w:10,h:12},
+    // LT: center, 2 lots
+    'LT2':{x:38,y:36,w:13,h:11},'LT1':{x:51,y:36,w:12,h:11},
+    // FM: bottom center, 5 lots
+    'FM1':{x:42,y:56,w:10,h:10},'FM6':{x:52,y:56,w:10,h:10},
+    'FM2':{x:42,y:66,w:10,h:10},'FM5':{x:52,y:66,w:10,h:10},
+    'FM3':{x:46,y:78,w:12,h:13},
+  },
+  _dmLabelDefaults: {
+    'AM':{x:46,y:4},'Sucesion':{x:76,y:4},'El Frances':{x:8,y:49},'La Tapera':{x:54,y:48},'FM':{x:40,y:78},
+  },
+
+  initCustomPlano() {
+    if (!data.planoLotPos) data.planoLotPos = {};
+    if (!data.planoLabels) data.planoLabels = {};
+    // Copy DM y AG defaults (only for lots that exist in data.lotes)
+    const existingNames = new Set(data.lotes.map(l => l.nombre));
+    Object.entries(App._dmLotDefaults).forEach(([name, pos]) => {
+      if (existingNames.has(name)) data.planoLotPos[name] = {...pos};
+    });
+    Object.entries(App._dmLabelDefaults).forEach(([name, pos]) => {
+      data.planoLabels[name] = {...pos};
+    });
+    Storage.save(data);
+    App.renderPlanos();
+    showToast('Plano custom inicializado');
+  },
+
+  clearCustomPlano() {
+    data.planoLotPos = {};
+    data.planoLabels = {};
+    Storage.save(data);
+    App.renderPlanos();
+    showToast('Plano custom eliminado — volviendo a vista por establecimiento');
+  },
+
+  _renderCustomPlanoCanvas(campKey, canvasId, title) {
+    const bgMap = {'cult-maiz':'#f0d060','cult-girasol':'#d4b0e8','cult-soja':'#90dba0','cult-trigo':'#f0c090','cult-barbecho':'#d0d0d0','cult-empty':'#ffffff','cult-pastura':'#f8b0b0'};
+    const isFina = campKey.startsWith('fina_');
+    const lotPos = data.planoLotPos || {};
+
+    // Build lookup: lote name → lote + plan
+    const loteMap = {};
+    data.lotes.forEach(l => {
+      const plan = App._getPlan(l, campKey);
+      loteMap[l.nombre] = { ...l, plan };
+    });
+
+    // Group by establecimiento for labels
+    const groups = {};
+    data.lotes.forEach(l => {
+      const estab = l.establecimiento || 'Sin estab.';
+      if (!groups[estab]) groups[estab] = { totalHas: 0 };
+      groups[estab].totalHas += l.hectareas || 0;
+    });
+
+    let h = `<div class="plano-canvas plano-custom" id="${esc(canvasId)}" style="min-height:650px;padding:30px 10px 10px;">`;
+    h += `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--title);font-size:14px;color:var(--navy);text-transform:uppercase;letter-spacing:2px;z-index:5;">${esc(title)}</div>`;
+
+    // Establishment labels
+    const labels = data.planoLabels || {};
+    Object.entries(labels).forEach(([estab, pos]) => {
+      const gd = groups[estab];
+      const totalHas = gd ? fmtInt(gd.totalHas) : '?';
+      h += `<div class="plano-label" data-label="${esc(estab)}" style="position:absolute;left:${pos.x}%;top:${pos.y}%;z-index:3;font-family:var(--title);font-size:13px;font-weight:700;color:#333;text-align:center;pointer-events:none;user-select:none;">
+        ${esc(estab)}<br><span style="font-family:var(--mono);font-size:11px;font-weight:400;">${totalHas}</span>
+      </div>`;
+    });
+
+    // Render each lot as positioned div
+    Object.entries(lotPos).forEach(([name, pos]) => {
+      const l = loteMap[name];
+      if (!l) return; // lot no longer exists
+      const plan = l.plan || {};
+      const cc = App._cultivoClass(plan.cultivo || '');
+      const bg = bgMap[cc] || '#fff';
+      const cultivo = plan.cultivo || '';
+      const fechaStr = plan.fechaSiembra ? plan.fechaSiembra.replace(/^\d{4}-/,'').replace('-','/') : '';
+
+      h += `<div class="plano-lot" data-lot="${esc(name)}" data-lot-id="${esc(l.id)}" data-camp="${isFina ? esc(campKey) : ''}" style="position:absolute;left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;background:${bg};border:1.5px solid rgba(0,0,0,.25);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;z-index:2;">
+        <div style="position:absolute;top:2px;left:4px;font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(0,0,0,.35);">${l.hectareas}</div>
+        <div style="font-family:var(--title);font-size:12px;font-weight:700;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(name)}</div>
+        ${cultivo ? `<div style="font-size:10px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>` : ''}
+        ${plan.variedad ? `<div style="font-size:8px;color:rgba(0,0,0,.35);font-family:var(--mono);">${esc(plan.variedad)}</div>` : ''}
+        ${fechaStr ? `<div style="font-size:7px;color:rgba(0,0,0,.3);font-family:var(--mono);">${fechaStr}</div>` : ''}
+        <div class="pe-resize" data-corner="br" style="bottom:0;right:0;cursor:nwse-resize;"></div>
+        <div class="pe-resize" data-corner="bl" style="bottom:0;left:0;cursor:nesw-resize;"></div>
+        <div class="pe-resize" data-corner="tr" style="top:0;right:0;cursor:nesw-resize;"></div>
+        <div class="pe-resize" data-corner="tl" style="top:0;left:0;cursor:nwse-resize;"></div>
+      </div>`;
+    });
+
+    // Show lots that exist but have no position assigned
+    const unpositioned = data.lotes.filter(l => !lotPos[l.nombre]);
+    if (unpositioned.length) {
+      h += `<div style="position:absolute;bottom:4px;left:8px;font-size:10px;color:#888;z-index:5;">Sin posicionar: ${unpositioned.map(l=>l.nombre).join(', ')}</div>`;
+    }
+
+    h += '</div>';
+    return h;
+  },
+
+  _initCustomPlanoDrag() {
+    document.querySelectorAll('.plano-custom').forEach(cv => App._initCustomPlanoDragOn(cv));
+  },
+  _initCustomPlanoDragOn(canvas) {
+    if (!canvas || canvas._customInit) return;
+    canvas._customInit = true;
+
+    let activeEl = null, mode = null, sX, sY, sL, sT, sW, sH, cn;
+
+    canvas.addEventListener('pointerdown', e => {
+      const resizer = e.target.closest('.pe-resize');
+      const lot = e.target.closest('.plano-lot');
+      if (!lot) return;
+      // If click is NOT on resizer, it's a drag (but we still want click to open modal)
+      // Only start drag if pointer stays down > 150ms or moves
+      e.preventDefault();
+      e.stopPropagation();
+      activeEl = lot;
+      sX = e.clientX; sY = e.clientY;
+      sL = parseFloat(lot.style.left); sT = parseFloat(lot.style.top);
+      sW = parseFloat(lot.style.width); sH = parseFloat(lot.style.height);
+      if (resizer) { mode = 'resize'; cn = resizer.dataset.corner; lot.style.zIndex = 100; }
+      else { mode = 'predrag'; }
+    });
+    document.addEventListener('pointermove', e => {
+      if (!activeEl) return;
+      const rect = canvas.getBoundingClientRect();
+      const dx = (e.clientX - sX) / rect.width * 100;
+      const dy = (e.clientY - sY) / rect.height * 100;
+      if (mode === 'predrag' && (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)) {
+        mode = 'drag'; activeEl.style.opacity = '0.8'; activeEl.style.zIndex = 100;
+      }
+      if (mode === 'drag') {
+        activeEl.style.left = Math.max(0, Math.min(95, sL + dx)) + '%';
+        activeEl.style.top = Math.max(0, Math.min(95, sT + dy)) + '%';
+      } else if (mode === 'resize') {
+        if (cn==='br'){activeEl.style.width=Math.max(4,sW+dx)+'%';activeEl.style.height=Math.max(4,sH+dy)+'%';}
+        else if(cn==='bl'){activeEl.style.left=Math.max(0,sL+dx)+'%';activeEl.style.width=Math.max(4,sW-dx)+'%';activeEl.style.height=Math.max(4,sH+dy)+'%';}
+        else if(cn==='tr'){activeEl.style.top=Math.max(0,sT+dy)+'%';activeEl.style.width=Math.max(4,sW+dx)+'%';activeEl.style.height=Math.max(4,sH-dy)+'%';}
+        else if(cn==='tl'){activeEl.style.left=Math.max(0,sL+dx)+'%';activeEl.style.top=Math.max(0,sT+dy)+'%';activeEl.style.width=Math.max(4,sW-dx)+'%';activeEl.style.height=Math.max(4,sH-dy)+'%';}
+      }
+    });
+    document.addEventListener('pointerup', e => {
+      if (!activeEl) return;
+      const wasDrag = mode === 'drag' || mode === 'resize';
+      if (mode === 'drag') { activeEl.style.opacity = ''; }
+      activeEl.style.zIndex = 2;
+      if (wasDrag) {
+        App._saveCustomPlanoPositions();
+      } else if (mode === 'predrag') {
+        // Was a click (no drag happened) — open plan modal
+        const lid = activeEl.dataset.lotId;
+        const camp = activeEl.dataset.camp;
+        if (lid) App.openPlanModal(lid, camp || undefined);
+      }
+      activeEl = null; mode = null;
+    });
+  },
+
+  _saveCustomPlanoPositions() {
+    const canvas = $('plano-canvas') || document.querySelector('.plano-custom');
+    if (!canvas) return;
+    if (!data.planoLotPos) data.planoLotPos = {};
+    canvas.querySelectorAll('.plano-lot').forEach(el => {
+      const name = el.dataset.lot;
+      if (!name) return;
+      data.planoLotPos[name] = {
+        x: Math.round(parseFloat(el.style.left)*10)/10 || 0,
+        y: Math.round(parseFloat(el.style.top)*10)/10 || 0,
+        w: Math.round(parseFloat(el.style.width)*10)/10 || 8,
+        h: Math.round(parseFloat(el.style.height)*10)/10 || 10,
+      };
+    });
+    Storage.save(data);
   },
 
   openPlanModal(lid, campOverride) {

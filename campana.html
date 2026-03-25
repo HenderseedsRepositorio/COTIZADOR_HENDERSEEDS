@@ -574,48 +574,54 @@ const App = {
     if (activeBtn) { activeBtn.textContent = 'Cargando...'; activeBtn.style.opacity = '1'; }
 
     try {
-      const cloudData = await Cloud.loadFromCloud();
-      if (cloudData) {
-        data = migrateData(cloudData);
-        Storage.save(data);
-        if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
-      } else {
-        data = migrateData(Storage.load());
-      }
+      // FAST: Load from localStorage instantly (0ms)
+      data = migrateData(Storage.load());
 
-      // Auto-import initial data — lazy load from external JSON files
+      // If no local data, try import file first (fast, from same server)
       const importFiles = { JAM:'import-jam-25-26.json', Ginar:'import-ginar-25-26.json', DMyAG:'import-dmag-25-26.json', FabioyTomas:'import-fabiotomas-25-26.json' };
-      if (importFiles[userId] && (!data.ordenes || !data.ordenes.length) && (!data.lotes || !data.lotes.length)) {
+      if ((!data.ordenes || !data.ordenes.length) && (!data.lotes || !data.lotes.length) && importFiles[userId]) {
         try {
           const res = await fetch(importFiles[userId]);
-          if (res.ok) {
-            const importData = await res.json();
-            data = importData;
-            Storage.save(data);
-            Cloud.saveToCloud();
-          }
-        } catch(e) { console.warn('No se pudo cargar datos iniciales:', e); }
-      }
-      // Merge missing lotes from external file
-      if (importFiles[userId] && data.lotes?.length && data.ordenes?.length) {
-        try {
-          const res = await fetch(importFiles[userId]);
-          if (res.ok) {
-            const importData = await res.json();
-            let added = false;
-            (importData.lotes || []).forEach(il => {
-              if (!data.lotes.find(l => l.id === il.id)) { data.lotes.push(JSON.parse(JSON.stringify(il))); added = true; }
-            });
-            if (added) Storage.save(data);
-          }
+          if (res.ok) { data = await res.json(); Storage.save(data); }
         } catch(e) {}
       }
 
+      // Show app IMMEDIATELY with local data
       $('productor-gate').style.display = 'none';
       $('app-main').style.display = '';
       $('productor-label').textContent = u.nombre + ' ▾';
-
       App.init();
+
+      // BACKGROUND: Sync from cloud (doesn't block UI)
+      Cloud.loadFromCloud().then(cloudData => {
+        if (cloudData) {
+          const migrated = migrateData(cloudData);
+          // Only update if cloud has more data or different data
+          const cloudOrdenes = migrated.ordenes?.length || 0;
+          const localOrdenes = data.ordenes?.length || 0;
+          if (cloudOrdenes > localOrdenes || JSON.stringify(migrated.lotes?.length) !== JSON.stringify(data.lotes?.length)) {
+            data = migrated;
+            Storage.save(data);
+            if (Cloud._syncTimer) { clearTimeout(Cloud._syncTimer); Cloud._syncTimer = null; }
+            // Refresh visible tab
+            App.renderLotes(); App._tabRendered = { lotes: true, planos: false, ordenes: false, analisis: false };
+            const at = document.querySelector('.tab-btn.active')?.dataset?.tab;
+            if (at === 'planos') { App.renderPlanos(); App._tabRendered.planos = true; }
+            else if (at === 'ordenes') { App.renderOrdenes(); App._tabRendered.ordenes = true; }
+            else if (at === 'analisis') { App.renderAnalisis(); App._tabRendered.analisis = true; }
+            App.refreshSelectors();
+          }
+        }
+        // Merge missing lotes from import
+        if (importFiles[userId] && data.lotes?.length) {
+          fetch(importFiles[userId]).then(r => r.ok ? r.json() : null).then(imp => {
+            if (!imp) return;
+            let added = false;
+            (imp.lotes || []).forEach(il => { if (!data.lotes.find(l => l.id === il.id)) { data.lotes.push(JSON.parse(JSON.stringify(il))); added = true; } });
+            if (added) { Storage.save(data); App.renderLotes(); }
+          }).catch(() => {});
+        }
+      });
     } finally {
       document.querySelectorAll('#user-buttons button').forEach(b => { b.disabled = false; b.style.opacity = '1'; b.textContent = USUARIOS.find(x => x.id === b.dataset.uid)?.nombre || ''; });
     }

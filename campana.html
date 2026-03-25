@@ -407,7 +407,7 @@ function showToast(msg) { const t = document.createElement('div'); t.className =
 const Storage = {
   _counter: 0,
   _productorKey() { return 'sc_data_' + (currentProductor || 'default'); },
-  defaults() { return { lotes: [], ordenes: [], aplicadores: [], campana: '2025/26', planoLotPos: {}, planoLabels: {} }; },
+  defaults() { return { lotes: [], ordenes: [], aplicadores: [], campana: '2025/26', planoLotPos: {}, planoLabels: {}, planoView: 'standard' }; },
   load() {
     try { const d = JSON.parse(localStorage.getItem(this._productorKey())); if (d && (d.lotes || d.campos || d.campolotes)) return d; } catch(e) {}
     // Fallback: try old key for migration
@@ -998,7 +998,7 @@ const App = {
     kpiEl.innerHTML = kH;
 
     // === Custom per-lot plano mode ===
-    const hasCustomPlano = data.planoLotPos && Object.keys(data.planoLotPos).length > 0;
+    const hasCustomPlano = data.planoView === 'custom' && data.planoLotPos && Object.keys(data.planoLotPos).length > 0;
     if (hasCustomPlano) {
       let mH = '';
       // GRUESA canvas
@@ -1009,7 +1009,8 @@ const App = {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           Guardar todo
         </button>
-        <button class="btn btn-outline btn-sm" onclick="App.clearCustomPlano()" style="font-size:12px;">Volver a vista estándar</button>
+        <button class="btn btn-outline btn-sm" onclick="App.togglePlanoView()" style="font-size:12px;">Ver vista estándar</button>
+        <button class="btn btn-outline btn-sm" onclick="if(confirm('¿Resetear todas las posiciones?')){App.resetCustomPlano();}" style="font-size:11px;color:#e11d48;">Reset posiciones</button>
       </div>`;
       // FINA canvas
       const finaKey = 'fina_' + campPlan;
@@ -1035,9 +1036,13 @@ const App = {
     }
 
     // === Standard establishment-based plano ===
-    // Show button to init custom plano
+    // Show buttons: switch to custom view (or init if no positions exist)
+    const hasPositions = data.planoLotPos && Object.keys(data.planoLotPos).length > 0;
     const initBtn = `<div style="text-align:center;margin-bottom:12px;">
-      <button class="btn btn-outline btn-sm" onclick="App.initCustomPlano()" style="font-size:11px;">Activar plano custom (lotes individuales)</button>
+      ${hasPositions
+        ? `<button class="btn btn-outline btn-sm" onclick="App.togglePlanoView()" style="font-size:11px;">Ver plano custom (lotes individuales)</button>`
+        : `<button class="btn btn-outline btn-sm" onclick="App.initCustomPlano()" style="font-size:11px;">Armar plano custom (lotes individuales)</button>`
+      }
     </div>`;
 
     // Map — drag & drop field planner
@@ -1380,23 +1385,23 @@ const App = {
 
   // ── Custom per-lot plano ──
   _dmLotDefaults: {
-    // AM: 4×2 grid, top-center
-    'AM5':{x:35,y:10,w:9,h:12},'AM6':{x:44,y:10,w:9,h:12},'AM7':{x:53,y:10,w:8,h:12},'AM8':{x:61,y:10,w:8,h:12},
-    'AM4':{x:35,y:22,w:9,h:12},'AM2':{x:44,y:22,w:9,h:12},'AM3':{x:53,y:22,w:8,h:12},'AM1':{x:61,y:22,w:8,h:12},
-    // EF: irregular layout, left — top row tall, bottom row 4 equal
-    'EF5':{x:0,y:10,w:8,h:24},'EF7':{x:8,y:10,w:8,h:12},
-    'EF6':{x:8,y:22,w:10,h:12},'EF8':{x:18,y:16,w:6,h:18},
-    'EF4':{x:0,y:34,w:8,h:14},'EF3':{x:8,y:34,w:8,h:14},'EF2':{x:16,y:34,w:8,h:14},'EF1':{x:24,y:34,w:8,h:14},
-    // SC: right side, 3 rows × 2 cols
-    'SC6':{x:70,y:10,w:10,h:14},'SC1':{x:80,y:10,w:10,h:14},
-    'SC5':{x:70,y:24,w:10,h:14},'SC4':{x:80,y:24,w:10,h:14},
-    'SC2':{x:80,y:38,w:10,h:12},'SC3':{x:90,y:38,w:10,h:12},
-    // LT: center, 2 lots
-    'LT2':{x:38,y:36,w:13,h:11},'LT1':{x:51,y:36,w:12,h:11},
-    // FM: bottom center, 5 lots
-    'FM1':{x:42,y:56,w:10,h:10},'FM6':{x:52,y:56,w:10,h:10},
-    'FM2':{x:42,y:66,w:10,h:10},'FM5':{x:52,y:66,w:10,h:10},
-    'FM3':{x:46,y:78,w:12,h:13},
+    // AM: 4×2 grid, top-center  (estab: 'AM')
+    'AM5':{x:35,y:10,w:9,h:12,e:'AM'},'AM6':{x:44,y:10,w:9,h:12,e:'AM'},'AM7':{x:53,y:10,w:8,h:12,e:'AM'},'AM8':{x:61,y:10,w:8,h:12,e:'AM'},
+    'AM4':{x:35,y:22,w:9,h:12,e:'AM'},'AM2':{x:44,y:22,w:9,h:12,e:'AM'},'AM3':{x:53,y:22,w:8,h:12,e:'AM'},'AM1':{x:61,y:22,w:8,h:12,e:'AM'},
+    // EF: irregular layout, left  (estab: 'El Frances')
+    'EF5':{x:0,y:10,w:8,h:24,e:'El Frances'},'EF7':{x:8,y:10,w:8,h:12,e:'El Frances'},
+    'EF6':{x:8,y:22,w:10,h:12,e:'El Frances'},'EF8':{x:18,y:16,w:6,h:18,e:'El Frances'},
+    'EF4':{x:0,y:34,w:8,h:14,e:'El Frances'},'EF3':{x:8,y:34,w:8,h:14,e:'El Frances'},'EF2':{x:16,y:34,w:8,h:14,e:'El Frances'},'EF1':{x:24,y:34,w:8,h:14,e:'El Frances'},
+    // SC: right side, 3 rows × 2 cols  (estab: 'Sucesion')
+    'SC6':{x:70,y:10,w:10,h:14,e:'Sucesion'},'SC1':{x:80,y:10,w:10,h:14,e:'Sucesion'},
+    'SC5':{x:70,y:24,w:10,h:14,e:'Sucesion'},'SC4':{x:80,y:24,w:10,h:14,e:'Sucesion'},
+    'SC2':{x:80,y:38,w:10,h:12,e:'Sucesion'},'SC3':{x:90,y:38,w:10,h:12,e:'Sucesion'},
+    // LT: center, 2 lots  (estab: 'La Tapera')
+    'LT2':{x:38,y:36,w:13,h:11,e:'La Tapera'},'LT1':{x:51,y:36,w:12,h:11,e:'La Tapera'},
+    // FM: bottom center, 5 lots  (estab: 'FM')
+    'FM1':{x:42,y:56,w:10,h:10,e:'FM'},'FM6':{x:52,y:56,w:10,h:10,e:'FM'},
+    'FM2':{x:42,y:66,w:10,h:10,e:'FM'},'FM5':{x:52,y:66,w:10,h:10,e:'FM'},
+    'FM3':{x:46,y:78,w:12,h:13,e:'FM'},
   },
   _dmLabelDefaults: {
     'AM':{x:46,y:4},'Sucesion':{x:76,y:4},'El Frances':{x:8,y:49},'La Tapera':{x:54,y:48},'FM':{x:40,y:78},
@@ -1405,25 +1410,103 @@ const App = {
   initCustomPlano() {
     if (!data.planoLotPos) data.planoLotPos = {};
     if (!data.planoLabels) data.planoLabels = {};
-    // Copy DM y AG defaults (only for lots that exist in data.lotes)
     const existingNames = new Set(data.lotes.map(l => l.nombre));
-    Object.entries(App._dmLotDefaults).forEach(([name, pos]) => {
-      if (existingNames.has(name)) data.planoLotPos[name] = {...pos};
+    // Build estab lookup: lot name → establecimiento name
+    const loteEstab = {};
+    data.lotes.forEach(l => { loteEstab[l.nombre] = l.establecimiento || ''; });
+
+    // Try DM y AG defaults (only if lot name AND establecimiento match)
+    let usedDefaults = 0;
+    const matchedEstabs = new Set();
+    Object.entries(App._dmLotDefaults).forEach(([name, def]) => {
+      if (existingNames.has(name) && def.e && loteEstab[name] === def.e) {
+        data.planoLotPos[name] = {x:def.x, y:def.y, w:def.w, h:def.h};
+        usedDefaults++;
+        matchedEstabs.add(def.e);
+      }
     });
-    Object.entries(App._dmLabelDefaults).forEach(([name, pos]) => {
-      data.planoLabels[name] = {...pos};
-    });
+    // Only add DM y AG labels for establishments that actually matched
+    if (usedDefaults > 0) {
+      Object.entries(App._dmLabelDefaults).forEach(([name, pos]) => {
+        if (matchedEstabs.has(name)) data.planoLabels[name] = {...pos};
+      });
+    }
+
+    // Auto-generate positions for lotes that don't have a default
+    const lotesWithoutPos = data.lotes.filter(l => !data.planoLotPos[l.nombre]);
+    if (lotesWithoutPos.length > 0) {
+      App._autoGeneratePositions(lotesWithoutPos, usedDefaults > 0);
+    }
+
+    data.planoView = 'custom';
     Storage.save(data);
     App.renderPlanos();
-    showToast('Plano custom inicializado');
+    showToast('Plano custom activado');
   },
 
-  clearCustomPlano() {
-    data.planoLotPos = {};
-    data.planoLabels = {};
+  _autoGeneratePositions(lotes, appendMode) {
+    // Group by establecimiento
+    const groups = {};
+    lotes.forEach(l => {
+      const estab = l.establecimiento || 'Sin estab.';
+      if (!groups[estab]) groups[estab] = [];
+      groups[estab].push(l);
+    });
+
+    // Calculate starting position (if appending to existing, start lower)
+    const existingPositions = Object.values(data.planoLotPos || {});
+    let startY = 5;
+    if (appendMode && existingPositions.length) {
+      startY = Math.max(...existingPositions.map(p => (p.y||0) + (p.h||10))) + 3;
+    }
+
+    const estabNames = Object.keys(groups);
+    const maxCols = 4; // max lots per row within an establishment
+    let curX = 2, curY = startY;
+    const lotW = 10, lotH = 11, gapX = 1, gapY = 1, estabGap = 4;
+
+    estabNames.forEach(estab => {
+      const gLotes = groups[estab];
+      const cols = Math.min(gLotes.length, maxCols);
+      const rows = Math.ceil(gLotes.length / cols);
+      const blockW = cols * (lotW + gapX);
+
+      // If block doesn't fit horizontally, wrap to next row
+      if (curX + blockW > 98) { curX = 2; curY += rows * (lotH + gapY) + estabGap; }
+
+      // Label
+      if (!data.planoLabels) data.planoLabels = {};
+      data.planoLabels[estab] = { x: curX + blockW/2 - 3, y: curY - 3 };
+
+      // Position each lot
+      gLotes.forEach((l, i) => {
+        const col = i % cols, row = Math.floor(i / cols);
+        data.planoLotPos[l.nombre] = {
+          x: Math.round((curX + col * (lotW + gapX))*10)/10,
+          y: Math.round((curY + row * (lotH + gapY))*10)/10,
+          w: lotW, h: lotH
+        };
+      });
+
+      curX += blockW + estabGap;
+      // Wrap if next group won't fit
+      if (curX > 70) { curX = 2; curY += rows * (lotH + gapY) + estabGap; }
+    });
+  },
+
+  togglePlanoView() {
+    data.planoView = data.planoView === 'custom' ? 'standard' : 'custom';
     Storage.save(data);
     App.renderPlanos();
-    showToast('Plano custom eliminado — volviendo a vista por establecimiento');
+  },
+
+  resetCustomPlano() {
+    data.planoLotPos = {};
+    data.planoLabels = {};
+    data.planoView = 'standard';
+    Storage.save(data);
+    App.renderPlanos();
+    showToast('Posiciones reseteadas');
   },
 
   _renderCustomPlanoCanvas(campKey, canvasId, title) {

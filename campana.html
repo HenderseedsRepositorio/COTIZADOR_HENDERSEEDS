@@ -200,15 +200,6 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .plano-estab .pe-cell:hover { filter:brightness(.88); }
 .pe-resize { position:absolute;width:12px;height:12px;background:rgba(45,111,196,.2);border-radius:2px;z-index:10;opacity:0;transition:opacity .2s; }
 .plano-estab:hover .pe-resize { opacity:1; }
-/* Plano edit mode */
-.pe-edit-bar { display:flex;align-items:center;gap:6px;margin-bottom:4px;justify-content:center; }
-.pe-edit-bar button { font-size:11px;padding:2px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-family:var(--mono);font-weight:700; }
-.pe-edit-bar button:hover { background:var(--accent-bg); }
-.pe-edit-bar .pe-cols-label { font-size:10px;color:var(--text-sec);font-weight:600; }
-.pe-cell.pe-editable { transition:filter .15s; }
-.plano-estab.pe-editing { z-index:50;cursor:default!important; }
-.plano-estab.pe-editing .pe-block { border-color:var(--accent);border-style:dashed; }
-.pe-pick:focus { outline:2px solid var(--accent); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -1121,20 +1112,6 @@ const App = {
       return h;
     };
 
-    // Helper: get saved lote order & cols for an establishment
-    if (!data.planoLoteOrder) data.planoLoteOrder = {};
-    const _getEstabOrder = (estab, lotes, defaultCols) => {
-      const saved = data.planoLoteOrder[estab];
-      if (saved && saved.order && saved.order.length) {
-        // Sort lotes by saved order
-        const orderMap = {};
-        saved.order.forEach((name, i) => orderMap[name] = i);
-        lotes.sort((a, b) => (orderMap[a.nombre] ?? 999) - (orderMap[b.nombre] ?? 999));
-        return { cols: saved.cols || defaultCols, lotes };
-      }
-      return { cols: defaultCols, lotes };
-    };
-
     Object.entries(groups).forEach(([estab, gd]) => {
       const pos = getPos(estab);
 
@@ -1147,61 +1124,20 @@ const App = {
       const nL = gd.lotes.length;
       const layout = pos.layout || 'g';
       let cols, rows;
-      if (layout === 'h') { cols = nL; rows = 1; }
-      else if (layout === 'v') { cols = 1; rows = nL; }
-      else if (layout[0]==='g' && layout.length>1) { cols = parseInt(layout.substring(1)); rows = Math.ceil(nL/cols); }
-      else {
+      if (layout === 'h') { cols = nL; rows = 1; } // horizontal: all side by side
+      else if (layout === 'v') { cols = 1; rows = nL; } // vertical: all stacked
+      else if (layout[0]==='g' && layout.length>1) { cols = parseInt(layout.substring(1)); rows = Math.ceil(nL/cols); } // forced grid cols e.g. 'g4'
+      else { // grid: auto
         const isVert = pos.h > pos.w * 1.5;
         cols = nL<=1?1: isVert?(nL<=2?1:2) : (nL<=2?2:nL<=3?3:Math.min(nL,4));
         rows = Math.ceil(nL / cols);
       }
 
-      // Apply saved order/cols override
-      const eo = _getEstabOrder(estab, gd.lotes, cols);
-      cols = eo.cols; rows = Math.ceil(nL / cols);
-      const isEditing = App._planoEditEstab === estab;
+      mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
-      // Store rendered order for edit swap operations
-      if (!App._planoRenderedOrder) App._planoRenderedOrder = {};
-      App._planoRenderedOrder[estab] = gd.lotes.map(l => l.nombre);
-      if (!App._planoRenderedCols) App._planoRenderedCols = {};
-      App._planoRenderedCols[estab] = cols;
-
-      mH += `<div class="plano-estab ${isEditing?'pe-editing':''}" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
-      // Label + edit toggle
-      mH += `<div class="pe-label" style="pointer-events:auto;cursor:default;">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span>`;
-      mH += ` <span class="pe-edit-btn" style="cursor:pointer;font-size:13px;opacity:.5;" title="Editar orden">&#9998;</span>`;
-      mH += `</div>`;
-
-      // Edit bar (cols +/-)
-      if (isEditing) {
-        mH += `<div class="pe-edit-bar">`;
-        mH += `<button data-action="cols-minus">−</button>`;
-        mH += `<span class="pe-cols-label">${cols} col</span>`;
-        mH += `<button data-action="cols-plus">+</button>`;
-        mH += `<button data-action="save" style="background:var(--accent);color:#fff;border-color:var(--accent);">Guardar</button>`;
-        mH += `<button data-action="cancel" style="color:var(--text-sec);">✕</button>`;
-        mH += `</div>`;
-      }
-
-      mH += `<div class="pe-block" data-estab-block="${esc(estab)}" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - ${isEditing?'48px':'26px'});">`;
-
-      // Build select options for edit mode (all lotes in this estab)
-      const allNames = gd.lotes.map(l => l.nombre);
-      gd.lotes.forEach((l, idx) => {
-        if (isEditing) {
-          const cc = App._cultivoClass(l.plan.cultivo || '');
-          const bg = bgMap[cc] || '#fff';
-          const selOpts = allNames.map(n => `<option value="${esc(n)}" ${n===l.nombre?'selected':''}>${esc(n)}</option>`).join('');
-          mH += `<div class="pe-cell pe-editable" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);">
-            <select class="pe-pick" data-edit-idx="${idx}" style="font-family:var(--title);font-size:13px;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:4px;padding:2px 4px;cursor:pointer;text-align:center;width:90%;">${selOpts}</select>
-            <div style="font-family:var(--mono);font-size:10px;color:rgba(0,0,0,.4);margin-top:2px;">${l.hectareas} ha</div>
-            ${l.plan.cultivo ? `<div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(l.plan.cultivo)}</div>` : ''}
-          </div>`;
-        } else {
-          mH += cellHtml(l);
-        }
-      });
+      gd.lotes.forEach(l => { mH += cellHtml(l); });
 
       mH += '</div>';
       mH += '<div class="pe-resize" data-corner="br" style="bottom:0;right:0;cursor:nwse-resize;"></div>';
@@ -1286,79 +1222,6 @@ const App = {
 
     mapEl.innerHTML = mH;
     App._initPlanoDrag();
-    App._initPlanoEditEvents();
-  },
-  // ── Plano edit mode ──
-  _planoEditEstab: null,
-  _planoRenderedOrder: {},
-  _planoRenderedCols: {},
-  planoToggleEdit(estab) {
-    App._planoEditEstab = (App._planoEditEstab === estab || !estab) ? null : estab;
-    App.renderPlanos();
-  },
-  _planoPickLote(estab, idx, newName) {
-    // Swap: find where newName currently is and swap with idx
-    const order = App._planoRenderedOrder[estab];
-    if (!order) return;
-    const oldIdx = order.indexOf(newName);
-    if (oldIdx === -1 || oldIdx === idx) return;
-    [order[idx], order[oldIdx]] = [order[oldIdx], order[idx]];
-    if (!data.planoLoteOrder) data.planoLoteOrder = {};
-    if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
-    data.planoLoteOrder[estab].order = [...order];
-    if (App._planoRenderedCols[estab]) data.planoLoteOrder[estab].cols = App._planoRenderedCols[estab];
-    App.renderPlanos();
-  },
-  _planoSetCols(estab, delta) {
-    const nL = App._planoRenderedOrder[estab]?.length || 1;
-    const cur = App._planoRenderedCols[estab] || 4;
-    const newCols = Math.max(1, Math.min(nL, cur + delta));
-    if (!data.planoLoteOrder) data.planoLoteOrder = {};
-    if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
-    data.planoLoteOrder[estab].cols = newCols;
-    if (App._planoRenderedOrder[estab]) data.planoLoteOrder[estab].order = [...App._planoRenderedOrder[estab]];
-    App.renderPlanos();
-  },
-  _planoSave(estab) {
-    App._planoEditEstab = null;
-    App.renderPlanos();
-    App.guardarPlanoCompleto();
-    showToast('Orden guardado ✓');
-  },
-  _initPlanoEditEvents() {
-    const map = $('planos-map');
-    if (!map || map._editInit) return;
-    map._editInit = true;
-    // Capture phase: block drag on edit elements
-    map.addEventListener('pointerdown', e => {
-      if (e.target.closest('.pe-edit-bar') || e.target.closest('.pe-edit-btn') || e.target.closest('.pe-editing .pe-cell')) {
-        e.stopPropagation();
-      }
-    }, true);
-    // Click: pencil + edit bar buttons
-    map.addEventListener('click', e => {
-      const editBtn = e.target.closest('.pe-edit-btn');
-      if (editBtn) {
-        const estabEl = editBtn.closest('.plano-estab');
-        App.planoToggleEdit(estabEl?.dataset.estab);
-        return;
-      }
-      const actionBtn = e.target.closest('[data-action]');
-      if (actionBtn && App._planoEditEstab) {
-        const a = actionBtn.dataset.action, es = App._planoEditEstab;
-        if (a === 'cols-minus') App._planoSetCols(es, -1);
-        else if (a === 'cols-plus') App._planoSetCols(es, 1);
-        else if (a === 'save') App._planoSave(es);
-        else if (a === 'cancel') App.planoToggleEdit(null);
-      }
-    });
-    // Change: dropdown lote picker
-    map.addEventListener('change', e => {
-      const sel = e.target.closest('.pe-pick');
-      if (!sel || !App._planoEditEstab) return;
-      const idx = parseInt(sel.dataset.editIdx);
-      App._planoPickLote(App._planoEditEstab, idx, sel.value);
-    });
   },
   _initPlanoDrag() {
     const canvas = $('plano-canvas');
@@ -1373,8 +1236,7 @@ const App = {
       const resizer = e.target.closest('.pe-resize');
       const estab = e.target.closest('.plano-estab');
       if (!estab) return;
-      if (estab.classList.contains('pe-editing')) return; // skip drag in edit mode
-      if (e.target.closest('.pe-cell') || e.target.closest('.pe-block') || e.target.closest('.pe-edit-btn')) return;
+      if (e.target.closest('.pe-cell') || e.target.closest('.pe-block')) return;
       e.preventDefault();
       activeEl = estab;
       sX = e.clientX; sY = e.clientY;
@@ -1482,12 +1344,8 @@ const App = {
       const ids = new Set();
       ['maiz','girasol'].forEach(t => (semCat[t]||[]).forEach(h => { const short = h.id.split(' ')[0]; if (!ids.has(short)) { ids.add(short); hybridOpts += `<option value="${esc(short)}">`; } }));
     }
-    openModal(`<div class="modal-title">Planificar lote</div>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div style="flex:1;"><label class="form-lbl">Nombre del lote</label><input type="text" id="m-plan-nombre" class="inp inp-sm" value="${esc(l.nombre)}" placeholder="Ej: AM5"></div>
-        <div style="flex:1;"><label class="form-lbl">Hectáreas</label><input type="number" id="m-plan-has" class="inp inp-sm" value="${l.hectareas||''}" placeholder="Ej: 30" inputmode="decimal" step="0.1"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text-sec);margin-bottom:10px;">${esc(l.establecimiento||'')} · ${esc(campLabel)}</div>
+    openModal(`<div class="modal-title">Planificar ${esc(l.nombre)}</div>
+      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has · ${esc(l.establecimiento||'')} · ${esc(campLabel)}</div>
       <div style="margin-bottom:10px;"><label class="form-lbl">Cultivo</label>
         <select id="m-plan-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${opts}</select></div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -1507,19 +1365,6 @@ const App = {
   },
   savePlan(lid, campOverride) {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
-    // Update nombre & hectareas if changed
-    const newNombre = $('m-plan-nombre')?.value.trim();
-    const newHas = parseFloat($('m-plan-has')?.value);
-    if (newNombre && newNombre !== l.nombre) {
-      // Update planoLoteOrder references
-      if (data.planoLoteOrder) {
-        Object.values(data.planoLoteOrder).forEach(cfg => {
-          if (cfg.order) cfg.order = cfg.order.map(n => n === l.nombre ? newNombre : n);
-        });
-      }
-      l.nombre = newNombre;
-    }
-    if (!isNaN(newHas) && newHas > 0) l.hectareas = newHas;
     const campPlan = campOverride || data.campana || '2025/26';
     if (!l.planes) l.planes = {};
     l.planes[campPlan] = {

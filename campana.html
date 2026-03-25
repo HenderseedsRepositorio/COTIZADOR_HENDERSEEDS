@@ -975,7 +975,8 @@ const App = {
     const _defaultOrders = {
       'AM': ['AM5','AM6','AM7','AM8','AM4','AM3','AM2','AM1'],
       'El Frances': ['EF5','EF6','EF7','EF8','EF4','EF3','EF2','EF1'],
-      'Sucesion': ['SC6','SC1','SC5','SC4','SC2','SC3'],
+      'Sucesion': ['SC6','SC5','SC4','SC1','SC2','SC3'],
+      'FM': ['FM1','FM6','FM2','FM5','FM3'],
     };
     Object.entries(groups).forEach(([estab, gd]) => {
       const order = data.loteOrder[estab] || _defaultOrders[estab];

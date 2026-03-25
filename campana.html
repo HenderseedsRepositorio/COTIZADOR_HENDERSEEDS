@@ -195,6 +195,8 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .plano-estab { position:absolute;cursor:grab;user-select:none;touch-action:none; }
 .plano-estab.dragging { opacity:.8;z-index:100;cursor:grabbing; }
 .plano-estab .pe-label { font-family:var(--title);font-size:11px;color:#333;text-align:center;margin-bottom:2px;pointer-events:none; }
+.plano-estab .pe-label .pe-cols-ctrl { pointer-events:auto; }
+.plano-estab .pe-label .pe-cols-ctrl button { pointer-events:auto; }
 .plano-estab .pe-block { border:2.5px solid #333;overflow:hidden; }
 .plano-estab .pe-cell { display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3px;position:relative;cursor:pointer;pointer-events:auto; }
 .plano-estab .pe-cell:hover { filter:brightness(.88); }

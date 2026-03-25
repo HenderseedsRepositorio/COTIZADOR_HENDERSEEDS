@@ -4,155 +4,349 @@
       "id": "lt_dm_am6",
       "nombre": "AM6",
       "hectareas": 28.0,
-      "cultivo": "Trigo",
-      "establecimiento": "AM"
+      "cultivo": "Maiz 2da",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz 2da"
+        }
+      }
     },
     {
       "id": "lt_dm_am8",
       "nombre": "AM8",
       "hectareas": 26.0,
-      "cultivo": "Trigo",
-      "establecimiento": "AM"
+      "cultivo": "Maiz",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz"
+        }
+      }
     },
     {
       "id": "lt_dm_sc6",
       "nombre": "SC6",
       "hectareas": 31.0,
-      "cultivo": "Trigo",
-      "establecimiento": "Sucesion"
+      "cultivo": "Maiz 2da",
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz 2da"
+        }
+      }
     },
     {
       "id": "lt_dm_ef1",
       "nombre": "EF1",
       "hectareas": 34.0,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_ef8",
       "nombre": "EF8",
-      "hectareas": 16.0,
+      "hectareas": 22,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_lt2",
       "nombre": "LT2",
-      "hectareas": 15.0,
-      "cultivo": "Maiz tardio",
-      "establecimiento": "La Tapera"
+      "hectareas": 54,
+      "cultivo": "Maiz 2da",
+      "establecimiento": "La Tapera",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz 2da"
+        }
+      }
     },
     {
       "id": "lt_dm_sc1",
       "nombre": "SC1",
-      "hectareas": 45.0,
-      "cultivo": "Maiz tardio",
-      "establecimiento": "Sucesion"
+      "hectareas": 47,
+      "cultivo": "Maiz",
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz"
+        }
+      }
     },
     {
       "id": "lt_dm_ef4",
       "nombre": "EF4",
-      "hectareas": 30.0,
+      "hectareas": 37,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_ef5",
       "nombre": "EF5",
-      "hectareas": 17.0,
+      "hectareas": 45,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_ef6",
       "nombre": "EF6",
-      "hectareas": 14.0,
+      "hectareas": 37,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_ef7",
       "nombre": "EF7",
-      "hectareas": 27.0,
+      "hectareas": 44,
       "cultivo": "Maiz tardio",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
     },
     {
       "id": "lt_dm_ef2",
       "nombre": "EF2",
-      "hectareas": 27.0,
+      "hectareas": 29,
       "cultivo": "Girasol",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Girasol"
+        }
+      }
     },
     {
       "id": "lt_dm_ef3",
       "nombre": "EF3",
-      "hectareas": 28.0,
+      "hectareas": 30,
       "cultivo": "Girasol",
-      "establecimiento": "El Frances"
+      "establecimiento": "El Frances",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Girasol"
+        }
+      }
     },
     {
       "id": "lt_dm_sc3",
       "nombre": "SC3",
       "hectareas": 39.0,
-      "cultivo": "Girasol",
-      "establecimiento": "Sucesion"
+      "cultivo": "Soja",
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     },
     {
       "id": "lt_dm_sc4",
       "nombre": "SC4",
       "hectareas": 39.0,
-      "cultivo": "Girasol",
-      "establecimiento": "Sucesion"
+      "cultivo": "Soja",
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     },
     {
       "id": "lt_dm_am5",
       "nombre": "AM5",
       "hectareas": 28.0,
-      "cultivo": "Girasol",
-      "establecimiento": "AM"
+      "cultivo": "Soja",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     },
     {
       "id": "lt_dm_am2",
       "nombre": "AM2",
-      "hectareas": 35.0,
-      "cultivo": "Girasol",
-      "establecimiento": "AM"
+      "hectareas": 26,
+      "cultivo": "Maiz",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz"
+        }
+      }
     },
     {
       "id": "lt_dm_am1",
       "nombre": "AM1",
-      "hectareas": 26.0,
-      "cultivo": "Girasol",
-      "establecimiento": "AM"
+      "hectareas": 28,
+      "cultivo": "Soja",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     },
     {
       "id": "lt_dm_sc2",
       "nombre": "SC2",
       "hectareas": 39.0,
       "cultivo": "Maiz",
-      "establecimiento": "Sucesion"
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz"
+        }
+      }
     },
     {
       "id": "lt_dm_sc5",
       "nombre": "SC5",
-      "hectareas": 25.0,
+      "hectareas": 26,
       "cultivo": "Maiz",
-      "establecimiento": "Sucesion"
+      "establecimiento": "Sucesion",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz"
+        }
+      }
     },
     {
       "id": "lt_dm_lt1",
       "nombre": "LT1",
-      "hectareas": 30.0,
-      "cultivo": "Maiz tardio",
-      "establecimiento": "La Tapera"
+      "hectareas": 35,
+      "cultivo": "Soja",
+      "establecimiento": "La Tapera",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     },
     {
       "id": "lt_dm_fm5",
       "nombre": "FM5",
-      "hectareas": 20.0,
+      "hectareas": 25,
       "cultivo": "Maiz tardio",
-      "establecimiento": "FM"
+      "establecimiento": "FM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Maiz tardio"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_am3",
+      "nombre": "AM3",
+      "hectareas": 30,
+      "cultivo": "Pastura",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Pastura"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_am4",
+      "nombre": "AM4",
+      "hectareas": 26.6,
+      "cultivo": "Pastura",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Pastura"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_am7",
+      "nombre": "AM7",
+      "hectareas": 24,
+      "cultivo": "Pastura",
+      "establecimiento": "AM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Pastura"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_fm1",
+      "nombre": "FM1",
+      "hectareas": 25,
+      "cultivo": "Girasol",
+      "establecimiento": "FM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Girasol"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_fm2",
+      "nombre": "FM2",
+      "hectareas": 25,
+      "cultivo": "Girasol",
+      "establecimiento": "FM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Girasol"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_fm3",
+      "nombre": "FM3",
+      "hectareas": 50,
+      "cultivo": "Girasol",
+      "establecimiento": "FM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Girasol"
+        }
+      }
+    },
+    {
+      "id": "lt_dm_fm6",
+      "nombre": "FM6",
+      "hectareas": 25,
+      "cultivo": "Soja",
+      "establecimiento": "FM",
+      "planes": {
+        "2025/26": {
+          "cultivo": "Soja"
+        }
+      }
     }
   ],
   "ordenes": [
@@ -1866,5 +2060,42 @@
     "posada",
     "perez david"
   ],
-  "campana": "2025/26"
+  "campana": "2025/26",
+  "planoPos": {
+    "El Frances": {
+      "x": 1,
+      "y": 42,
+      "w": 38,
+      "h": 55,
+      "layout": "g"
+    },
+    "AM": {
+      "x": 28,
+      "y": 2,
+      "w": 38,
+      "h": 40,
+      "layout": "g"
+    },
+    "Sucesion": {
+      "x": 67,
+      "y": 2,
+      "w": 32,
+      "h": 42,
+      "layout": "g"
+    },
+    "La Tapera": {
+      "x": 55,
+      "y": 38,
+      "w": 13,
+      "h": 22,
+      "layout": "v"
+    },
+    "FM": {
+      "x": 38,
+      "y": 62,
+      "w": 20,
+      "h": 35,
+      "layout": "g"
+    }
+  }
 }

@@ -202,8 +202,10 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .plano-estab:hover .pe-resize { opacity:1; }
 /* Click-to-swap: selected lote highlight */
 .pe-cell.swap-selected { outline:3px solid var(--accent);outline-offset:-3px;animation:swapPulse 1s infinite; }
-.pe-cell .pe-swap { opacity:.2;transition:opacity .2s;font-size:12px; }
+.pe-cell .pe-swap { opacity:.15;transition:opacity .2s;font-size:12px; }
 .pe-cell:hover .pe-swap { opacity:.6; }
+.pe-cols-ctrl { opacity:0;transition:opacity .2s; }
+.plano-estab:hover .pe-cols-ctrl { opacity:1; }
 @keyframes swapPulse { 0%,100%{outline-color:var(--accent);} 50%{outline-color:#f59e0b;} }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
@@ -969,7 +971,7 @@ const App = {
     if (!data.loteOrder) data.loteOrder = {};
     // Default orders for DM y AG (only applied if no custom order saved for that estab)
     const _defaultOrders = {
-      'AM': ['AM5','AM6','AM7','AM8','AM4','AM2','AM3','AM1'],
+      'AM': ['AM5','AM6','AM7','AM8','AM4','AM3','AM2','AM1'],
       'El Frances': ['EF5','EF6','EF7','EF8','EF4','EF3','EF2','EF1'],
       'Sucesion': ['SC6','SC1','SC5','SC4','SC2','SC3'],
     };
@@ -1031,7 +1033,7 @@ const App = {
       'El Socorro':       {x:58,y:42,w:18,h:35,layout:'h'},
       // DM y AG defaults
       'AM':               {x:28,y:2,w:40,h:28,layout:'g'},
-      'Sucesion':         {x:68,y:18,w:31,h:48,layout:'g4'},
+      'Sucesion':         {x:68,y:18,w:31,h:48,layout:'g3'},
       'El Frances':       {x:1,y:18,w:28,h:50,layout:'g4'},
       'La Tapera':        {x:38,y:32,w:16,h:32,layout:'v'},
       'FM':               {x:35,y:66,w:20,h:32,layout:'g'}
@@ -1146,7 +1148,14 @@ const App = {
       }
 
       mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
-      mH += `<div class="pe-label">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></div>`;
+      mH += `<div class="pe-label" style="display:flex;align-items:center;justify-content:center;gap:4px;">
+        <span>${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></span>
+        <span class="pe-cols-ctrl" style="display:inline-flex;align-items:center;gap:1px;margin-left:4px;">
+          <button onclick="event.stopPropagation();App.changeCols('${esc(estab)}',-1)" style="background:none;border:1px solid rgba(0,0,0,.15);border-radius:3px;width:16px;height:16px;font-size:11px;cursor:pointer;color:#555;line-height:1;padding:0;">−</button>
+          <span style="font-family:var(--mono);font-size:9px;color:#666;min-width:14px;text-align:center;">${cols}</span>
+          <button onclick="event.stopPropagation();App.changeCols('${esc(estab)}',1)" style="background:none;border:1px solid rgba(0,0,0,.15);border-radius:3px;width:16px;height:16px;font-size:11px;cursor:pointer;color:#555;line-height:1;padding:0;">+</button>
+        </span>
+      </div>`;
       mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
 
       gd.lotes.forEach(l => { mH += cellHtml(l, estab); });
@@ -1371,6 +1380,24 @@ const App = {
   cancelSwap() {
     App._swapState = null;
     document.querySelectorAll('.pe-cell.swap-selected').forEach(el => el.classList.remove('swap-selected'));
+  },
+
+  changeCols(estab, delta) {
+    if (!data.planoPos) data.planoPos = {};
+    const pos = data.planoPos[estab] || {};
+    // Parse current layout
+    let curCols;
+    const layout = pos.layout || 'g';
+    if (layout === 'h') curCols = 99;
+    else if (layout === 'v') curCols = 1;
+    else if (layout[0]==='g' && layout.length>1) curCols = parseInt(layout.substring(1));
+    else curCols = 2; // default auto grid
+    const nLotes = data.lotes.filter(l => (l.establecimiento||'') === estab).length;
+    const newCols = Math.max(1, Math.min(nLotes, curCols + delta));
+    pos.layout = 'g' + newCols;
+    data.planoPos[estab] = pos;
+    Storage.save(data);
+    App.renderPlanos();
   },
 
   openPlanModal(lid, campOverride) {

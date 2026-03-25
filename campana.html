@@ -1038,14 +1038,18 @@ const App = {
       'AM':               {x:28,y:2,w:40,h:28,layout:'g'},
       'Sucesion':         {x:68,y:18,w:31,h:48,layout:'g3'},
       'El Frances':       {x:1,y:18,w:28,h:50,layout:'g4'},
-      'La Tapera':        {x:38,y:32,w:16,h:32,layout:'v'},
-      'FM':               {x:35,y:66,w:20,h:32,layout:'g'}
+      'La Tapera':        {x:38,y:32,w:16,h:32,layout:'v',ls:'l'},
+      'FM':               {x:35,y:66,w:20,h:32,layout:'g',ls:'l'}
     };
 
     const getPos = (estab) => {
       const saved = savedPos[estab];
       const def = defaultPos[estab] || {x:5,y:5,w:18,h:25,layout:'g'};
-      if (saved) { if (!saved.layout) saved.layout = def.layout || 'g'; return saved; }
+      if (saved) {
+        if (!saved.layout) saved.layout = def.layout || 'g';
+        if (def.ls && !saved.ls) saved.ls = def.ls; // inherit label-side from default
+        return saved;
+      }
       return def;
     };
 
@@ -1150,16 +1154,29 @@ const App = {
         rows = Math.ceil(nL / cols);
       }
 
-      mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
-      mH += `<div class="pe-label" style="display:flex;align-items:center;justify-content:center;gap:4px;">
-        <span>${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></span>
-        <span class="pe-cols-ctrl" style="display:inline-flex;align-items:center;gap:1px;margin-left:4px;">
+      const labelSide = pos.ls; // 'l'=left, 'r'=right, undefined=top (default)
+      const colsCtrl = `<span class="pe-cols-ctrl" style="display:inline-flex;align-items:center;gap:1px;margin-left:4px;">
           <button onclick="event.stopPropagation();App.changeCols('${esc(estab)}',-1)" style="background:none;border:1px solid rgba(0,0,0,.15);border-radius:3px;width:16px;height:16px;font-size:11px;cursor:pointer;color:#555;line-height:1;padding:0;">−</button>
           <span style="font-family:var(--mono);font-size:9px;color:#666;min-width:14px;text-align:center;">${cols}</span>
           <button onclick="event.stopPropagation();App.changeCols('${esc(estab)}',1)" style="background:none;border:1px solid rgba(0,0,0,.15);border-radius:3px;width:16px;height:16px;font-size:11px;cursor:pointer;color:#555;line-height:1;padding:0;">+</button>
-        </span>
-      </div>`;
-      mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
+        </span>`;
+
+      mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      if (labelSide) {
+        // Label to the side (left or right) — block uses full height
+        const side = labelSide === 'r' ? 'right' : 'left';
+        const offset = labelSide === 'r' ? 'right:-2px' : 'left:-2px';
+        mH += `<div class="pe-label" style="position:absolute;${offset};top:50%;transform:translate(${labelSide==='r'?'100%':'-100%'},-50%);display:flex;flex-direction:column;align-items:center;gap:2px;white-space:nowrap;">
+          <span style="font-weight:700;">${esc(estab)}</span><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span>${colsCtrl}
+        </div>`;
+        mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:100%;">`;
+      } else {
+        // Label on top (default)
+        mH += `<div class="pe-label" style="display:flex;align-items:center;justify-content:center;gap:4px;">
+          <span>${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span></span>${colsCtrl}
+        </div>`;
+        mH += `<div class="pe-block" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - 26px);">`;
+      }
 
       gd.lotes.forEach(l => { mH += cellHtml(l, estab); });
 
@@ -1320,7 +1337,8 @@ const App = {
         y: parseFloat(el.style.top) || 0,
         w: parseFloat(el.style.width) || 20,
         h: parseFloat(el.style.height) || 30,
-        layout: prev.layout || 'g'
+        layout: prev.layout || 'g',
+        ...(prev.ls ? {ls: prev.ls} : {})
       };
     });
     Storage.save(data);

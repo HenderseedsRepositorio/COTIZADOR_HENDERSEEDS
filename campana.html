@@ -205,9 +205,12 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .pe-edit-bar button { font-size:11px;padding:2px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-family:var(--mono);font-weight:700; }
 .pe-edit-bar button:hover { background:var(--accent-bg); }
 .pe-edit-bar .pe-cols-label { font-size:10px;color:var(--text-sec);font-weight:600; }
-.pe-cell.pe-selected { outline:3px solid var(--accent)!important;outline-offset:-3px;z-index:5;filter:brightness(.85)!important; }
-.pe-cell.pe-editable { cursor:pointer; }
+.pe-cell.pe-selected { outline:3px solid var(--accent)!important;outline-offset:-3px;z-index:5;filter:brightness(.82)!important;animation:pe-pulse .8s ease-in-out infinite alternate; }
+@keyframes pe-pulse { from{outline-color:var(--accent)} to{outline-color:#f59e0b} }
+.pe-cell.pe-editable { cursor:pointer;transition:filter .15s; }
 .pe-cell.pe-editable:hover { filter:brightness(.78)!important; }
+.plano-estab.pe-editing { z-index:50;cursor:default!important; }
+.plano-estab.pe-editing .pe-block { border-color:var(--accent);border-style:dashed; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -1159,22 +1162,27 @@ const App = {
       const eo = _getEstabOrder(estab, gd.lotes, cols);
       cols = eo.cols; rows = Math.ceil(nL / cols);
       const isEditing = App._planoEditEstab === estab;
-      const eKey = estab.replace(/[^a-zA-Z0-9]/g,'_');
 
-      mH += `<div class="plano-estab" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
+      // Store rendered order for edit swap operations
+      if (!App._planoRenderedOrder) App._planoRenderedOrder = {};
+      App._planoRenderedOrder[estab] = gd.lotes.map(l => l.nombre);
+      if (!App._planoRenderedCols) App._planoRenderedCols = {};
+      App._planoRenderedCols[estab] = cols;
+
+      mH += `<div class="plano-estab ${isEditing?'pe-editing':''}" data-estab="${esc(estab)}" style="left:${pos.x}%;top:${pos.y}%;width:${pos.w}%;height:${pos.h}%;">`;
       // Label + edit toggle
       mH += `<div class="pe-label" style="pointer-events:auto;cursor:default;">${esc(estab)}<br><span style="font-family:var(--mono);font-size:9px;color:#888;">${fmtInt(gd.totalHas)} ha</span>`;
-      mH += ` <span style="cursor:pointer;font-size:13px;opacity:.5;" onclick="event.stopPropagation();App.planoToggleEdit('${esc(estab)}')" title="Editar orden">&#9998;</span>`;
+      mH += ` <span class="pe-edit-btn" style="cursor:pointer;font-size:13px;opacity:.5;" title="Editar orden">&#9998;</span>`;
       mH += `</div>`;
 
       // Edit bar (cols +/-)
       if (isEditing) {
-        mH += `<div class="pe-edit-bar" style="pointer-events:auto;">`;
-        mH += `<button onclick="event.stopPropagation();App.planoChangeCols('${esc(estab)}',-1)">−</button>`;
+        mH += `<div class="pe-edit-bar">`;
+        mH += `<button data-action="cols-minus">−</button>`;
         mH += `<span class="pe-cols-label">${cols} col</span>`;
-        mH += `<button onclick="event.stopPropagation();App.planoChangeCols('${esc(estab)}',1)">+</button>`;
-        mH += `<button onclick="event.stopPropagation();App.planoSaveOrder('${esc(estab)}')" style="background:var(--accent);color:#fff;border-color:var(--accent);">Guardar</button>`;
-        mH += `<button onclick="event.stopPropagation();App.planoToggleEdit(null)" style="color:var(--text-sec);">✕</button>`;
+        mH += `<button data-action="cols-plus">+</button>`;
+        mH += `<button data-action="save" style="background:var(--accent);color:#fff;border-color:var(--accent);">Guardar</button>`;
+        mH += `<button data-action="cancel" style="color:var(--text-sec);">✕</button>`;
         mH += `</div>`;
       }
 
@@ -1182,11 +1190,10 @@ const App = {
 
       gd.lotes.forEach((l, idx) => {
         if (isEditing) {
-          // Editable cell: click to select/swap
           const cc = App._cultivoClass(l.plan.cultivo || '');
           const bg = bgMap[cc] || '#fff';
           const isSelected = App._planoSelectedIdx === idx;
-          mH += `<div class="pe-cell pe-editable ${isSelected?'pe-selected':''}" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);" onclick="event.stopPropagation();App.planoClickCell('${esc(estab)}',${idx})">
+          mH += `<div class="pe-cell pe-editable ${isSelected?'pe-selected':''}" data-edit-idx="${idx}" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);">
             <div style="font-family:var(--title);font-size:12px;color:rgba(0,0,0,.7);letter-spacing:.5px;font-weight:700;">${esc(l.nombre)}</div>
             <div style="font-family:var(--mono);font-size:11px;color:rgba(0,0,0,.4);">${l.hectareas} ha</div>
             ${l.plan.cultivo ? `<div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(l.plan.cultivo)}</div>` : ''}
@@ -1279,79 +1286,94 @@ const App = {
 
     mapEl.innerHTML = mH;
     App._initPlanoDrag();
+    App._initPlanoEditEvents();
   },
   // ── Plano edit mode ──
   _planoEditEstab: null,
   _planoSelectedIdx: null,
-  _planoEditCols: {},
-  _planoEditOrder: {},
+  _planoRenderedOrder: {},
+  _planoRenderedCols: {},
   planoToggleEdit(estab) {
-    if (App._planoEditEstab === estab || !estab) {
-      App._planoEditEstab = null;
-      App._planoSelectedIdx = null;
-    } else {
-      App._planoEditEstab = estab;
-      App._planoSelectedIdx = null;
-      // Initialize edit state from current rendered order
-      const campPlan = data.campana || '2025/26';
-      const groups = {};
-      data.lotes.forEach(l => {
-        const e = l.establecimiento || 'Sin establecimiento';
-        if (!groups[e]) groups[e] = [];
-        groups[e].push(l);
-      });
-      // Apply saved order if any
-      const saved = data.planoLoteOrder?.[estab];
-      if (saved?.order?.length) {
-        const om = {}; saved.order.forEach((n,i) => om[n]=i);
-        groups[estab]?.sort((a,b) => (om[a.nombre]??999) - (om[b.nombre]??999));
-      }
-      App._planoEditOrder[estab] = (groups[estab] || []).map(l => l.nombre);
-      if (!App._planoEditCols[estab]) {
-        App._planoEditCols[estab] = data.planoLoteOrder?.[estab]?.cols || null;
-      }
-    }
+    App._planoEditEstab = (App._planoEditEstab === estab || !estab) ? null : estab;
+    App._planoSelectedIdx = null;
     App.renderPlanos();
   },
-  planoClickCell(estab, idx) {
-    if (App._planoSelectedIdx === null || App._planoSelectedIdx === idx) {
-      App._planoSelectedIdx = idx;
-      App.renderPlanos();
-    } else {
-      // Swap the two lotes
-      const order = App._planoEditOrder[estab];
-      if (order) {
-        [order[App._planoSelectedIdx], order[idx]] = [order[idx], order[App._planoSelectedIdx]];
-        // Apply to data.planoLoteOrder immediately (visual feedback)
-        if (!data.planoLoteOrder) data.planoLoteOrder = {};
-        if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
-        data.planoLoteOrder[estab].order = [...order];
-      }
-      App._planoSelectedIdx = null;
-      App.renderPlanos();
-    }
+  _planoSwap(estab, idxA, idxB) {
+    const order = App._planoRenderedOrder[estab];
+    if (!order) return;
+    [order[idxA], order[idxB]] = [order[idxB], order[idxA]];
+    if (!data.planoLoteOrder) data.planoLoteOrder = {};
+    if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
+    data.planoLoteOrder[estab].order = [...order];
+    if (App._planoRenderedCols[estab]) data.planoLoteOrder[estab].cols = App._planoRenderedCols[estab];
+    App._planoSelectedIdx = null;
+    App.renderPlanos();
   },
-  planoChangeCols(estab, delta) {
-    const block = document.querySelector(`[data-estab-block="${estab}"]`);
-    const nL = App._planoEditOrder[estab]?.length || 1;
-    const current = App._planoEditCols[estab] || parseInt(block?.style.gridTemplateColumns?.match(/repeat\((\d+)/)?.[1] || '4');
-    const newCols = Math.max(1, Math.min(nL, current + delta));
-    App._planoEditCols[estab] = newCols;
+  _planoSetCols(estab, delta) {
+    const nL = App._planoRenderedOrder[estab]?.length || 1;
+    const cur = App._planoRenderedCols[estab] || 4;
+    const newCols = Math.max(1, Math.min(nL, cur + delta));
     if (!data.planoLoteOrder) data.planoLoteOrder = {};
     if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
     data.planoLoteOrder[estab].cols = newCols;
+    if (App._planoRenderedOrder[estab]) data.planoLoteOrder[estab].order = [...App._planoRenderedOrder[estab]];
     App.renderPlanos();
   },
-  planoSaveOrder(estab) {
-    if (!data.planoLoteOrder) data.planoLoteOrder = {};
-    const order = App._planoEditOrder[estab] || [];
-    const cols = App._planoEditCols[estab] || null;
-    data.planoLoteOrder[estab] = { order: [...order], cols };
+  _planoSave(estab) {
     App._planoEditEstab = null;
     App._planoSelectedIdx = null;
     App.renderPlanos();
     App.guardarPlanoCompleto();
     showToast('Orden guardado');
+  },
+  _initPlanoEditEvents() {
+    // Single delegated listener on planos-map for all edit interactions
+    const map = $('planos-map');
+    if (!map || map._editInit) return;
+    map._editInit = true;
+    map.addEventListener('pointerdown', e => {
+      // Block drag on edit bar, label buttons, and editable cells
+      if (e.target.closest('.pe-edit-bar') || e.target.closest('.pe-edit-btn') || e.target.closest('.pe-editing .pe-cell')) {
+        e.stopPropagation();
+      }
+    }, true); // capture phase — fires before drag handler
+    map.addEventListener('click', e => {
+      const estab = App._planoEditEstab;
+      // Edit pencil button
+      const editBtn = e.target.closest('.pe-edit-btn');
+      if (editBtn) {
+        const estabEl = editBtn.closest('.plano-estab');
+        App.planoToggleEdit(estabEl?.dataset.estab);
+        return;
+      }
+      // Edit bar actions
+      const actionBtn = e.target.closest('[data-action]');
+      if (actionBtn && estab) {
+        const action = actionBtn.dataset.action;
+        if (action === 'cols-minus') App._planoSetCols(estab, -1);
+        else if (action === 'cols-plus') App._planoSetCols(estab, 1);
+        else if (action === 'save') App._planoSave(estab);
+        else if (action === 'cancel') App.planoToggleEdit(null);
+        return;
+      }
+      // Cell click in edit mode
+      const cell = e.target.closest('.pe-editable[data-edit-idx]');
+      if (cell && estab) {
+        const idx = parseInt(cell.dataset.editIdx);
+        if (App._planoSelectedIdx === null) {
+          // Select
+          App._planoSelectedIdx = idx;
+          cell.classList.add('pe-selected');
+        } else if (App._planoSelectedIdx === idx) {
+          // Deselect
+          App._planoSelectedIdx = null;
+          cell.classList.remove('pe-selected');
+        } else {
+          // Swap
+          App._planoSwap(estab, App._planoSelectedIdx, idx);
+        }
+      }
+    });
   },
   _initPlanoDrag() {
     const canvas = $('plano-canvas');
@@ -1366,7 +1388,8 @@ const App = {
       const resizer = e.target.closest('.pe-resize');
       const estab = e.target.closest('.plano-estab');
       if (!estab) return;
-      if (e.target.closest('.pe-cell') || e.target.closest('.pe-block')) return;
+      if (estab.classList.contains('pe-editing')) return; // skip drag in edit mode
+      if (e.target.closest('.pe-cell') || e.target.closest('.pe-block') || e.target.closest('.pe-edit-btn')) return;
       e.preventDefault();
       activeEl = estab;
       sX = e.clientX; sY = e.clientY;

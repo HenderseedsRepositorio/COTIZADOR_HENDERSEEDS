@@ -205,12 +205,10 @@ textarea.inp { resize: vertical; min-height: 60px; }
 .pe-edit-bar button { font-size:11px;padding:2px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-family:var(--mono);font-weight:700; }
 .pe-edit-bar button:hover { background:var(--accent-bg); }
 .pe-edit-bar .pe-cols-label { font-size:10px;color:var(--text-sec);font-weight:600; }
-.pe-cell.pe-selected { outline:3px solid var(--accent)!important;outline-offset:-3px;z-index:5;filter:brightness(.82)!important;animation:pe-pulse .8s ease-in-out infinite alternate; }
-@keyframes pe-pulse { from{outline-color:var(--accent)} to{outline-color:#f59e0b} }
-.pe-cell.pe-editable { cursor:pointer;transition:filter .15s; }
-.pe-cell.pe-editable:hover { filter:brightness(.78)!important; }
+.pe-cell.pe-editable { transition:filter .15s; }
 .plano-estab.pe-editing { z-index:50;cursor:default!important; }
 .plano-estab.pe-editing .pe-block { border-color:var(--accent);border-style:dashed; }
+.pe-pick:focus { outline:2px solid var(--accent); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(13,45,94,.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
 .modal-overlay.show { display: flex; }
@@ -973,7 +971,7 @@ const App = {
     // Custom lote order for DM y AG plano (matching physical field map)
     const _loteOrderDM = {
       'AM': ['AM5','AM7','AM6','AM8','AM4','AM2','AM3','AM1'],
-      'El Frances': ['EF6','EF7','EF8','EF4','EF5','EF3','EF2','EF1'],
+      'El Frances': ['EF6','EF7','EF8','EF5','EF4','EF3','EF2','EF1'],
       'Sucesion': ['SC6','SC1','SC5','SC4','SC2','SC3'],
     };
     Object.entries(_loteOrderDM).forEach(([estab, order]) => {
@@ -1188,14 +1186,16 @@ const App = {
 
       mH += `<div class="pe-block" data-estab-block="${esc(estab)}" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);height:calc(100% - ${isEditing?'48px':'26px'});">`;
 
+      // Build select options for edit mode (all lotes in this estab)
+      const allNames = gd.lotes.map(l => l.nombre);
       gd.lotes.forEach((l, idx) => {
         if (isEditing) {
           const cc = App._cultivoClass(l.plan.cultivo || '');
           const bg = bgMap[cc] || '#fff';
-          const isSelected = App._planoSelectedIdx === idx;
-          mH += `<div class="pe-cell pe-editable ${isSelected?'pe-selected':''}" data-edit-idx="${idx}" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);">
-            <div style="font-family:var(--title);font-size:12px;color:rgba(0,0,0,.7);letter-spacing:.5px;font-weight:700;">${esc(l.nombre)}</div>
-            <div style="font-family:var(--mono);font-size:11px;color:rgba(0,0,0,.4);">${l.hectareas} ha</div>
+          const selOpts = allNames.map(n => `<option value="${esc(n)}" ${n===l.nombre?'selected':''}>${esc(n)}</option>`).join('');
+          mH += `<div class="pe-cell pe-editable" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);">
+            <select class="pe-pick" data-edit-idx="${idx}" style="font-family:var(--title);font-size:13px;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:4px;padding:2px 4px;cursor:pointer;text-align:center;width:90%;">${selOpts}</select>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(0,0,0,.4);margin-top:2px;">${l.hectareas} ha</div>
             ${l.plan.cultivo ? `<div style="font-size:9px;color:rgba(0,0,0,.5);">${esc(l.plan.cultivo)}</div>` : ''}
           </div>`;
         } else {
@@ -1290,23 +1290,23 @@ const App = {
   },
   // ── Plano edit mode ──
   _planoEditEstab: null,
-  _planoSelectedIdx: null,
   _planoRenderedOrder: {},
   _planoRenderedCols: {},
   planoToggleEdit(estab) {
     App._planoEditEstab = (App._planoEditEstab === estab || !estab) ? null : estab;
-    App._planoSelectedIdx = null;
     App.renderPlanos();
   },
-  _planoSwap(estab, idxA, idxB) {
+  _planoPickLote(estab, idx, newName) {
+    // Swap: find where newName currently is and swap with idx
     const order = App._planoRenderedOrder[estab];
     if (!order) return;
-    [order[idxA], order[idxB]] = [order[idxB], order[idxA]];
+    const oldIdx = order.indexOf(newName);
+    if (oldIdx === -1 || oldIdx === idx) return;
+    [order[idx], order[oldIdx]] = [order[oldIdx], order[idx]];
     if (!data.planoLoteOrder) data.planoLoteOrder = {};
     if (!data.planoLoteOrder[estab]) data.planoLoteOrder[estab] = {};
     data.planoLoteOrder[estab].order = [...order];
     if (App._planoRenderedCols[estab]) data.planoLoteOrder[estab].cols = App._planoRenderedCols[estab];
-    App._planoSelectedIdx = null;
     App.renderPlanos();
   },
   _planoSetCols(estab, delta) {
@@ -1321,58 +1321,43 @@ const App = {
   },
   _planoSave(estab) {
     App._planoEditEstab = null;
-    App._planoSelectedIdx = null;
     App.renderPlanos();
     App.guardarPlanoCompleto();
-    showToast('Orden guardado');
+    showToast('Orden guardado ✓');
   },
   _initPlanoEditEvents() {
-    // Single delegated listener on planos-map for all edit interactions
     const map = $('planos-map');
     if (!map || map._editInit) return;
     map._editInit = true;
+    // Capture phase: block drag on edit elements
     map.addEventListener('pointerdown', e => {
-      // Block drag on edit bar, label buttons, and editable cells
       if (e.target.closest('.pe-edit-bar') || e.target.closest('.pe-edit-btn') || e.target.closest('.pe-editing .pe-cell')) {
         e.stopPropagation();
       }
-    }, true); // capture phase — fires before drag handler
+    }, true);
+    // Click: pencil + edit bar buttons
     map.addEventListener('click', e => {
-      const estab = App._planoEditEstab;
-      // Edit pencil button
       const editBtn = e.target.closest('.pe-edit-btn');
       if (editBtn) {
         const estabEl = editBtn.closest('.plano-estab');
         App.planoToggleEdit(estabEl?.dataset.estab);
         return;
       }
-      // Edit bar actions
       const actionBtn = e.target.closest('[data-action]');
-      if (actionBtn && estab) {
-        const action = actionBtn.dataset.action;
-        if (action === 'cols-minus') App._planoSetCols(estab, -1);
-        else if (action === 'cols-plus') App._planoSetCols(estab, 1);
-        else if (action === 'save') App._planoSave(estab);
-        else if (action === 'cancel') App.planoToggleEdit(null);
-        return;
+      if (actionBtn && App._planoEditEstab) {
+        const a = actionBtn.dataset.action, es = App._planoEditEstab;
+        if (a === 'cols-minus') App._planoSetCols(es, -1);
+        else if (a === 'cols-plus') App._planoSetCols(es, 1);
+        else if (a === 'save') App._planoSave(es);
+        else if (a === 'cancel') App.planoToggleEdit(null);
       }
-      // Cell click in edit mode
-      const cell = e.target.closest('.pe-editable[data-edit-idx]');
-      if (cell && estab) {
-        const idx = parseInt(cell.dataset.editIdx);
-        if (App._planoSelectedIdx === null) {
-          // Select
-          App._planoSelectedIdx = idx;
-          cell.classList.add('pe-selected');
-        } else if (App._planoSelectedIdx === idx) {
-          // Deselect
-          App._planoSelectedIdx = null;
-          cell.classList.remove('pe-selected');
-        } else {
-          // Swap
-          App._planoSwap(estab, App._planoSelectedIdx, idx);
-        }
-      }
+    });
+    // Change: dropdown lote picker
+    map.addEventListener('change', e => {
+      const sel = e.target.closest('.pe-pick');
+      if (!sel || !App._planoEditEstab) return;
+      const idx = parseInt(sel.dataset.editIdx);
+      App._planoPickLote(App._planoEditEstab, idx, sel.value);
     });
   },
   _initPlanoDrag() {

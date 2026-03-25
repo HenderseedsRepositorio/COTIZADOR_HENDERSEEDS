@@ -133,9 +133,9 @@
       }
     },
     {
-      "id": "lt_dm_ef4",
-      "nombre": "EF4",
-      "hectareas": 37,
+      "id": "lt_dm_ef5",
+      "nombre": "EF5",
+      "hectareas": 45,
       "cultivo": "Maiz tardio",
       "establecimiento": "El Frances",
       "planes": {
@@ -145,9 +145,9 @@
       }
     },
     {
-      "id": "lt_dm_ef5",
-      "nombre": "EF5",
-      "hectareas": 45,
+      "id": "lt_dm_ef4",
+      "nombre": "EF4",
+      "hectareas": 37,
       "cultivo": "Maiz tardio",
       "establecimiento": "El Frances",
       "planes": {

@@ -38,8 +38,15 @@
     {
       "id": "lt_ch1",
       "nombre": "CH1",
-      "hectareas": 25.0,
-      "cultivo": "Maiz tardio",
+      "hectareas": 45.0,
+      "cultivo": "Maiz 2da",
+      "establecimiento": "Charterina"
+    },
+    {
+      "id": "lt_ch2",
+      "nombre": "CH2",
+      "hectareas": 45.0,
+      "cultivo": "Maiz 2da",
       "establecimiento": "Charterina"
     }
   ],

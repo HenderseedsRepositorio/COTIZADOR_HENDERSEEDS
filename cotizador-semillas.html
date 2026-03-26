@@ -1148,6 +1148,7 @@ const Sheets = {
           const numero = await this._sendToSheets(payload);
           LocalBackup.markSynced(localId);
           Toast.ok('Cotización registrada',`#${String(numero).padStart(4,'0')} guardada en Sheets.`);
+          Historial._cacheTime=0; // invalidate historial cache
           return numero;
         } catch(e) {
           console.error(`Sheets.register intento ${attempt}:`, e);
@@ -1176,6 +1177,7 @@ const Sheets = {
       const numero = await this._sendToSheets(payload);
       LocalBackup.markSynced(localId);
       Toast.ok('Sincronizado','Cotización #'+String(numero).padStart(4,'0')+' guardada en Sheets.');
+      Historial._cacheTime=0;
     } catch(e) {
       console.error('Retry sync failed:', e);
       Toast.err('Sigue sin conexión','Intentá de nuevo más tarde.',{
@@ -1206,6 +1208,8 @@ const Sheets = {
         this._showEditingBanner();
         Toast.ok('Cotización guardada','#'+String(numero).padStart(4,'0')+' registrada en Sheets.');
       }
+      // Invalidate historial cache so next open shows fresh data
+      Historial._cacheTime=0;
     } catch(e) {
       Toast.warn('Error al guardar',e.message);
     } finally {

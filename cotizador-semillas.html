@@ -1317,21 +1317,36 @@ const Quote = {
     if(sinCant.length) { Toast.warn('Cantidad en 0',`${sinCant.map(l=>l.hibrido).join(', ')} tiene cantidad 0.`); return false; }
     return true;
   },
+  _pendingShare: null, // {blob, filename, title} ready to send
   async shareDirect() {
+    const btn=$('btnShareDirect');
+    // Phase 2: blob is ready → send with fresh gesture
+    if(this._pendingShare) {
+      const {blob,filename,title}=this._pendingShare;
+      this._pendingShare=null;
+      btn.innerHTML=this._origShareHTML; btn.style.background='';
+      try {
+        const file=new File([blob],filename,{type:'application/pdf'});
+        if(navigator.canShare && navigator.canShare({files:[file]})) {
+          await navigator.share({files:[file],title});
+        } else {
+          const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+        }
+      } catch(e) { if(e.name!=='AbortError') { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); } }
+      return;
+    }
+    // Phase 1: validate, generate blob, then prompt to send
     if(!this._validate()) return;
-    const gestureTime=Date.now();
-    const btn=$('btnShareDirect'), orig=btn.innerHTML;
+    this._origShareHTML=btn.innerHTML;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     const cliente=$('cliente').value||'Cliente';
     const filename=`Cotizacion_${cliente}.pdf`, title=`Cotización Henderseeds — ${cliente}`;
     try {
       await this.build();
-      const ov=$('quote-overlay');
-      const qc=$('quote-content');
+      const ov=$('quote-overlay'), qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      // Generate PDF blob
       const canvas=await html2canvas(qc,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
       const imgData=canvas.toDataURL('image/png');
       const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/3)*25.4/96,mmH=(pxH/3)*25.4/96;
@@ -1339,29 +1354,18 @@ const Quote = {
       const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
       pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
       const blob=pdf.output('blob');
-      const file=new File([blob],filename,{type:'application/pdf'});
-      // Only try navigator.share if gesture is still fresh (<4s)
-      const elapsed=Date.now()-gestureTime;
-      if(elapsed<4000 && navigator.canShare && navigator.canShare({files:[file]})) {
-        try {
-          await navigator.share({files:[file],title});
-        } catch(shareErr) {
-          if(shareErr.name==='AbortError') return; // user cancelled
-          // Gesture expired or share failed — download instead
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-          setTimeout(()=>URL.revokeObjectURL(url),1000);
-        }
-      } else {
-        // Too much time passed or share not supported — download directly
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-        setTimeout(()=>URL.revokeObjectURL(url),1000);
-      }
+      // Store blob and show "ready to send" button
+      this._pendingShare={blob,filename,title};
+      btn.disabled=false;
+      btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Tocar para enviar';
+      btn.style.background='#22c55e';
+      // Auto-reset after 30s if not tapped
+      setTimeout(()=>{ if(this._pendingShare) { this._pendingShare=null; btn.innerHTML=this._origShareHTML; btn.style.background=''; } },30000);
     } catch(e) {
-      if(e.name!=='AbortError') alert('Error al generar el PDF. Probá con Vista previa.');
+      alert('Error al generar el PDF. Intentá de nuevo.');
+      btn.innerHTML=this._origShareHTML; btn.disabled=false;
     }
-    finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
+    finally { const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
   async show() {
     if(!this._validate()) return;
@@ -1794,9 +1798,9 @@ const Historial = {
     Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y guardá con 💾 o compartí.');
   },
   async compartir(numero) {
-    // Load the quote, then show preview with share buttons (fresh user gesture)
+    // Load the quote, recalculate, then trigger share generation
     Historial.cargar(numero);
-    await Quote.show();
+    Quote.shareDirect();
   },
   async eliminar(numero) {
     if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;

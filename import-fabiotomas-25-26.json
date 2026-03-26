@@ -3,7 +3,7 @@
     {
       "id": "lt_ft_gs1",
       "nombre": "GS1",
-      "hectareas": 32.0,
+      "hectareas": 32,
       "cultivo": "Maiz",
       "establecimiento": "Guazone",
       "planes": {
@@ -15,7 +15,7 @@
     {
       "id": "lt_ft_gs4",
       "nombre": "GS4",
-      "hectareas": 32.0,
+      "hectareas": 32,
       "cultivo": "Maiz",
       "establecimiento": "Guazone",
       "planes": {
@@ -27,7 +27,7 @@
     {
       "id": "lt_ft_fm4",
       "nombre": "FM4",
-      "hectareas": 50.0,
+      "hectareas": 50,
       "cultivo": "Maiz",
       "establecimiento": "Fito Mateos",
       "planes": {
@@ -39,7 +39,7 @@
     {
       "id": "lt_ft_ms5",
       "nombre": "MS5",
-      "hectareas": 21.0,
+      "hectareas": 21,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia",
       "planes": {
@@ -63,7 +63,7 @@
     {
       "id": "lt_ft_ms3",
       "nombre": "MS3",
-      "hectareas": 52.0,
+      "hectareas": 52,
       "cultivo": "Maiz",
       "establecimiento": "Masceroni-Coscia",
       "planes": {
@@ -75,7 +75,7 @@
     {
       "id": "lt_ft_ms4",
       "nombre": "MS4",
-      "hectareas": 22.0,
+      "hectareas": 22,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia",
       "planes": {
@@ -99,7 +99,7 @@
     {
       "id": "lt_ft_pm2",
       "nombre": "PM2",
-      "hectareas": 39.0,
+      "hectareas": 39,
       "cultivo": "Girasol",
       "establecimiento": "PM",
       "planes": {
@@ -111,7 +111,7 @@
     {
       "id": "lt_ft_pm3",
       "nombre": "PM3",
-      "hectareas": 39.0,
+      "hectareas": 39,
       "cultivo": "Girasol",
       "establecimiento": "PM",
       "planes": {
@@ -123,7 +123,7 @@
     {
       "id": "lt_ft_ss1",
       "nombre": "SS1",
-      "hectareas": 35.0,
+      "hectareas": 35,
       "cultivo": "Girasol",
       "establecimiento": "San Salvador",
       "planes": {
@@ -135,7 +135,7 @@
     {
       "id": "lt_ft_ss4",
       "nombre": "SS4",
-      "hectareas": 55.0,
+      "hectareas": 55,
       "cultivo": "Soja",
       "establecimiento": "San Salvador",
       "planes": {
@@ -147,7 +147,7 @@
     {
       "id": "lt_ft_pm4",
       "nombre": "PM4",
-      "hectareas": 30.0,
+      "hectareas": 30,
       "cultivo": "Pastizal",
       "establecimiento": "PM",
       "planes": {
@@ -159,7 +159,7 @@
     {
       "id": "lt_ft_pm5",
       "nombre": "PM5",
-      "hectareas": 28.0,
+      "hectareas": 28,
       "cultivo": "Pastizal",
       "establecimiento": "PM",
       "planes": {
@@ -171,7 +171,7 @@
     {
       "id": "lt_ft_pm6",
       "nombre": "PM6",
-      "hectareas": 37.0,
+      "hectareas": 37,
       "cultivo": "Pastura",
       "establecimiento": "PM",
       "planes": {
@@ -183,7 +183,7 @@
     {
       "id": "lt_ft_gs2",
       "nombre": "GS2",
-      "hectareas": 35.0,
+      "hectareas": 35,
       "cultivo": "Soja",
       "establecimiento": "Guazone",
       "planes": {
@@ -195,7 +195,7 @@
     {
       "id": "lt_ft_gs3",
       "nombre": "GS3",
-      "hectareas": 35.0,
+      "hectareas": 35,
       "cultivo": "Soja",
       "establecimiento": "Guazone",
       "planes": {
@@ -207,7 +207,7 @@
     {
       "id": "lt_ft_ss2",
       "nombre": "SS2",
-      "hectareas": 7.0,
+      "hectareas": 7,
       "cultivo": "Pastura",
       "establecimiento": "San Salvador",
       "planes": {
@@ -219,7 +219,7 @@
     {
       "id": "lt_ft_ss3",
       "nombre": "SS3",
-      "hectareas": 15.0,
+      "hectareas": 15,
       "cultivo": "Pastura",
       "establecimiento": "San Salvador",
       "planes": {
@@ -231,7 +231,7 @@
     {
       "id": "lt_ft_ss5",
       "nombre": "SS5",
-      "hectareas": 57.0,
+      "hectareas": 57,
       "cultivo": "Pastura",
       "establecimiento": "San Salvador",
       "planes": {
@@ -243,7 +243,7 @@
     {
       "id": "lt_ft_ss6",
       "nombre": "SS6",
-      "hectareas": 44.0,
+      "hectareas": 44,
       "cultivo": "Pastura",
       "establecimiento": "San Salvador",
       "planes": {
@@ -255,7 +255,7 @@
     {
       "id": "lt_ft_sm1",
       "nombre": "SM1",
-      "hectareas": 26.0,
+      "hectareas": 26,
       "cultivo": "Maiz",
       "establecimiento": "Santa Maria",
       "planes": {
@@ -303,7 +303,7 @@
     {
       "id": "lt_ft_sm5",
       "nombre": "SM5",
-      "hectareas": 31.0,
+      "hectareas": 31,
       "cultivo": "Pastura",
       "establecimiento": "Santa Maria",
       "planes": {
@@ -315,7 +315,7 @@
     {
       "id": "lt_ft_sm6",
       "nombre": "SM6",
-      "hectareas": 15.0,
+      "hectareas": 15,
       "cultivo": "Soja",
       "establecimiento": "Santa Maria",
       "planes": {
@@ -339,7 +339,7 @@
     {
       "id": "lt_ft_sm8",
       "nombre": "SM8",
-      "hectareas": 28.0,
+      "hectareas": 28,
       "cultivo": "Soja",
       "establecimiento": "Santa Maria",
       "planes": {
@@ -351,7 +351,7 @@
     {
       "id": "lt_ft_sm9",
       "nombre": "SM9",
-      "hectareas": 27.0,
+      "hectareas": 27,
       "cultivo": "Soja",
       "establecimiento": "Santa Maria",
       "planes": {
@@ -363,7 +363,7 @@
     {
       "id": "lt_ft_ms1",
       "nombre": "MS1",
-      "hectareas": 24.0,
+      "hectareas": 24,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia",
       "planes": {
@@ -375,7 +375,7 @@
     {
       "id": "lt_ft_ms2",
       "nombre": "MS2",
-      "hectareas": 33.0,
+      "hectareas": 33,
       "cultivo": "Girasol",
       "establecimiento": "Masceroni-Coscia",
       "planes": {

@@ -3,49 +3,49 @@
     {
       "id": "lt_lp1",
       "nombre": "LP1",
-      "hectareas": 90.0,
+      "hectareas": 90,
       "cultivo": "Trigo",
       "establecimiento": "La Primavera"
     },
     {
       "id": "lt_gi1",
       "nombre": "GI1",
-      "hectareas": 42.0,
+      "hectareas": 40,
       "cultivo": "Maiz",
       "establecimiento": "Ginar"
     },
     {
       "id": "lt_gi4",
       "nombre": "GI4",
-      "hectareas": 38.0,
+      "hectareas": 39,
       "cultivo": "Maiz",
       "establecimiento": "Ginar"
     },
     {
       "id": "lt_gi2",
       "nombre": "GI2",
-      "hectareas": 15.0,
+      "hectareas": 32,
       "cultivo": "Girasol",
       "establecimiento": "Ginar"
     },
     {
       "id": "lt_gi3",
       "nombre": "GI3",
-      "hectareas": 15.0,
+      "hectareas": 44,
       "cultivo": "Girasol",
       "establecimiento": "Ginar"
     },
     {
       "id": "lt_ch1",
       "nombre": "CH1",
-      "hectareas": 45.0,
+      "hectareas": 45,
       "cultivo": "Maiz 2da",
       "establecimiento": "Charterina"
     },
     {
       "id": "lt_ch2",
       "nombre": "CH2",
-      "hectareas": 45.0,
+      "hectareas": 45,
       "cultivo": "Maiz 2da",
       "establecimiento": "Charterina"
     }

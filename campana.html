@@ -1068,10 +1068,12 @@ const App = {
       const cc = App._cultivoClass(l.plan.cultivo || '');
       const bg = bgMap[cc] || '#fff';
       const cultivo = l.plan.cultivo || '';
+      const planHa = l.plan.hectareas || '';
       return `<div class="pe-cell" data-swap-id="${esc(l.id)}" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;position:relative;" onclick="App.openPlanModal('${esc(l.id)}')">
+        <div style="position:absolute;top:2px;left:3px;font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(0,0,0,.35);">${l.hectareas}</div>
         <div class="pe-swap" onclick="event.stopPropagation();App.swapLote('${esc(l.id)}','${esc(estab||'')}')" title="Click para intercambiar posición" style="position:absolute;top:2px;right:2px;width:16px;height:16px;cursor:pointer;opacity:.25;z-index:5;display:flex;align-items:center;justify-content:center;">⇄</div>
         <div style="font-family:var(--title);font-size:11px;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(l.nombre)}</div>
-        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${l.hectareas} <span style="font-size:9px;font-weight:400;">ha</span></div>
+        ${planHa ? `<div style="font-family:var(--mono);font-size:12px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${planHa} <span style="font-size:8px;font-weight:400;">ha</span></div>` : ''}
         ${cultivo ? `<div style="font-size:9px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>` : ''}
         ${l.plan.variedad ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.35);font-family:var(--mono);">${esc(l.plan.variedad)}${l.plan.densidad ? ' · ' + fmtInt(l.plan.densidad) : ''}</div>` : ''}
       </div>`;
@@ -1093,9 +1095,11 @@ const App = {
       const cellInfo = (l) => {
         if (!l) return '';
         const cultivo = l.plan?.cultivo || '';
-        return `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%;">
+        const planHa = l.plan?.hectareas || '';
+        return `<div style="position:absolute;top:2px;left:3px;font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(0,0,0,.3);pointer-events:none;">${l.hectareas}</div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%;">
           <div style="font-family:var(--title);font-size:10px;color:rgba(0,0,0,.5);letter-spacing:.5px;">${esc(l.nombre)}</div>
-          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:rgba(0,0,0,.4);">${l.hectareas} <span style="font-size:8px;font-weight:400;">ha</span></div>
+          ${planHa ? `<div style="font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(0,0,0,.4);">${planHa} <span style="font-size:7px;font-weight:400;">ha</span></div>` : ''}
           ${cultivo ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.45);">${esc(cultivo)}</div>` : ''}
           ${l.plan?.variedad ? `<div style="font-size:7px;color:rgba(0,0,0,.3);font-family:var(--mono);">${esc(l.plan.variedad)}</div>` : ''}
         </div>`;
@@ -1255,9 +1259,11 @@ const App = {
         const cc = App._cultivoClass(finaPlan.cultivo || '');
         const bg = bgMap[cc] || '#fff';
         const cultivo = finaPlan.cultivo || '';
-        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">
+        const finaHa = finaPlan.hectareas || '';
+        mH += `<div class="pe-cell" style="background:${bg};border-right:1.5px solid rgba(0,0,0,.2);border-bottom:1.5px solid rgba(0,0,0,.2);justify-content:center;align-items:center;text-align:center;position:relative;" onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')">
+          <div style="position:absolute;top:2px;left:3px;font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(0,0,0,.35);">${l.hectareas}</div>
           <div style="font-family:var(--title);font-size:11px;color:rgba(0,0,0,.55);letter-spacing:.5px;">${esc(l.nombre)}</div>
-          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${l.hectareas} <span style="font-size:9px;font-weight:400;">ha</span></div>
+          ${finaHa ? `<div style="font-family:var(--mono);font-size:12px;font-weight:700;color:rgba(0,0,0,.45);margin:1px 0;">${finaHa} <span style="font-size:8px;font-weight:400;">ha</span></div>` : ''}
           ${cultivo ? `<div style="font-size:9px;font-weight:600;color:rgba(0,0,0,.5);">${esc(cultivo)}</div>` : ''}
           ${finaPlan.variedad ? `<div style="font-size:8px;font-weight:600;color:rgba(0,0,0,.35);font-family:var(--mono);">${esc(finaPlan.variedad)}${finaPlan.densidad ? ' · ' + fmtInt(finaPlan.densidad) : ''}</div>` : ''}
         </div>`;

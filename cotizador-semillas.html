@@ -795,7 +795,7 @@ const App = {
     $('toggleGrid').innerHTML = [
       makeToggle('chkPre','Pre-Camp','M:10%/G:7%','Calc.run()',true),
       makeToggle('chkContado','Contado','8%','Calc.run()'),
-      makeToggle('chkCrecer','Plan Crecer','2.5%','Calc.run()'),
+      makeToggle('chkCrecer','Plan Crecer','2.5% solo maíz','Calc.run()'),
       makeToggle('chkCross','Cross','5%','Calc.run()')
     ].join('');
     $('mktToggleGrid').innerHTML = [
@@ -995,7 +995,7 @@ const Calc = {
     const chkCre=$('chkCrecer').checked, chkCro=$('chkCross').checked;
     const valZM=+$('valZM').value, valZG=+$('valZG').value;
     const valPM=+$('valPM').value, valPG=+$('valPG').value;
-    const fC=chkCont?.92:1, fCre=chkCre?.975:1, fCro=chkCro?.95:1;
+    const fC=chkCont?.92:1, fCro=chkCro?.95:1;
     const isMan=$('selVol').value==='manual';
     const fVAct=isMan ? (1-+$('valVolManual').value/100) : null;
 
@@ -1004,6 +1004,7 @@ const Calc = {
       const esM=l.tipo==='maiz';
       const fPre=chkPre?(esM?.90:.93):1;
       const pPre=chkPre?(esM?10:7):0;
+      const fCre=(chkCre&&esM)?.975:1;
       const valZ=esM?valZM:valZG, valP=esM?valPM:valPG;
       const fZP=(1-valZ/100)*(1-valP/100);
       const fVol=fVAct!==null?fVAct:this.getVolFactor(l.tipo,esM?bM:bG);
@@ -1015,7 +1016,7 @@ const Calc = {
       $(`u-siva-${i}`).innerText=`\$${fmt(siva)}`;
       $(`s-civa-${i}`).innerText=`\$${fmt(civa)}`;
       netTotal+=siva;
-      lc.push({...l,unitNeto:unit,totalSIVA:siva,totalCIVA:civa,pPre,pCont:chkCont?8:0,pCre:chkCre?2.5:0,pCro:chkCro?5:0,pVol,valZ,valP});
+      lc.push({...l,unitNeto:unit,totalSIVA:siva,totalCIVA:civa,pPre,pCont:chkCont?8:0,pCre:(chkCre&&esM)?2.5:0,pCro:chkCro?5:0,pVol,valZ,valP});
     });
 
     $('sumNeto').innerText=`USD ${fmt(netTotal)}`;
@@ -1051,13 +1052,14 @@ const Market = {
   render() {
     const fPreM=$('mktPre').checked?.90:1, fPreG=$('mktPre').checked?.93:1;
     const fCont=$('mktContado').checked?.92:1;
-    const fCre=$('mktCrecer').checked?.975:1;
+    const chkCre=$('mktCrecer').checked;
     const fCro=$('mktCross').checked?.95:1;
     const fVm=1-+$('mktVolM').value/100, fVg=1-+$('mktVolG').value/100;
     const fZPm=(1-+$('mktZonalM').value/100)*(1-+$('mktProdM').value/100);
     const fZPg=(1-+$('mktZonalG').value/100)*(1-+$('mktProdG').value/100);
 
     const draw = (t,el,fp,fZP,fV) => {
+      const fCre=(chkCre&&t==='maiz')?.975:1;
       const label=t==='maiz'?'🌽 Maíz — Precio Neto':'🌻 Girasol — Precio Neto';
       let h=`<p style="margin:0 0 10px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">${label}</p>`;
       h+='<table class="mkt-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B1</th><th>B2</th>';

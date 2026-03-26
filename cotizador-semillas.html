@@ -685,15 +685,15 @@ const LocalBackup = {
 
 // Shared html2canvas capture helper — supports PNG share, PNG download, and PDF download
 async function captureAndShare(el, filename, opts={}) {
-  const canvas = await html2canvas(el, {scale:1.5, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
+  const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
   
   // PDF mode: render canvas into a perfectly-fitted PDF page
   if(opts.pdf) {
     const imgData = canvas.toDataURL('image/png');
     const pxW = canvas.width, pxH = canvas.height;
     // Convert pixels to mm at 96 DPI (canvas scale=3 → effective 288 DPI)
-    const mmW = (pxW / 1.5) * 25.4 / 96;
-    const mmH = (pxH / 1.5) * 25.4 / 96;
+    const mmW = (pxW / 2) * 25.4 / 96;
+    const mmH = (pxH / 2) * 25.4 / 96;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
     pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
@@ -1274,12 +1274,12 @@ const Quote = {
       const wasVisible=ov.classList.contains('visible');
       if(!wasVisible) ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      const canvas=await html2canvas(qc,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
       qc.style.width='';
       if(!wasVisible) ov.style.cssText='';
       if(ver!==this._preVersion) return; // stale
       const imgData=canvas.toDataURL('image/png');
-      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/1.5)*25.4/96,mmH=(pxH/1.5)*25.4/96;
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
       pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
@@ -1375,9 +1375,9 @@ const Quote = {
       const ov=$('quote-overlay'), qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      const canvas=await html2canvas(qc,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
       const imgData=canvas.toDataURL('image/png');
-      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/1.5)*25.4/96,mmH=(pxH/1.5)*25.4/96;
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
       pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
@@ -1405,7 +1405,7 @@ const Quote = {
   async _preCaptureImg() {
     try {
       const el=$('quote-content');
-      const canvas=await html2canvas(el,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+      const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
       this._imgBlob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
       this._imgReady=true;
     } catch(e) { this._imgBlob=null; this._imgReady=false; }
@@ -1421,7 +1421,7 @@ const Quote = {
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     try {
-      // Use pre-captured blob if ready, otherwise generate (fast with scale:1.5)
+      // Use pre-captured blob if ready, otherwise generate (fast with scale:2)
       let blob=this._imgBlob;
       if(!blob) {
         if(!this._imgReady) { for(let i=0;i<10&&!this._imgReady;i++) await new Promise(r=>setTimeout(r,300)); }
@@ -1429,7 +1429,7 @@ const Quote = {
       }
       if(!blob) {
         const el=$('quote-content');
-        const canvas=await html2canvas(el,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+        const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
         blob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
       }
       const file=new File([blob],filename,{type:'image/png'});

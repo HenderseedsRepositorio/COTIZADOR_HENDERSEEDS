@@ -700,8 +700,13 @@ async function captureAndShare(el, filename, opts={}) {
     const pdfBlob = pdf.output('blob');
     const pdfFile = new File([pdfBlob], filename.replace(/\.png$/i,'.pdf'), {type:'application/pdf'});
     if(opts.share && navigator.canShare && navigator.canShare({files:[pdfFile]})) {
-      await navigator.share({files:[pdfFile], title:opts.title||filename});
-      return;
+      try {
+        await navigator.share({files:[pdfFile], title:opts.title||filename});
+        return;
+      } catch(shareErr) {
+        if(shareErr.name==='AbortError') throw shareErr;
+        // Share failed (user gesture expired) — fallback to download below
+      }
     }
     const url = URL.createObjectURL(pdfBlob);
     const a = document.createElement('a'); a.href=url; a.download=pdfFile.name; a.click();
@@ -714,8 +719,13 @@ async function captureAndShare(el, filename, opts={}) {
   if(opts.share && navigator.canShare) {
     const file = new File([blob], filename, {type:'image/png'});
     if(navigator.canShare({files:[file]})) {
-      await navigator.share({files:[file], title:opts.title||filename});
-      return;
+      try {
+        await navigator.share({files:[file], title:opts.title||filename});
+        return;
+      } catch(shareErr) {
+        if(shareErr.name==='AbortError') throw shareErr;
+        // Share failed (user gesture expired) — fallback to download below
+      }
     }
   }
   const url = URL.createObjectURL(blob);
@@ -1236,6 +1246,21 @@ const Sheets = {
    QUOTE — vista previa y compartir
    ══════════════════════════════════════════════════════════════════ */
 const Quote = {
+  _blob: null,      // pre-generated PDF blob for instant sharing
+  _blobReady: false,
+  async _preCapture(el, width) {
+    try {
+      const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:width, width:width, height:el.scrollHeight});
+      const imgData = canvas.toDataURL('image/png');
+      const pxW = canvas.width, pxH = canvas.height;
+      const mmW = (pxW / 3) * 25.4 / 96, mmH = (pxH / 3) * 25.4 / 96;
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
+      pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
+      this._blob = pdf.output('blob');
+      this._blobReady = true;
+    } catch(e) { this._blob=null; this._blobReady=false; }
+  },
   async build() {
     const lc=lastLC, net=lc.reduce((s,l)=>s+l.totalSIVA,0);
     const hasCont=lc.some(l=>l.pCont>0);
@@ -1297,34 +1322,114 @@ const Quote = {
     const btn=$('btnShareDirect'), orig=btn.innerHTML;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
+    const cliente=$('cliente').value||'Cliente';
+    const filename=`Cotizacion_${cliente}.pdf`, title=`Cotización Henderseeds — ${cliente}`;
     try {
       await this.build();
       const ov=$('quote-overlay');
       const qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      const cliente=$('cliente').value||'Cliente';
-      await captureAndShare(qc, `Cotizacion_${cliente}.pdf`, {share:true, pdf:true, title:`Cotización Henderseeds — ${cliente}`, width:440});
-    } catch(e) { if(e.name!=='AbortError') alert('Error al compartir. Probá con vista previa.'); }
+      // Pre-capture in background, then wait for blob
+      this._blob=null; this._blobReady=false;
+      this._preCapture(qc, 440);
+      // Wait up to 10s for pre-capture
+      for(let i=0;i<20&&!this._blobReady;i++) await new Promise(r=>setTimeout(r,500));
+      let blob=this._blob;
+      // Fallback: generate with lower scale if pre-capture failed
+      if(!blob) {
+        const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+        const imgData=canvas.toDataURL('image/png');
+        const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
+        const {jsPDF}=window.jspdf;
+        const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
+        pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
+        blob=pdf.output('blob');
+      }
+      const file=new File([blob],filename,{type:'application/pdf'});
+      if(navigator.canShare && navigator.canShare({files:[file]})) {
+        await navigator.share({files:[file],title});
+      } else {
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }
+    } catch(e) {
+      if(e.name==='AbortError') { /* user cancelled */ }
+      else {
+        // Share failed — auto-download as fallback
+        try {
+          if(this._blob) {
+            const url=URL.createObjectURL(this._blob);
+            const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+            setTimeout(()=>URL.revokeObjectURL(url),1000);
+          }
+          alert('No se pudo compartir directamente. Se descargó el PDF — compartilo desde tus archivos.');
+        } catch(e2) { alert('Error al generar. Probá con Vista previa.'); }
+      }
+    }
     finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
   async show() {
     if(!this._validate()) return;
+    this._blob=null; this._blobReady=false;
     await this.build();
     $('quote-overlay').classList.add('visible');
     document.body.style.overflow='hidden';
+    // Pre-generate PNG in background for instant share
+    this._preCaptureImg();
+  },
+  async _preCaptureImg() {
+    try {
+      const el=$('quote-content');
+      const canvas=await html2canvas(el,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+      this._imgBlob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
+      this._imgReady=true;
+    } catch(e) { this._imgBlob=null; this._imgReady=false; }
   },
   close() {
     $('quote-overlay').classList.remove('visible');
     document.body.style.overflow='';
+    this._imgBlob=null; this._imgReady=false;
   },
   async shareImage() {
     const btn=$('btnShareImg'), cliente=$('cliente').value||'Cliente', orig=btn.innerHTML;
+    const filename=`Cotizacion_${cliente}.png`, title=`Cotización Henderseeds — ${cliente}`;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     try {
-      await captureAndShare($('quote-content'), `Cotizacion_${cliente}.png`, {share:true, title:`Cotización Henderseeds — ${cliente}`, width:440});
-    } catch(e) { if(e.name!=='AbortError') alert('No se pudo generar la imagen. Probá con Descargar.'); }
+      // Wait for pre-captured blob (max 8s)
+      if(!this._imgReady) {
+        for(let i=0;i<16&&!this._imgReady;i++) await new Promise(r=>setTimeout(r,500));
+      }
+      let blob=this._imgBlob;
+      if(!blob) {
+        const el=$('quote-content');
+        const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+        blob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
+      }
+      const file=new File([blob],filename,{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})) {
+        await navigator.share({files:[file],title});
+      } else {
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }
+    } catch(e) {
+      if(e.name==='AbortError') { /* user cancelled */ }
+      else {
+        try {
+          const el=$('quote-content');
+          const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+          const b=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
+          const url=URL.createObjectURL(b);
+          const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+          setTimeout(()=>URL.revokeObjectURL(url),1000);
+          alert('No se pudo compartir directamente. Se descargó la imagen — compartila desde tu galería.');
+        } catch(e2) { alert('Error al generar la imagen. Intentá de nuevo.'); }
+      }
+    }
     finally { btn.innerHTML=orig; btn.disabled=false; }
   },
   async downloadPNG() {

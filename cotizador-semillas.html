@@ -685,15 +685,15 @@ const LocalBackup = {
 
 // Shared html2canvas capture helper — supports PNG share, PNG download, and PDF download
 async function captureAndShare(el, filename, opts={}) {
-  const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
+  const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
   
   // PDF mode: render canvas into a perfectly-fitted PDF page
   if(opts.pdf) {
     const imgData = canvas.toDataURL('image/png');
     const pxW = canvas.width, pxH = canvas.height;
     // Convert pixels to mm at 96 DPI (canvas scale=3 → effective 288 DPI)
-    const mmW = (pxW / 3) * 25.4 / 96;
-    const mmH = (pxH / 3) * 25.4 / 96;
+    const mmW = (pxW / 2) * 25.4 / 96;
+    const mmH = (pxH / 2) * 25.4 / 96;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
     pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
@@ -1252,10 +1252,10 @@ const Quote = {
   _blobReady: false,
   async _preCapture(el, width) {
     try {
-      const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:width, width:width, height:el.scrollHeight});
+      const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:width, width:width, height:el.scrollHeight});
       const imgData = canvas.toDataURL('image/png');
       const pxW = canvas.width, pxH = canvas.height;
-      const mmW = (pxW / 3) * 25.4 / 96, mmH = (pxH / 3) * 25.4 / 96;
+      const mmW = (pxW / 2) * 25.4 / 96, mmH = (pxH / 2) * 25.4 / 96;
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
       pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
@@ -1266,9 +1266,6 @@ const Quote = {
   async build() {
     const lc=lastLC, net=lc.reduce((s,l)=>s+l.totalSIVA,0);
     const hasCont=lc.some(l=>l.pCont>0);
-    // If contado is active, unitNeto already includes the 8% — calculate lista (pre-contado) price
-    // If contado is NOT active, unitNeto IS the lista price
-    const contFactor=hasCont?0.92:1;
 
     $('q-fecha').innerText=dateStr();
     $('q-vendedor').innerText=vendor||'—';
@@ -1278,38 +1275,39 @@ const Quote = {
     $('q-contado').innerText=`USD ${fmtInt(net)}`;
     $('q-iva').innerText=`USD ${fmtInt(net*CONFIG.IVA)}`;
     $('q-final').innerText=`USD ${fmtInt(net*(1+CONFIG.IVA))}`;
-
-    // Hide discounts detail from shared image — client only sees final prices
     $('q-descuentos').innerHTML='';
     $('q-descuentos').style.display='none';
 
-    $('q-numero').innerText='⏳ Registrando...';
-    let num;
-    if(editingQuoteNum) {
-      // Update existing quote instead of creating new
-      const payload=Sheets._buildPayload();
-      payload.action='updateCotizacion';
-      payload.numero=editingQuoteNum;
-      try {
-        const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-        const text=await r.text();
-        const d=JSON.parse(text);
-        num=d.ok?editingQuoteNum:null;
-      } catch(e) { num=null; }
-    } else {
-      num=await Sheets.register();
-    }
-    $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL (sin sincronizar)';
-
-    // Always show both Contado and Mayo 27 columns
+    // Build table immediately (no network wait)
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
-      // If contado is active: unitNeto already has 8% off, mayo = unitNeto / 0.92
-      // If contado is NOT active: unitNeto is the base price (mayo), contado = unitNeto * 0.92
       const pContado=hasCont?l.unitNeto:Math.round(l.unitNeto*0.92*100)/100;
       const pMayo=hasCont?Math.round(l.unitNeto/0.92*100)/100:l.unitNeto;
       return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">$${fmtInt(pContado)}</td><td class="q-lista">$${fmtInt(pMayo)}</td></tr>`;
     }).join('');
+
+    // Register in Sheets in background (don't block PDF generation)
+    $('q-numero').innerText='...';
+    this._registerInBackground();
+  },
+  _registerInBackground() {
+    const doReg=async()=>{
+      let num;
+      try {
+        if(editingQuoteNum) {
+          const payload=Sheets._buildPayload();
+          payload.action='updateCotizacion';
+          payload.numero=editingQuoteNum;
+          const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+          const d=JSON.parse(await r.text());
+          num=d.ok?editingQuoteNum:null;
+        } else {
+          num=await Sheets.register();
+        }
+      } catch(e) { num=null; }
+      $('q-numero').innerText=num?`#${String(num).padStart(4,'0')}`:'LOCAL';
+    };
+    doReg(); // fire and forget
   },
   _validate() {
     if(!vendor) { Toast.warn('Falta vendedor','Seleccioná un vendedor antes de cotizar.'); return false; }
@@ -1349,9 +1347,9 @@ const Quote = {
       const ov=$('quote-overlay'), qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      const canvas=await html2canvas(qc,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
       const imgData=canvas.toDataURL('image/png');
-      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/3)*25.4/96,mmH=(pxH/3)*25.4/96;
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
       pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
@@ -1381,7 +1379,7 @@ const Quote = {
   async _preCaptureImg() {
     try {
       const el=$('quote-content');
-      const canvas=await html2canvas(el,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+      const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
       this._imgBlob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
       this._imgReady=true;
     } catch(e) { this._imgBlob=null; this._imgReady=false; }
@@ -1397,11 +1395,12 @@ const Quote = {
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     try {
-      // Wait for pre-captured blob (max 8s)
-      if(!this._imgReady) {
-        for(let i=0;i<16&&!this._imgReady;i++) await new Promise(r=>setTimeout(r,500));
-      }
+      // Use pre-captured blob if ready, otherwise generate (fast with scale:2)
       let blob=this._imgBlob;
+      if(!blob) {
+        if(!this._imgReady) { for(let i=0;i<10&&!this._imgReady;i++) await new Promise(r=>setTimeout(r,300)); }
+        blob=this._imgBlob;
+      }
       if(!blob) {
         const el=$('quote-content');
         const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
@@ -1411,22 +1410,13 @@ const Quote = {
       if(navigator.canShare && navigator.canShare({files:[file]})) {
         await navigator.share({files:[file],title});
       } else {
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-        setTimeout(()=>URL.revokeObjectURL(url),1000);
+        const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
       }
     } catch(e) {
-      if(e.name==='AbortError') { /* user cancelled */ }
-      else {
-        try {
-          const el=$('quote-content');
-          const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
-          const b=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
-          const url=URL.createObjectURL(b);
-          const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-          setTimeout(()=>URL.revokeObjectURL(url),1000);
-          alert('No se pudo compartir directamente. Se descargó la imagen — compartila desde tu galería.');
-        } catch(e2) { alert('Error al generar la imagen. Intentá de nuevo.'); }
+      if(e.name!=='AbortError') {
+        // Fallback: download
+        try { await captureAndShare($('quote-content'),filename,{width:440}); alert('Se descargó la imagen — compartila desde tu galería.'); }
+        catch(e2) { alert('Error al generar la imagen.'); }
       }
     }
     finally { btn.innerHTML=orig; btn.disabled=false; }
@@ -1679,9 +1669,11 @@ const Historial = {
     }
   },
   _cache: JSON.parse(localStorage.getItem('hs_historial_cache') || 'null'),
+  _cacheTime: 0,
+  _cacheTTL: 60000, // 60s — don't re-fetch if data is fresh
   _page: 0,
   _perPage: 10,
-  async load() {
+  async load(force=false) {
     // Always show local pending first
     const pending = LocalBackup.getPending();
     let localHtml = '';
@@ -1694,19 +1686,22 @@ const Historial = {
           <strong>${c.cliente}</strong> · ${c.vendedor} · ${c.fecha}<br>
           ${c.items.length} item(s) · USD ${fmt(total)} s/IVA</div>`;
       });
-      localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load())" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.7rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
+      localHtml += `<button onclick="Sheets.syncPending().then(()=>Historial.load(true))" style="margin-top:4px;background:#92400e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.7rem;font-weight:600;cursor:pointer;">Reintentar sincronización</button></div>`;
     }
     this._localHtml=localHtml;
 
     // Show cached immediately
     if(this._cache) { this._page=0; this.render(); }
 
+    // Skip network fetch if cache is fresh (unless forced)
+    if(!force && this._cache && (Date.now()-this._cacheTime)<this._cacheTTL) return;
+
     if(!CONFIG.APPS_SCRIPT_URL){ if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin conexión a Sheets</p>'; return; }
     if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">⏳ Cargando...</p>';
     try {
       const r=await fetch(CONFIG.APPS_SCRIPT_URL+'?action=getHistorial',{redirect:'follow'});
       const data=await r.json();
-      if(Array.isArray(data)&&data.length){ this._cache=data; localStorage.setItem('hs_historial_cache',JSON.stringify(data)); this._page=0; this.render(); }
+      if(Array.isArray(data)&&data.length){ this._cache=data; this._cacheTime=Date.now(); localStorage.setItem('hs_historial_cache',JSON.stringify(data)); this._page=0; this.render(); }
       else if(!this._cache){ $('historialContent').innerHTML=localHtml+'<p style="color:var(--c-light);font-size:.72rem;">Sin cotizaciones registradas</p>'; }
     } catch(e) { if(!this._cache) $('historialContent').innerHTML=localHtml+'<p style="color:#e74c3c;font-size:.72rem;">Error al cargar historial: '+esc(e.message)+'</p>'; }
   },
@@ -1811,7 +1806,7 @@ const Historial = {
       if(!r.ok) throw new Error('HTTP '+r.status);
       const text=await r.text();
       let d; try{d=JSON.parse(text);}catch(e){throw new Error('Respuesta no es JSON');}
-      if(d.ok){ Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.'); this.load(); }
+      if(d.ok){ Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.'); this.load(true); }
       else { Toast.warn('Error',d.error||'No se pudo eliminar'); }
     } catch(e){ Toast.warn('Error de conexión',e.message); }
   }

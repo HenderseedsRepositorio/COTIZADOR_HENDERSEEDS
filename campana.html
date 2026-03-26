@@ -1409,14 +1409,23 @@ const App = {
 
   changeCols(estab, delta) {
     if (!data.planoPos) data.planoPos = {};
-    const pos = data.planoPos[estab] || {};
-    // Parse current layout
+    // Read current position from DOM to preserve x/y/w/h
+    const el = document.querySelector(`.plano-estab[data-estab="${estab}"]`);
+    const saved = data.planoPos[estab] || {};
+    const pos = {
+      x: parseFloat(el?.style.left) || saved.x || 5,
+      y: parseFloat(el?.style.top) || saved.y || 5,
+      w: parseFloat(el?.style.width) || saved.w || 20,
+      h: parseFloat(el?.style.height) || saved.h || 25,
+      layout: saved.layout || 'g',
+      ...(saved.ls ? {ls: saved.ls} : {})
+    };
+    // Parse current columns
     let curCols;
-    const layout = pos.layout || 'g';
-    if (layout === 'h') curCols = 99;
-    else if (layout === 'v') curCols = 1;
-    else if (layout[0]==='g' && layout.length>1) curCols = parseInt(layout.substring(1));
-    else curCols = 2; // default auto grid
+    if (pos.layout === 'h') curCols = 99;
+    else if (pos.layout === 'v') curCols = 1;
+    else if (pos.layout[0]==='g' && pos.layout.length>1) curCols = parseInt(pos.layout.substring(1));
+    else curCols = 2;
     const nLotes = data.lotes.filter(l => (l.establecimiento||'') === estab).length;
     const newCols = Math.max(1, Math.min(nLotes, curCols + delta));
     pos.layout = 'g' + newCols;

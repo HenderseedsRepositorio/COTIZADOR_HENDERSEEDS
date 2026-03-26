@@ -195,8 +195,13 @@ function getNextQuoteNumber() {
   var sheet = ss.getSheetByName('Cotizaciones');
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return 1;
-  var lastNumber = sheet.getRange(lastRow, 1).getValue();
-  return (Number(lastNumber) || 0) + 1;
+  var values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  var max = 0;
+  for (var i = 0; i < values.length; i++) {
+    var n = Number(values[i][0]) || 0;
+    if (n > max) max = n;
+  }
+  return max + 1;
 }
 
 function registrarCotizacion(data) {
@@ -486,8 +491,13 @@ function getNextNumberAgro() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName('Historial Cotizaciones');
   if (!sheet || sheet.getLastRow() < 2) return { numero: 1 };
-  var lastVal = sheet.getRange(sheet.getLastRow(), 1).getValue();
-  return { numero: (Number(lastVal) || 0) + 1 };
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues();
+  var max = 0;
+  for (var i = 0; i < values.length; i++) {
+    var n = Number(values[i][0]) || 0;
+    if (n > max) max = n;
+  }
+  return { numero: max + 1 };
 }
 
 function deleteCotizacionAgro(data) {

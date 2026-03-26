@@ -341,7 +341,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <div class="hcard fu fu1" style="padding:12px 15px;margin-bottom:8px;position:relative;z-index:20;">
       <p class="slabel">Datos del cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="cliente-wrap"><label style="display:block;font-size:.7rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)"><div class="cliente-dd" id="cliente-dd"></div></div>
+        <div class="cliente-wrap"><label style="display:block;font-size:.7rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">Cliente</label><input type="text" id="cliente" placeholder="Buscar cliente..." class="inp" style="font-size:.82rem;padding:7px 9px;" autocomplete="off" oninput="App._debouncedFilterClientes()" onfocus="App.filterClientes(true)" onclick="App.filterClientes(true)" onblur="Quote.schedulePreGen()"><div class="cliente-dd" id="cliente-dd"></div></div>
         <div><label style="display:block;font-size:.7rem;font-weight:600;color:var(--c-gray);margin-bottom:3px;">CUIT</label><input type="text" id="cuit" placeholder="XX-XXXXXXXX-X" inputmode="numeric" class="inp" style="font-size:.82rem;padding:7px 9px;" onblur="this.classList.toggle('input-err', this.value && !/^\d{2}-\d{8}-\d$/.test(this.value))"></div>
       </div>
     </div>
@@ -685,15 +685,15 @@ const LocalBackup = {
 
 // Shared html2canvas capture helper — supports PNG share, PNG download, and PDF download
 async function captureAndShare(el, filename, opts={}) {
-  const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
+  const canvas = await html2canvas(el, {scale:1.5, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
   
   // PDF mode: render canvas into a perfectly-fitted PDF page
   if(opts.pdf) {
     const imgData = canvas.toDataURL('image/png');
     const pxW = canvas.width, pxH = canvas.height;
     // Convert pixels to mm at 96 DPI (canvas scale=3 → effective 288 DPI)
-    const mmW = (pxW / 2) * 25.4 / 96;
-    const mmH = (pxH / 2) * 25.4 / 96;
+    const mmW = (pxW / 1.5) * 25.4 / 96;
+    const mmH = (pxH / 1.5) * 25.4 / 96;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
     pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
@@ -819,6 +819,8 @@ const App = {
       if(!e.target.closest('.row-new-search') && !e.target.closest('#hybridDD')) Calc.hideDropdown();
       if(!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
     });
+    // Pre-fetch historial silently so it's instant when user opens it
+    if(CONFIG.APPS_SCRIPT_URL) fetch(CONFIG.APPS_SCRIPT_URL+'?action=getHistorial',{redirect:'follow'}).then(r=>r.json()).then(data=>{ if(Array.isArray(data)&&data.length){ Historial._cache=data; Historial._cacheTime=Date.now(); localStorage.setItem('hs_historial_cache',JSON.stringify(data)); }}).catch(()=>{});
     // Keyboard navigation for hybrid search
     $('hybridSearch').addEventListener('keydown', e => {
       if(e.key==='ArrowDown'){ e.preventDefault(); Calc.moveHighlight(1); }
@@ -1024,6 +1026,7 @@ const Calc = {
     $('sumFinal').innerText=`USD ${fmt(netTotal*(1+CONFIG.IVA))}`;
     lastLC=lc;
     this.renderResumen(lc);
+    Quote.schedulePreGen();
   },
   renderResumen(lc) {
     if(!lc.length){ $('resumenLineas').innerHTML='<p style="color:var(--c-light);font-size:.75rem;margin:0;">Sin híbridos cargados.</p>'; return; }
@@ -1188,30 +1191,34 @@ const Sheets = {
   async saveQuote() {
     if(!Quote._validate()) return;
     const btn=$('btnSaveQuote'); const orig=btn.innerHTML;
-    btn.disabled=true; btn.innerHTML='⏳ Guardando...';
+    const payload=this._buildPayload();
+
+    // Optimistic: save local backup + show success immediately
+    const localId='cot_'+Date.now();
+    LocalBackup.save({localId,fecha:new Date().toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}),vendedor:payload.vendedor,cliente:payload.cliente,cuit:payload.cuit,items:payload.items,synced:false,numero:editingQuoteNum||null});
+    btn.innerHTML='✓ Guardado'; btn.disabled=true;
+    Toast.ok('Cotización guardada','Sincronizando con Sheets...');
+    setTimeout(()=>{ btn.innerHTML=orig; btn.disabled=false; },1500);
+
+    // Sync to Sheets in background
+    Historial._cacheTime=0;
     try {
-      const payload=this._buildPayload();
       if(editingQuoteNum) {
-        // Update existing quote
         payload.action='updateCotizacion';
         payload.numero=editingQuoteNum;
         const r=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-        if(!r.ok) throw new Error('HTTP '+r.status);
-        const text=await r.text();
-        let d; try{d=JSON.parse(text);}catch(e){throw new Error('Respuesta no JSON');}
+        const d=JSON.parse(await r.text());
         if(d.error) throw new Error(d.error);
-        Toast.ok('Cotización actualizada','#'+String(editingQuoteNum).padStart(4,'0')+' guardada en Sheets.');
+        LocalBackup.markSynced(localId);
+        Toast.ok('Sincronizado','#'+String(editingQuoteNum).padStart(4,'0')+' actualizada en Sheets.');
       } else {
-        // Register new quote — don't set editingQuoteNum so next save creates a fresh one
         const numero=await this._sendToSheets(payload);
-        Toast.ok('Cotización guardada','#'+String(numero).padStart(4,'0')+' registrada en Sheets.');
+        LocalBackup.markSynced(localId);
+        Toast.ok('Sincronizado','#'+String(numero).padStart(4,'0')+' registrada en Sheets.');
       }
-      // Invalidate historial cache so next open shows fresh data
       Historial._cacheTime=0;
     } catch(e) {
-      Toast.warn('Error al guardar',e.message);
-    } finally {
-      btn.disabled=false; btn.innerHTML=orig;
+      Toast.warn('Sin conexión','Cotización guardada local. Se sincronizará después.');
     }
   },
   async saveAsNew() {
@@ -1250,22 +1257,39 @@ const Sheets = {
    QUOTE — vista previa y compartir
    ══════════════════════════════════════════════════════════════════ */
 const Quote = {
-  _blob: null,      // pre-generated PDF blob for instant sharing
-  _blobReady: false,
-  async _preCapture(el, width) {
-    try {
-      const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:width, width:width, height:el.scrollHeight});
-      const imgData = canvas.toDataURL('image/png');
-      const pxW = canvas.width, pxH = canvas.height;
-      const mmW = (pxW / 2) * 25.4 / 96, mmH = (pxH / 2) * 25.4 / 96;
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: mmW > mmH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
-      pdf.addImage(imgData, 'PNG', 0, 0, mmW, mmH, '', 'FAST');
-      this._blob = pdf.output('blob');
-      this._blobReady = true;
-    } catch(e) { this._blob=null; this._blobReady=false; }
+  // ── Pre-generation: PDF blob built in background after data changes ──
+  _preBlob: null, _preReady: false, _preTimer: null,
+  _preVersion: 0, _genVersion: 0,
+  schedulePreGen() {
+    this._preReady=false; this._preVersion++;
+    clearTimeout(this._preTimer);
+    if(!lastLC.length || !vendor || !$('cliente').value.trim()) return;
+    this._preTimer=setTimeout(()=>this._preGenerate(), 1500);
   },
-  async build() {
+  async _preGenerate() {
+    const ver=this._preVersion;
+    try {
+      this._buildHTML();
+      const ov=$('quote-overlay'), qc=$('quote-content');
+      const wasVisible=ov.classList.contains('visible');
+      if(!wasVisible) ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
+      qc.style.width='440px';
+      const canvas=await html2canvas(qc,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      qc.style.width='';
+      if(!wasVisible) ov.style.cssText='';
+      if(ver!==this._preVersion) return; // stale
+      const imgData=canvas.toDataURL('image/png');
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/1.5)*25.4/96,mmH=(pxH/1.5)*25.4/96;
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
+      pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
+      this._preBlob=pdf.output('blob');
+      this._genVersion=ver;
+      this._preReady=true;
+    } catch(e) { /* silent */ }
+  },
+  // ── Build quote HTML (fast, sync, no network) ──
+  _buildHTML() {
     const lc=lastLC, net=lc.reduce((s,l)=>s+l.totalSIVA,0);
     const hasCont=lc.some(l=>l.pCont>0);
 
@@ -1277,20 +1301,14 @@ const Quote = {
     $('q-contado').innerText=`USD ${fmtInt(net)}`;
     $('q-iva').innerText=`USD ${fmtInt(net*CONFIG.IVA)}`;
     $('q-final').innerText=`USD ${fmtInt(net*(1+CONFIG.IVA))}`;
-    $('q-descuentos').innerHTML='';
-    $('q-descuentos').style.display='none';
-
-    // Build table immediately (no network wait)
+    $('q-descuentos').innerHTML=''; $('q-descuentos').style.display='none';
     $('q-tbody').innerHTML=lc.map((l,idx)=>{
       const bg=idx%2===0?'#fafbfc':'#fff';
       const pContado=hasCont?l.unitNeto:Math.round(l.unitNeto*0.92*100)/100;
       const pMayo=hasCont?Math.round(l.unitNeto/0.92*100)/100:l.unitNeto;
       return `<tr class="q-row" style="background:${bg};"><td class="q-name">${l.hibrido}</td><td class="q-center">B${l.banda}</td><td class="q-center q-mono">${+l.cant}</td><td class="q-contado">$${fmtInt(pContado)}</td><td class="q-lista">$${fmtInt(pMayo)}</td></tr>`;
     }).join('');
-
-    // Register in Sheets in background (don't block PDF generation)
-    $('q-numero').innerText='...';
-    this._registerInBackground();
+    $('q-numero').innerText='';
   },
   _registerInBackground() {
     const doReg=async()=>{
@@ -1319,49 +1337,55 @@ const Quote = {
     if(sinCant.length) { Toast.warn('Cantidad en 0',`${sinCant.map(l=>l.hibrido).join(', ')} tiene cantidad 0.`); return false; }
     return true;
   },
-  _pendingShare: null, // {blob, filename, title} ready to send
+  _pendingShare: null,
+  _sendBlob(blob,filename,title) {
+    const file=new File([blob],filename,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})) return navigator.share({files:[file],title});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  },
   async shareDirect() {
     const btn=$('btnShareDirect');
-    // Phase 2: blob is ready → send with fresh gesture
+    const cliente=$('cliente').value||'Cliente';
+    const filename=`Cotizacion_${cliente}.pdf`, title=`Cotización Henderseeds — ${cliente}`;
+
+    // ── Phase 2 (fallback): blob was generated, user taps to send ──
     if(this._pendingShare) {
-      const {blob,filename,title}=this._pendingShare;
+      const {blob}=this._pendingShare;
       this._pendingShare=null;
       btn.innerHTML=this._origShareHTML; btn.style.background='';
-      try {
-        const file=new File([blob],filename,{type:'application/pdf'});
-        if(navigator.canShare && navigator.canShare({files:[file]})) {
-          await navigator.share({files:[file],title});
-        } else {
-          const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-        }
-      } catch(e) { if(e.name!=='AbortError') { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); } }
+      try { await this._sendBlob(blob,filename,title); } catch(e) { if(e.name!=='AbortError') { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); } }
       return;
     }
-    // Phase 1: validate, generate blob, then prompt to send
+
     if(!this._validate()) return;
+
+    // ── Instant path: pre-blob is fresh → share in 1 tap ──
+    if(this._preReady && this._preBlob && this._genVersion===this._preVersion) {
+      this._registerInBackground();
+      try { await this._sendBlob(this._preBlob,filename,title); } catch(e) { if(e.name!=='AbortError') { const url=URL.createObjectURL(this._preBlob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); } }
+      return;
+    }
+
+    // ── Fallback path: generate now, 2-phase ──
     this._origShareHTML=btn.innerHTML;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
-    const cliente=$('cliente').value||'Cliente';
-    const filename=`Cotizacion_${cliente}.pdf`, title=`Cotización Henderseeds — ${cliente}`;
     try {
-      await this.build();
+      this._buildHTML();
       const ov=$('quote-overlay'), qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      const canvas=await html2canvas(qc,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
       const imgData=canvas.toDataURL('image/png');
-      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/1.5)*25.4/96,mmH=(pxH/1.5)*25.4/96;
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
       pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
       const blob=pdf.output('blob');
-      // Store blob and show "ready to send" button
-      this._pendingShare={blob,filename,title};
+      this._pendingShare={blob};
       btn.disabled=false;
       btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Tocar para enviar';
       btn.style.background='#22c55e';
-      // Auto-reset after 30s if not tapped
       setTimeout(()=>{ if(this._pendingShare) { this._pendingShare=null; btn.innerHTML=this._origShareHTML; btn.style.background=''; } },30000);
     } catch(e) {
       alert('Error al generar el PDF. Intentá de nuevo.');
@@ -1371,17 +1395,17 @@ const Quote = {
   },
   async show() {
     if(!this._validate()) return;
-    this._blob=null; this._blobReady=false;
-    await this.build();
+    this._buildHTML();
+    this._registerInBackground();
     $('quote-overlay').classList.add('visible');
     document.body.style.overflow='hidden';
-    // Pre-generate PNG in background for instant share
+    this._imgBlob=null; this._imgReady=false;
     this._preCaptureImg();
   },
   async _preCaptureImg() {
     try {
       const el=$('quote-content');
-      const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+      const canvas=await html2canvas(el,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
       this._imgBlob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
       this._imgReady=true;
     } catch(e) { this._imgBlob=null; this._imgReady=false; }
@@ -1397,7 +1421,7 @@ const Quote = {
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
     try {
-      // Use pre-captured blob if ready, otherwise generate (fast with scale:2)
+      // Use pre-captured blob if ready, otherwise generate (fast with scale:1.5)
       let blob=this._imgBlob;
       if(!blob) {
         if(!this._imgReady) { for(let i=0;i<10&&!this._imgReady;i++) await new Promise(r=>setTimeout(r,300)); }
@@ -1405,7 +1429,7 @@ const Quote = {
       }
       if(!blob) {
         const el=$('quote-content');
-        const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
+        const canvas=await html2canvas(el,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:el.scrollHeight});
         blob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
       }
       const file=new File([blob],filename,{type:'image/png'});

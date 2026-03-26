@@ -1319,6 +1319,7 @@ const Quote = {
   },
   async shareDirect() {
     if(!this._validate()) return;
+    const gestureTime=Date.now();
     const btn=$('btnShareDirect'), orig=btn.innerHTML;
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Generando...';
     btn.disabled=true;
@@ -1330,43 +1331,35 @@ const Quote = {
       const qc=$('quote-content');
       ov.style.cssText='display:block;position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
       qc.style.width='440px';
-      // Pre-capture in background, then wait for blob
-      this._blob=null; this._blobReady=false;
-      this._preCapture(qc, 440);
-      // Wait up to 10s for pre-capture
-      for(let i=0;i<20&&!this._blobReady;i++) await new Promise(r=>setTimeout(r,500));
-      let blob=this._blob;
-      // Fallback: generate with lower scale if pre-capture failed
-      if(!blob) {
-        const canvas=await html2canvas(qc,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
-        const imgData=canvas.toDataURL('image/png');
-        const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/2)*25.4/96,mmH=(pxH/2)*25.4/96;
-        const {jsPDF}=window.jspdf;
-        const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
-        pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
-        blob=pdf.output('blob');
-      }
+      // Generate PDF blob
+      const canvas=await html2canvas(qc,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:440,width:440,height:qc.scrollHeight});
+      const imgData=canvas.toDataURL('image/png');
+      const pxW=canvas.width,pxH=canvas.height,mmW=(pxW/3)*25.4/96,mmH=(pxH/3)*25.4/96;
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:mmW>mmH?'l':'p',unit:'mm',format:[mmW,mmH]});
+      pdf.addImage(imgData,'PNG',0,0,mmW,mmH,'','FAST');
+      const blob=pdf.output('blob');
       const file=new File([blob],filename,{type:'application/pdf'});
-      if(navigator.canShare && navigator.canShare({files:[file]})) {
-        await navigator.share({files:[file],title});
+      // Only try navigator.share if gesture is still fresh (<4s)
+      const elapsed=Date.now()-gestureTime;
+      if(elapsed<4000 && navigator.canShare && navigator.canShare({files:[file]})) {
+        try {
+          await navigator.share({files:[file],title});
+        } catch(shareErr) {
+          if(shareErr.name==='AbortError') return; // user cancelled
+          // Gesture expired or share failed — download instead
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+          setTimeout(()=>URL.revokeObjectURL(url),1000);
+        }
       } else {
+        // Too much time passed or share not supported — download directly
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
         setTimeout(()=>URL.revokeObjectURL(url),1000);
       }
     } catch(e) {
-      if(e.name==='AbortError') { /* user cancelled */ }
-      else {
-        // Share failed — auto-download as fallback
-        try {
-          if(this._blob) {
-            const url=URL.createObjectURL(this._blob);
-            const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-            setTimeout(()=>URL.revokeObjectURL(url),1000);
-          }
-          alert('No se pudo compartir directamente. Se descargó el PDF — compartilo desde tus archivos.');
-        } catch(e2) { alert('Error al generar. Probá con Vista previa.'); }
-      }
+      if(e.name!=='AbortError') alert('Error al generar el PDF. Probá con Vista previa.');
     }
     finally { btn.innerHTML=orig; btn.disabled=false; const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
   },
@@ -1766,15 +1759,24 @@ const Historial = {
   },
   cargar(numero) {
     const groups={};
-    this._cache.forEach(row=>{ const n=row[0]; if(!groups[n])groups[n]={numero:n,vendedor:row[2],cliente:row[3],cuit:row[4],items:[]}; groups[n].items.push({hibrido:row[5],banda:String(row[6]).replace(/\D/g,'')||'1',cant:row[7],pre:row[10],cont:row[11],vol:row[14],zonal:row[15],hend:row[16]}); });
+    this._cache.forEach(row=>{ const n=row[0]; if(!groups[n])groups[n]={numero:n,vendedor:row[2],cliente:row[3],cuit:row[4],items:[]}; groups[n].items.push({hibrido:row[5],banda:String(row[6]).replace(/\D/g,'')||'1',cant:row[7],pre:row[10],cont:row[11],cre:row[12],cro:row[13],vol:row[14],zonal:row[15],hend:row[16]}); });
     const q=groups[numero];
     if(!q){ Toast.warn('No encontrada'); return; }
     // Set client
     $('cliente').value=q.cliente||'';
     $('cuit').value=q.cuit||'';
-    // Set discounts from first item
+    // Restore ALL discount toggles
     const first=q.items[0];
-    $('chkPre').checked=+first.pre>0; $('chkContado').checked=+first.cont>0;
+    const pn=v=>{const n=parseFloat(String(v||'0'));return isNaN(n)?0:n>0&&n<1?Math.round(n*1000)/10:Math.round(n*10)/10;};
+    $('chkPre').checked=pn(first.pre)>0;
+    $('chkContado').checked=pn(first.cont)>0;
+    $('chkCrecer').checked=pn(first.cre)>0;
+    $('chkCross').checked=pn(first.cro)>0;
+    // Restore Dto. Zonal and Dto. Henderseeds per type (maíz/girasol)
+    const itemM=q.items.find(i=>hybridType(i.hibrido)==='maiz');
+    const itemG=q.items.find(i=>hybridType(i.hibrido)==='girasol');
+    if(itemM){ $('valZM').value=pn(itemM.zonal); $('valPM').value=pn(itemM.hend); }
+    if(itemG){ $('valZG').value=pn(itemG.zonal); $('valPG').value=pn(itemG.hend); }
     // Clear and load lines
     lineas.length=0;
     q.items.forEach(it=>{
@@ -1783,6 +1785,7 @@ const Historial = {
       lineas.push({tipo:hybridType(it.hibrido),hibrido:it.hibrido,banda:b,cant:+it.cant||0,lista:h?h['b'+b]||h.b1:0});
     });
     Calc.renderLines();
+    Calc.run();
     // Track editing state
     editingQuoteNum=numero;
     Sheets._showEditingBanner();
@@ -1791,11 +1794,9 @@ const Historial = {
     Toast.ok('Cotización #'+String(numero).padStart(4,'0')+' cargada','Editá y guardá con 💾 o compartí.');
   },
   async compartir(numero) {
-    // Load the quote then share
+    // Load the quote, then show preview with share buttons (fresh user gesture)
     Historial.cargar(numero);
-    await new Promise(r => setTimeout(r, 200));
-    Calc.run();
-    await Quote.shareDirect();
+    await Quote.show();
   },
   async eliminar(numero) {
     if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;

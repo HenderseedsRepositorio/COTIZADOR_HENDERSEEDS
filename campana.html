@@ -1053,7 +1053,7 @@ const App = {
       const def = defaultPos[estab] || {x:5,y:5,w:18,h:25,layout:'g'};
       if (saved) {
         if (!saved.layout) saved.layout = def.layout || 'g';
-        if (def.ls && !saved.ls) saved.ls = def.ls; // inherit label-side from default
+        if (def.ls) saved.ls = def.ls; // always use default label-side
         return saved;
       }
       return def;

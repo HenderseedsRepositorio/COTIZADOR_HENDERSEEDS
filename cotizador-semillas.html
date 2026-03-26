@@ -1202,10 +1202,8 @@ const Sheets = {
         if(d.error) throw new Error(d.error);
         Toast.ok('Cotización actualizada','#'+String(editingQuoteNum).padStart(4,'0')+' guardada en Sheets.');
       } else {
-        // Register new quote
+        // Register new quote — don't set editingQuoteNum so next save creates a fresh one
         const numero=await this._sendToSheets(payload);
-        editingQuoteNum=numero;
-        this._showEditingBanner();
         Toast.ok('Cotización guardada','#'+String(numero).padStart(4,'0')+' registrada en Sheets.');
       }
       // Invalidate historial cache so next open shows fresh data

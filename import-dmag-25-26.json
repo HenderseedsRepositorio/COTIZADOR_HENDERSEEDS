@@ -3,7 +3,7 @@
     {
       "id": "lt_dm_am5",
       "nombre": "AM5",
-      "hectareas": 28,
+      "hectareas": 28.0,
       "cultivo": "Soja",
       "establecimiento": "AM",
       "planes": {
@@ -27,7 +27,7 @@
     {
       "id": "lt_dm_am6",
       "nombre": "AM6",
-      "hectareas": 28,
+      "hectareas": 28.0,
       "cultivo": "Maiz 2da",
       "establecimiento": "AM",
       "planes": {
@@ -39,7 +39,7 @@
     {
       "id": "lt_dm_am8",
       "nombre": "AM8",
-      "hectareas": 26,
+      "hectareas": 26.0,
       "cultivo": "Maiz",
       "establecimiento": "AM",
       "planes": {
@@ -51,7 +51,7 @@
     {
       "id": "lt_dm_am4",
       "nombre": "AM4",
-      "hectareas": 26.6,
+      "hectareas": 27,
       "cultivo": "Pastura",
       "establecimiento": "AM",
       "planes": {
@@ -183,7 +183,7 @@
     {
       "id": "lt_dm_ef1",
       "nombre": "EF1",
-      "hectareas": 34,
+      "hectareas": 34.0,
       "cultivo": "Maiz tardio",
       "establecimiento": "El Frances",
       "planes": {
@@ -195,7 +195,7 @@
     {
       "id": "lt_dm_sc6",
       "nombre": "SC6",
-      "hectareas": 31,
+      "hectareas": 31.0,
       "cultivo": "Maiz 2da",
       "establecimiento": "Sucesion",
       "planes": {
@@ -231,7 +231,7 @@
     {
       "id": "lt_dm_sc4",
       "nombre": "SC4",
-      "hectareas": 39,
+      "hectareas": 39.0,
       "cultivo": "Soja",
       "establecimiento": "Sucesion",
       "planes": {
@@ -243,7 +243,7 @@
     {
       "id": "lt_dm_sc2",
       "nombre": "SC2",
-      "hectareas": 39,
+      "hectareas": 39.0,
       "cultivo": "Maiz",
       "establecimiento": "Sucesion",
       "planes": {
@@ -255,7 +255,7 @@
     {
       "id": "lt_dm_sc3",
       "nombre": "SC3",
-      "hectareas": 39,
+      "hectareas": 39.0,
       "cultivo": "Soja",
       "establecimiento": "Sucesion",
       "planes": {

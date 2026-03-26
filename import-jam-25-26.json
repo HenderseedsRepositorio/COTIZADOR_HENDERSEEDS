@@ -31,14 +31,14 @@
     {
       "id": "lt_sc1",
       "nombre": "SC1",
-      "hectareas": 60,
+      "hectareas": 48.0,
       "cultivo": "Girasol",
       "establecimiento": "San Clemente"
     },
     {
       "id": "lt_pv1",
       "nombre": "PV1",
-      "hectareas": 170,
+      "hectareas": 140.0,
       "cultivo": "Girasol",
       "establecimiento": "Pirovano"
     },
@@ -66,21 +66,21 @@
     {
       "id": "lt_dj1",
       "nombre": "DJ1",
-      "hectareas": 78.23,
+      "hectareas": 40.0,
       "cultivo": "Maiz tardio",
       "establecimiento": "Doña josefa"
     },
     {
       "id": "lt_dj2",
       "nombre": "DJ2",
-      "hectareas": 86.68,
+      "hectareas": 40.0,
       "cultivo": "Maiz tardio",
       "establecimiento": "Doña josefa"
     },
     {
       "id": "lt_dj3",
       "nombre": "DJ3",
-      "hectareas": 83.32,
+      "hectareas": 40.0,
       "cultivo": "Maiz tardio",
       "establecimiento": "Doña josefa"
     },

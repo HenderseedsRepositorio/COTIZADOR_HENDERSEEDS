@@ -857,7 +857,7 @@ const App = {
     };
     const numCell = (d, unit) => d ? `<span style="font-family:var(--mono);font-size:12px;color:var(--text-sec);">${fmtInt(d)}${unit||''}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
     const priceCell = (p) => p ? `<span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;">$${fmtInt(p)}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
-    const gridCols = '55px 80px 40px 24px 2px 95px 48px 38px 38px 22px 2px 95px 48px 38px 38px 22px';
+    const gridCols = '55px 80px 40px 24px 2px 32px 95px 48px 38px 38px 22px 2px 32px 95px 48px 38px 38px 22px';
 
     // Group by establecimiento
     const groups = {};
@@ -894,8 +894,8 @@ const App = {
     html += `<div style="overflow-x:auto;"><div style="min-width:920px;">`;
     html += `<div style="display:grid;grid-template-columns:${gridCols};gap:3px;padding:8px 12px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--navy);">
       <span>Lote</span><span>Estab.</span><span style="text-align:right;">Ha</span><span></span>
-      <span></span><span style="text-align:center;color:#ea580c;">Fina</span><span style="text-align:center;color:#ea580c;">Dens</span><span style="text-align:center;color:#ea580c;">Rde</span><span style="text-align:center;color:#ea580c;">USD</span><span></span>
-      <span></span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens</span><span style="text-align:center;color:#d97706;">Rde</span><span style="text-align:center;color:#d97706;">USD</span><span></span>
+      <span></span><span style="text-align:center;color:#ea580c;">Ha</span><span style="text-align:center;color:#ea580c;">Fina</span><span style="text-align:center;color:#ea580c;">Dens</span><span style="text-align:center;color:#ea580c;">Rde</span><span style="text-align:center;color:#ea580c;">USD</span><span></span>
+      <span></span><span style="text-align:center;color:#d97706;">Ha</span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens</span><span style="text-align:center;color:#d97706;">Rde</span><span style="text-align:center;color:#d97706;">USD</span><span></span>
     </div>`;
 
     Object.entries(groups).forEach(([est, lotes]) => {
@@ -919,12 +919,14 @@ const App = {
             <button style="background:none;border:none;cursor:pointer;padding:1px;opacity:.2;" onclick="if(confirm('Eliminar ${esc(l.nombre)}?'))App.removeLote('${esc(l.id)}')" title="Eliminar"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
           </span>
           <span style="background:#ea580c;width:2px;height:100%;border-radius:1px;opacity:.25;"></span>
+          <span style="text-align:center;">${numCell(fina.hectareas)}</span>
           <span style="text-align:center;">${cultivoBadge(fina.cultivo, fina.variedad)}</span>
           <span style="text-align:center;">${numCell(fina.densidad)}</span>
           <span style="text-align:center;">${numCell(fina.rinde)}</span>
           <span style="text-align:center;">${priceCell(fina.precio)}</span>
           <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${finaKey}')" style="background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>
           <span style="background:#d97706;width:2px;height:100%;border-radius:1px;opacity:.25;"></span>
+          <span style="text-align:center;">${numCell(gruesa.hectareas)}</span>
           <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
           <span style="text-align:center;">${numCell(gruesa.densidad)}</span>
           <span style="text-align:center;">${numCell(gruesa.rinde)}</span>
@@ -1452,10 +1454,14 @@ const App = {
       const ids = new Set();
       ['maiz','girasol'].forEach(t => (semCat[t]||[]).forEach(h => { const short = h.id.split(' ')[0]; if (!ids.has(short)) { ids.add(short); hybridOpts += `<option value="${esc(short)}">`; } }));
     }
+    const planHa = plan.hectareas || '';
     openModal(`<div class="modal-title">Planificar ${esc(l.nombre)}</div>
-      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has · ${esc(l.establecimiento||'')} · ${esc(campLabel)}</div>
-      <div style="margin-bottom:10px;"><label class="form-lbl">Cultivo</label>
-        <select id="m-plan-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${opts}</select></div>
+      <div style="font-size:12px;color:var(--text-sec);margin-bottom:12px;">${l.hectareas} has totales · ${esc(l.establecimiento||'')} · ${esc(campLabel)}</div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div><label class="form-lbl">Has ${isFina ? 'Fina' : 'Gruesa'}</label><input type="number" id="m-plan-ha" class="inp inp-sm" value="${planHa}" placeholder="${l.hectareas}" inputmode="decimal" step="0.1"></div>
+        <div><label class="form-lbl">Cultivo</label>
+          <select id="m-plan-cultivo" class="inp inp-sm"><option value="">-- Sin asignar --</option>${opts}</select></div>
+      </div>
       <div class="form-row" style="margin-bottom:10px;">
         <div><label class="form-lbl">Densidad (pl/ha)</label><input type="number" id="m-plan-densidad" class="inp inp-sm" value="${plan.densidad||''}" placeholder="65000" inputmode="numeric"></div>
         <div><label class="form-lbl">Variedad / Híbrido</label><input type="text" id="m-plan-variedad" class="inp inp-sm" list="plan-hybrid-list" value="${esc(plan.variedad||'')}" placeholder="Ej: NS7921"><datalist id="plan-hybrid-list">${hybridOpts}</datalist></div>
@@ -1475,8 +1481,10 @@ const App = {
     const l = data.lotes.find(x => x.id === lid); if (!l) return;
     const campPlan = campOverride || data.campana || '2025/26';
     if (!l.planes) l.planes = {};
+    const haVal = parseFloat($('m-plan-ha').value) || 0;
     l.planes[campPlan] = {
       cultivo: $('m-plan-cultivo').value,
+      ...(haVal > 0 ? {hectareas: haVal} : {}),
       densidad: parseFloat($('m-plan-densidad').value) || 0,
       variedad: $('m-plan-variedad').value.trim(),
       rinde: parseFloat($('m-plan-rinde').value) || 0,

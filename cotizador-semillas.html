@@ -1965,29 +1965,6 @@ const Ventas = {
     });
     h+=`</tbody></table></div>`;
 
-    // Per-vendor summary
-    const vendData={};
-    ventas.forEach(q=>{
-      if(!vendData[q.vendedor]) vendData[q.vendedor]={vendedor:q.vendedor,bolsas:0,usd:0,clientes:new Set()};
-      vendData[q.vendedor].clientes.add(q.cliente);
-      (q.items||[]).forEach(it=>{ vendData[q.vendedor].bolsas+=(+it.cant||0); vendData[q.vendedor].usd+=(+it.totalSIVA||0); });
-    });
-    const vends=Object.values(vendData).sort((a,b)=>b.usd-a.usd);
-
-    h+=`<p style="margin:14px 0 6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">Detalle por Vendedor</p>`;
-    h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr>
-      <th style="text-align:left;">Vendedor</th><th>Clientes</th><th>Bolsas</th><th>USD s/IVA</th>
-    </tr></thead><tbody>`;
-    vends.forEach(v=>{
-      h+=`<tr>
-        <td style="font-size:.7rem;font-weight:600;">${v.vendedor}</td>
-        <td style="font-family:var(--mono);">${v.clientes.size}</td>
-        <td style="font-family:var(--mono);font-weight:700;">${v.bolsas}</td>
-        <td style="font-family:var(--mono);color:var(--c-navy);font-weight:700;">$${fmtInt(v.usd)}</td>
-      </tr>`;
-    });
-    h+=`</tbody></table></div>`;
-
     $('ventasContent').innerHTML=h;
   }
 };

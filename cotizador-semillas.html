@@ -1738,18 +1738,17 @@ const Historial = {
     const allQuotes=data.map(q=>({
       numero:q.numero,
       fecha:q.fecha?new Date(q.fecha).toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—',
-      vendedor:q.vendedor,cliente:q.cliente,cuit:q.cuit,
+      vendedor:q.vendedor,cliente:q.cliente,cuit:q.cuit,estado:q.estado||'Pendiente',
       items:(q.items||[]).map(i=>({hibrido:i.hibrido,banda:'B'+(i.banda||1),cant:i.cant,precio:i.precioNeto,pre:i.pPre,cont:i.pCont,cre:i.pCre,cro:i.pCro,vol:i.pVol,zonal:i.valZ,hend:i.valP,siva:i.totalSIVA}))
     })).sort((a,b)=>b.numero-a.numero);
     const totalPages=Math.ceil(allQuotes.length/this._perPage);
     const quotes=allQuotes.slice(this._page*this._perPage, (this._page+1)*this._perPage);
 
-    const estados=JSON.parse(localStorage.getItem('hs_quote_estados')||'{}');
     const estadoColors={Pendiente:'#f59e0b',Enviada:'#3b82f6','Venta cargada':'#22c55e'};
     let h='';
     quotes.forEach(q=>{
       const totalSiva=q.items.reduce((s,i)=>s+(+i.siva||0),0);
-      const est=estados[q.numero]||'Pendiente';
+      const est=q.estado||'Pendiente';
       h+=`<div class="hist-card" style="display:flex;gap:10px;">`;
       // Left: quote content
       h+=`<div style="flex:1;min-width:0;">`;
@@ -1781,11 +1780,13 @@ const Historial = {
     }
     $('historialContent').innerHTML=(this._localHtml||'')+h;
   },
-  setEstado(numero, estado) {
-    const estados=JSON.parse(localStorage.getItem('hs_quote_estados')||'{}');
-    estados[numero]=estado;
-    localStorage.setItem('hs_quote_estados',JSON.stringify(estados));
+  async setEstado(numero, estado) {
+    // Update in cache immediately for instant UI
+    if(this._cache) { const q=this._cache.find(r=>r.numero===numero); if(q) q.estado=estado; }
     this.render();
+    // Sync to Supabase in background
+    try { await sb.from('cotizaciones').update({estado}).eq('numero',numero); }
+    catch(e) { console.warn('Error actualizando estado:',e); }
   },
   cargar(numero) {
     // Supabase format: cache is array of quote objects with items JSONB

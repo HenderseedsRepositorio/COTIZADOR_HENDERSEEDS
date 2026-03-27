@@ -334,6 +334,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
     <button class="tab-btn" id="tab-market" onclick="App.switchTab('market')">📋 Precios</button>
     <button class="tab-btn" id="tab-tech" onclick="App.switchTab('tech')">🔬 Técnicos</button>
     <button class="tab-btn" id="tab-cond" onclick="App.switchTab('cond')">💰 Condiciones</button>
+    <button class="tab-btn" id="tab-ventas" onclick="App.switchTab('ventas')">📊 Ventas</button>
   </div>
 
   <!-- ══════════ TAB: COTIZADOR ══════════ -->
@@ -497,6 +498,14 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
         </div>
         <div style="background:linear-gradient(90deg,var(--c-navy),var(--c-sky));height:4px;"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TAB: VENTAS ══════════ -->
+  <div id="ventas" style="display:none;">
+    <div class="hcard fu" style="padding:16px 18px;margin-bottom:10px;">
+      <p class="slabel" style="margin:0 0 12px;">Resumen de Ventas Cargadas</p>
+      <div id="ventasContent"><p style="color:var(--c-light);font-size:.75rem;">Cargando...</p></div>
     </div>
   </div>
 </div>
@@ -760,13 +769,14 @@ const App = {
   },
   changeVendor() { $('vendor-overlay').classList.remove('hidden'); },
   switchTab(id) {
-    ['calc','market','tech','cond'].forEach(t => {
+    ['calc','market','tech','cond','ventas'].forEach(t => {
       $(t).style.display = t===id ? 'block' : 'none';
       $('tab-'+t).className = 'tab-btn'+(t===id?' active':'');
     });
     if(id==='market') Market.render();
     if(id==='tech') TechFicha.load();
     if(id==='cond') Conditions.load();
+    if(id==='ventas') Ventas.load();
   },
   loadCatalog() {
     const hasCachedCatalog = localStorage.getItem('hs_catalogo_cache');
@@ -1832,6 +1842,153 @@ const Historial = {
       Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.');
       this.load(true);
     } catch(e){ Toast.warn('Error',e.message); }
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   VENTAS — resumen de cotizaciones con estado "Venta cargada"
+   ══════════════════════════════════════════════════════════════════ */
+const Ventas = {
+  async load() {
+    $('ventasContent').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">⏳ Cargando ventas...</p>';
+    try {
+      const {data,error}=await sb.from('cotizaciones').select().eq('estado','Venta cargada');
+      if(error) throw new Error(error.message);
+      if(!data||!data.length){ $('ventasContent').innerHTML='<p style="color:var(--c-light);font-size:.75rem;">No hay ventas cargadas aún.</p>'; return; }
+      this.render(data);
+    } catch(e) {
+      $('ventasContent').innerHTML='<p style="color:#e74c3c;font-size:.75rem;">Error: '+esc(e.message)+'</p>';
+    }
+  },
+  render(ventas) {
+    // Aggregate per hybrid
+    const hyb={};
+    let totalUSD=0, totalBolsas=0, totalClientes=new Set();
+    ventas.forEach(q=>{
+      totalClientes.add(q.cliente);
+      (q.items||[]).forEach(it=>{
+        const key=it.hibrido;
+        if(!hyb[key]) hyb[key]={hibrido:key,tipo:hybridType(key),bolsas:0,usdSiva:0,usdLista:0,clientes:new Set()};
+        const cant=+it.cant||0;
+        const neto=+it.precioNeto||0;
+        const lista=findHybrid(key);
+        const banda=+it.banda||1;
+        const precioLista=lista?lista['b'+banda]||lista.b1:neto;
+        hyb[key].bolsas+=cant;
+        hyb[key].usdSiva+=+it.totalSIVA||0;
+        hyb[key].usdLista+=precioLista*cant;
+        hyb[key].clientes.add(q.cliente);
+        totalBolsas+=cant;
+        totalUSD+=+it.totalSIVA||0;
+      });
+    });
+
+    const items=Object.values(hyb).sort((a,b)=>b.usdSiva-a.usdSiva);
+    const maizItems=items.filter(i=>i.tipo==='maiz');
+    const giraItems=items.filter(i=>i.tipo==='girasol');
+    const maizBolsas=maizItems.reduce((s,i)=>s+i.bolsas,0);
+    const giraBolsas=giraItems.reduce((s,i)=>s+i.bolsas,0);
+    const maizUSD=maizItems.reduce((s,i)=>s+i.usdSiva,0);
+    const giraUSD=giraItems.reduce((s,i)=>s+i.usdSiva,0);
+
+    let h='';
+    // Summary cards
+    h+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+      <div style="background:var(--c-navy);border-radius:10px;padding:10px 12px;text-align:center;">
+        <p style="margin:0;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Ventas Totales</p>
+        <p style="margin:3px 0 0;font-size:1.1rem;font-weight:700;color:var(--c-green);font-family:var(--mono);">USD ${fmtInt(totalUSD)}</p>
+      </div>
+      <div style="background:var(--c-navy);border-radius:10px;padding:10px 12px;text-align:center;">
+        <p style="margin:0;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Bolsas Vendidas</p>
+        <p style="margin:3px 0 0;font-size:1.1rem;font-weight:700;color:#fff;font-family:var(--mono);">${totalBolsas.toLocaleString('es-AR')}</p>
+      </div>
+      <div style="background:var(--c-navy);border-radius:10px;padding:10px 12px;text-align:center;">
+        <p style="margin:0;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);">Clientes</p>
+        <p style="margin:3px 0 0;font-size:1.1rem;font-weight:700;color:#fff;font-family:var(--mono);">${totalClientes.size}</p>
+      </div>
+    </div>`;
+
+    // Maíz vs Girasol
+    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:8px 10px;border-left:3px solid #89ba16;">
+        <p style="margin:0;font-size:.62rem;font-weight:700;color:#89ba16;text-transform:uppercase;">🌽 Maíz</p>
+        <p style="margin:2px 0 0;font-size:.82rem;font-weight:700;color:var(--c-navy);font-family:var(--mono);">${maizBolsas} bolsas · USD ${fmtInt(maizUSD)}</p>
+      </div>
+      <div style="background:#fffbeb;border-radius:8px;padding:8px 10px;border-left:3px solid #f59e0b;">
+        <p style="margin:0;font-size:.62rem;font-weight:700;color:#f59e0b;text-transform:uppercase;">🌻 Girasol</p>
+        <p style="margin:2px 0 0;font-size:.82rem;font-weight:700;color:var(--c-navy);font-family:var(--mono);">${giraBolsas} bolsas · USD ${fmtInt(giraUSD)}</p>
+      </div>
+    </div>`;
+
+    // Per-hybrid table
+    h+=`<p style="margin:0 0 6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">Detalle por Híbrido</p>`;
+    h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr>
+      <th style="text-align:left;">Híbrido</th><th>Bolsas</th><th>USD s/IVA</th><th>P.Prom</th><th>P.Lista</th><th>Dto.Prom</th><th>Clientes</th>
+    </tr></thead><tbody>`;
+    items.forEach(i=>{
+      const pProm=i.bolsas?Math.round(i.usdSiva/i.bolsas):0;
+      const pLista=i.bolsas?Math.round(i.usdLista/i.bolsas):0;
+      const dtoProm=pLista>0?Math.round((1-pProm/pLista)*100):0;
+      const emoji=i.tipo==='maiz'?'🌽':'🌻';
+      h+=`<tr>
+        <td style="font-size:.7rem;font-weight:600;">${emoji} ${i.hibrido}</td>
+        <td style="font-family:var(--mono);font-weight:700;">${i.bolsas}</td>
+        <td style="font-family:var(--mono);color:var(--c-navy);font-weight:700;">$${fmtInt(i.usdSiva)}</td>
+        <td style="font-family:var(--mono);">$${fmtInt(pProm)}</td>
+        <td style="font-family:var(--mono);color:var(--c-light);">$${fmtInt(pLista)}</td>
+        <td style="font-family:var(--mono);color:#15803d;font-weight:700;">${dtoProm}%</td>
+        <td style="font-family:var(--mono);">${i.clientes.size}</td>
+      </tr>`;
+    });
+    h+=`</tbody></table></div>`;
+
+    // Per-client summary
+    const cliData={};
+    ventas.forEach(q=>{
+      if(!cliData[q.cliente]) cliData[q.cliente]={cliente:q.cliente,bolsas:0,usd:0,cotizaciones:0};
+      cliData[q.cliente].cotizaciones++;
+      (q.items||[]).forEach(it=>{ cliData[q.cliente].bolsas+=(+it.cant||0); cliData[q.cliente].usd+=(+it.totalSIVA||0); });
+    });
+    const clis=Object.values(cliData).sort((a,b)=>b.usd-a.usd);
+
+    h+=`<p style="margin:14px 0 6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">Detalle por Cliente</p>`;
+    h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr>
+      <th style="text-align:left;">Cliente</th><th>Cotiz.</th><th>Bolsas</th><th>USD s/IVA</th>
+    </tr></thead><tbody>`;
+    clis.forEach(c=>{
+      h+=`<tr>
+        <td style="font-size:.7rem;font-weight:600;">${c.cliente}</td>
+        <td style="font-family:var(--mono);">${c.cotizaciones}</td>
+        <td style="font-family:var(--mono);font-weight:700;">${c.bolsas}</td>
+        <td style="font-family:var(--mono);color:var(--c-navy);font-weight:700;">$${fmtInt(c.usd)}</td>
+      </tr>`;
+    });
+    h+=`</tbody></table></div>`;
+
+    // Per-vendor summary
+    const vendData={};
+    ventas.forEach(q=>{
+      if(!vendData[q.vendedor]) vendData[q.vendedor]={vendedor:q.vendedor,bolsas:0,usd:0,clientes:new Set()};
+      vendData[q.vendedor].clientes.add(q.cliente);
+      (q.items||[]).forEach(it=>{ vendData[q.vendedor].bolsas+=(+it.cant||0); vendData[q.vendedor].usd+=(+it.totalSIVA||0); });
+    });
+    const vends=Object.values(vendData).sort((a,b)=>b.usd-a.usd);
+
+    h+=`<p style="margin:14px 0 6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);">Detalle por Vendedor</p>`;
+    h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr>
+      <th style="text-align:left;">Vendedor</th><th>Clientes</th><th>Bolsas</th><th>USD s/IVA</th>
+    </tr></thead><tbody>`;
+    vends.forEach(v=>{
+      h+=`<tr>
+        <td style="font-size:.7rem;font-weight:600;">${v.vendedor}</td>
+        <td style="font-family:var(--mono);">${v.clientes.size}</td>
+        <td style="font-family:var(--mono);font-weight:700;">${v.bolsas}</td>
+        <td style="font-family:var(--mono);color:var(--c-navy);font-weight:700;">$${fmtInt(v.usd)}</td>
+      </tr>`;
+    });
+    h+=`</tbody></table></div>`;
+
+    $('ventasContent').innerHTML=h;
   }
 };
 

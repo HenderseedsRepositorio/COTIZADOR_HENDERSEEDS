@@ -857,7 +857,12 @@ const App = {
     };
     const numCell = (d, unit) => d ? `<span style="font-family:var(--mono);font-size:12px;color:var(--text-sec);">${fmtInt(d)}${unit||''}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
     const priceCell = (p) => p ? `<span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;">$${fmtInt(p)}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>';
-    const gridCols = '55px 80px 40px 24px 2px 32px 95px 48px 38px 38px 22px 2px 32px 95px 48px 38px 38px 22px';
+    const bolsasPorCultivo = (cult, dens, ha) => {
+      if (!dens || !ha) return 0;
+      const sem = /girasol/i.test(cult) ? 180000 : /ma[ií]z|sorgo/i.test(cult) ? 80000 : 0;
+      return sem ? Math.ceil((dens * ha) / sem) : 0;
+    };
+    const gridCols = '55px 80px 40px 24px 2px 32px 95px 48px 38px 38px 22px 2px 32px 95px 48px 38px 38px 38px 22px';
 
     // Group by establecimiento
     const groups = {};
@@ -891,11 +896,11 @@ const App = {
     </div>`;
 
     // Table header
-    html += `<div style="overflow-x:auto;"><div style="min-width:920px;">`;
+    html += `<div style="overflow-x:auto;"><div style="min-width:960px;">`;
     html += `<div style="display:grid;grid-template-columns:${gridCols};gap:3px;padding:8px 12px;font-size:9px;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--navy);">
       <span>Lote</span><span>Estab.</span><span style="text-align:right;">Ha</span><span></span>
       <span></span><span style="text-align:center;color:#ea580c;">Ha</span><span style="text-align:center;color:#ea580c;">Fina</span><span style="text-align:center;color:#ea580c;">Dens</span><span style="text-align:center;color:#ea580c;">Rde</span><span style="text-align:center;color:#ea580c;">USD</span><span></span>
-      <span></span><span style="text-align:center;color:#d97706;">Ha</span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens</span><span style="text-align:center;color:#d97706;">Rde</span><span style="text-align:center;color:#d97706;">USD</span><span></span>
+      <span></span><span style="text-align:center;color:#d97706;">Ha</span><span style="text-align:center;color:#d97706;">Gruesa</span><span style="text-align:center;color:#d97706;">Dens</span><span style="text-align:center;color:#d97706;">Bolsas</span><span style="text-align:center;color:#d97706;">Rde</span><span style="text-align:center;color:#d97706;">USD</span><span></span>
     </div>`;
 
     Object.entries(groups).forEach(([est, lotes]) => {
@@ -929,6 +934,7 @@ const App = {
           <span style="text-align:center;">${numCell(gruesa.hectareas)}</span>
           <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
           <span style="text-align:center;">${numCell(gruesa.densidad)}</span>
+          <span style="text-align:center;">${numCell(bolsasPorCultivo(gCult, gruesa.densidad, gruesa.hectareas || l.hectareas))}</span>
           <span style="text-align:center;">${numCell(gruesa.rinde)}</span>
           <span style="text-align:center;">${priceCell(gruesa.precio)}</span>
           <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${campPlan}')" style="background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>

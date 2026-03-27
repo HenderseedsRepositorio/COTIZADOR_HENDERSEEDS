@@ -860,7 +860,7 @@ const App = {
     const bolsasPorCultivo = (cult, dens, ha) => {
       if (!dens || !ha) return 0;
       const sem = /girasol/i.test(cult) ? 180000 : /ma[ií]z|sorgo/i.test(cult) ? 80000 : 0;
-      return sem ? Math.ceil((dens * ha) / sem) : 0;
+      return sem ? Math.round(((dens * ha) / sem) * 10) / 10 : 0;
     };
     const gridCols = '55px 80px 40px 24px 2px 32px 95px 48px 38px 38px 22px 2px 32px 95px 48px 38px 38px 38px 22px';
 
@@ -934,7 +934,7 @@ const App = {
           <span style="text-align:center;">${numCell(gruesa.hectareas)}</span>
           <span style="text-align:center;">${cultivoBadge(gCult, gruesa.variedad)}</span>
           <span style="text-align:center;">${numCell(gruesa.densidad)}</span>
-          <span style="text-align:center;">${numCell(bolsasPorCultivo(gCult, gruesa.densidad, gruesa.hectareas || l.hectareas))}</span>
+          <span style="text-align:center;">${(b => b ? `<span style="font-family:var(--mono);font-size:12px;color:var(--text-sec);">${b % 1 === 0 ? b : b.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>` : '<span style="color:var(--text-mut);font-size:12px;">—</span>')(bolsasPorCultivo(gCult, gruesa.densidad, gruesa.hectareas || l.hectareas))}</span>
           <span style="text-align:center;">${numCell(gruesa.rinde)}</span>
           <span style="text-align:center;">${priceCell(gruesa.precio)}</span>
           <span style="text-align:center;"><button onclick="App.openPlanModal('${esc(l.id)}','${campPlan}')" style="background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></span>

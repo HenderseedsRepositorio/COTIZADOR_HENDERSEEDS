@@ -1741,8 +1741,7 @@ const Historial = {
       vendedor:q.vendedor,cliente:q.cliente,cuit:q.cuit,estado:q.estado||'Pendiente',
       items:(q.items||[]).map(i=>({hibrido:i.hibrido,banda:'B'+(i.banda||1),cant:i.cant,precio:i.precioNeto,pre:i.pPre,cont:i.pCont,cre:i.pCre,cro:i.pCro,vol:i.pVol,zonal:i.valZ,hend:i.valP,siva:i.totalSIVA}))
     })).sort((a,b)=>b.numero-a.numero);
-    const totalPages=Math.ceil(allQuotes.length/this._perPage);
-    const quotes=allQuotes.slice(this._page*this._perPage, (this._page+1)*this._perPage);
+    const quotes=allQuotes;
 
     const estadoColors={Pendiente:'#f59e0b',Enviada:'#3b82f6','Venta cargada':'#22c55e'};
     let h='';
@@ -1775,9 +1774,6 @@ const Historial = {
       h+=`</div>`;
     });
 
-    if(totalPages>1) {
-      h+=`<div class="hist-pager"><button onclick="Historial.goPage(-1)" ${this._page===0?'disabled':''}>← Anterior</button><span style="font-size:.7rem;color:var(--c-gray);padding:5px 0;">${this._page+1} / ${totalPages}</span><button onclick="Historial.goPage(1)" ${this._page>=totalPages-1?'disabled':''}>Siguiente →</button></div>`;
-    }
     $('historialContent').innerHTML=(this._localHtml||'')+h;
   },
   async setEstado(numero, estado) {

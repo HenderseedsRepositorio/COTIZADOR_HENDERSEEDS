@@ -667,7 +667,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
   <div class="status-bar">
     <a href="index.html" style="color:var(--text-mut);text-decoration:none;font-weight:600;font-size:.7rem;display:flex;align-items:center;gap:3px;">&larr; Menú</a>
     <span>Vendedor: <span class="vname" id="currentVendor" onclick="App.changeVendor()">—</span></span>
-    <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span></span>
+    <span style="display:flex;align-items:center;gap:4px;"><span class="status-dot" id="status-dot"></span> <span id="status-text">Offline — datos locales</span> <button onclick="Market.refresh()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;color:var(--text-sec);margin-left:4px;" title="Actualizar catálogo">↻</button></span>
   </div>
 
   <!-- TABS -->
@@ -697,7 +697,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
         <div class="plazo-bar">
           <button class="plazo-chip active" data-modo="contado" onclick="App.setModo(this)">Contado</button>
           <button class="plazo-chip" data-modo="financiacion" onclick="App.setModo(this)">Financiación</button>
-          <div id="fin-config" style="display:none; flex:2; display:none; align-items:center; gap:8px;">
+          <div id="fin-config" style="display:none; flex:2; align-items:center; gap:8px;">
             <input type="month" id="fin-fecha" class="inp inp-sm" style="font-size:12px; padding:4px 6px;"
               onchange="App.calcFinanciacion()">
             <div style="font-size:11px; color:var(--text-sec); white-space:nowrap;">
@@ -712,7 +712,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
         <div id="resumen-consolidado" style="display:none;"></div>
 
         <!-- ACCIONES (inline, debajo del resumen) -->
-        <div id="acciones-inline" style="display:none;margin-top:10px;display:none;">
+        <div id="acciones-inline" style="display:none;margin-top:10px;">
           <div style="display:flex;gap:8px;">
             <button class="btn btn-green" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('cotizacion')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Cotización</button>
             <button class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('receta')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Receta</button>
@@ -746,7 +746,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
       <button class="plazo-chip" data-plazo="dic2026" onclick="App.setListaPlazo(this)">Dic 26</button>
     </div>
     <input type="text" id="lista-search" class="inp inp-sm" placeholder="🔍 Buscar producto..." autocomplete="off"
-      oninput="App.renderLista()" style="margin-bottom:8px;">
+      oninput="App._debouncedRenderLista()" style="margin-bottom:8px;">
     <div style="display:grid;grid-template-columns:1fr 62px 46px 72px;gap:8px;padding:6px 8px;font-size:.65rem;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border);">
       <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:center;">Margen</span><span style="text-align:right;">P.Contado</span>
     </div>
@@ -929,7 +929,9 @@ const Market = {
     // Show cached data immediately
     const hasCachedCat = localStorage.getItem('hs_agro_catalogo_cache');
     const totalCached = Object.values(catalogo).reduce((s,arr) => s + arr.length, 0);
-    Market.setStatus(hasCachedCat ? true : null, hasCachedCat ? 'Cache — ' + totalCached + ' productos' : 'Conectando...');
+    const cacheTs = parseInt(localStorage.getItem('hs_agro_catalogo_ts') || '0');
+    const cacheStale = cacheTs > 0 && (Date.now() - cacheTs) > 4 * 60 * 60 * 1000; // 4h TTL
+    Market.setStatus(hasCachedCat ? true : null, hasCachedCat ? (cacheStale ? 'Cache viejo — ' : 'Cache — ') + totalCached + ' productos' : 'Conectando...');
 
     // Background refresh all data
     Promise.all([
@@ -940,6 +942,7 @@ const Market = {
       if (catRes.ok && catRes.catalogo) {
         catalogo = catRes.catalogo;
         localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
+        localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
         var totalProds = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
         Market.setStatus(true, 'Sheets — ' + totalProds + ' productos');
       } else if (!hasCachedCat) {
@@ -974,6 +977,7 @@ const Market = {
 
   async fetch(action) {
     const res = await fetch(API_URL + '?action=' + action + '&_t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   },
 
@@ -982,6 +986,7 @@ const Market = {
       method: 'POST',
       body: JSON.stringify(data)
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   },
 
@@ -1026,6 +1031,23 @@ const Market = {
       console.error('Registrar error:', err);
       return null;
     }
+  },
+
+  async refresh() {
+    Market.setStatus(null, 'Actualizando...');
+    try {
+      const [catRes, finRes, cliRes] = await Promise.all([Market.fetch('getCatalogoAgro'), Market.fetch('getFinanciacionAgro'), Market.fetch('getClientes')]);
+      if (catRes.ok && catRes.catalogo) {
+        catalogo = catRes.catalogo;
+        localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
+        localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
+      }
+      if (finRes.ok && finRes.financiacion) { financiacion = finRes.financiacion; localStorage.setItem('hs_agro_financiacion_cache', JSON.stringify(financiacion)); }
+      if (cliRes.ok && cliRes.clientes) { clientes = cliRes.clientes; localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes)); }
+      const total = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
+      Market.setStatus(true, 'Actualizado — ' + total + ' productos');
+      App.renderLista(plazoActual);
+    } catch(e) { Market.setStatus(false, 'Error al actualizar'); }
   },
 
   setStatus(online, text) {
@@ -1088,12 +1110,12 @@ const Historial = {
       </div>`;
       const trows = (h.lineas || []).map(l =>
         `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:3px 0; border-bottom:1px solid var(--bg); font-size:11px;">
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.producto}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.dosis}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.vol || '—'}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.precio || '—'}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${l.costoHa}</span>
-          <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${l.monto || '—'}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(l.producto)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.dosis)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.vol || '—')}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.precio || '—')}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px;">${esc(l.costoHa)}</span>
+          <span style="text-align:right; font-family:var(--mono); font-size:10px; font-weight:700;">${esc(l.monto || '—')}</span>
         </div>`
       ).join('');
       // Status buttons
@@ -1108,10 +1130,10 @@ const Historial = {
               <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">#${h.numero || '—'}</span>
               ${tipoTag}
             </div>
-            <span style="font-size:11px; color:var(--text-mut);">${h.fecha} · ${h.vendedor || ''} · ${h.plazo || ''}</span>
+            <span style="font-size:11px; color:var(--text-mut);">${esc(h.fecha)} · ${esc(h.vendedor || '')} · ${esc(h.plazo || '')}</span>
           </div>
-          <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${h.cliente || 'Sin nombre'}</div>
-          ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${h.establecimiento || ''}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? h.hectareas + ' has' : ''}</div>` : ''}
+          <div style="font-weight:700; font-size:14px; margin-bottom:1px;">${esc(h.cliente || 'Sin nombre')}</div>
+          ${h.establecimiento || h.hectareas ? `<div style="font-size:11px; color:var(--text-sec); margin-bottom:4px;">${esc(h.establecimiento || '')}${h.establecimiento && h.hectareas ? ' · ' : ''}${h.hectareas ? esc(h.hectareas) + ' has' : ''}</div>` : ''}
           <div style="margin-top:4px; overflow-x:auto;">
             ${thead}${trows}
           </div>
@@ -1177,7 +1199,7 @@ const Historial = {
     document.querySelector('[data-tab="cotizar"]').classList.add('active');
     $('tab-cotizar').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert('Cotización #' + (h.numero || '') + ' cargada', 'Editá y compartí.');
+    alert('Cotización #' + (h.numero || '') + ' cargada. Editá y compartí.');
   },
   async compartir(idx) {
     await Historial.exportar(idx);
@@ -1195,9 +1217,9 @@ const Historial = {
         Historial.items.splice(idx, 1);
         localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
         Historial.render();
-        alert('Eliminada', 'Cotización eliminada.');
-      } else { alert('Error', d.error || 'No se pudo eliminar'); }
-    } catch(e) { alert('Error de conexión', e.message); }
+        alert('Cotización eliminada.');
+      } else { alert('Error: ' + (d.error || 'No se pudo eliminar')); }
+    } catch(e) { alert('Error de conexión: ' + e.message); }
   },
   async recargar() {
     await Historial.cargar();
@@ -1362,11 +1384,11 @@ const Condiciones = {
     data.forEach(r=>{ const key=r.moneda||'Otro'; if(!groups[key])groups[key]=[]; groups[key].push(r); });
     let h='';
     Object.keys(groups).forEach(moneda=>{
-      h+=`<div style="margin-bottom:12px;"><p style="margin:0 0 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;">${moneda}</p>`;
+      h+=`<div style="margin-bottom:12px;"><p style="margin:0 0 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;">${esc(moneda)}</p>`;
       h+='<table class="cond-table"><thead><tr><th>Detalle</th><th>TNA</th><th>TEA</th><th>Plazo</th></tr></thead><tbody>';
       groups[moneda].forEach((r,i)=>{
         const bg=i%2===0?'#fafbfc':'#fff';
-        h+=`<tr style="background:${bg};"><td>${r.detalle||''}</td><td>${this.fmtRate(r.tna)}</td><td>${this.fmtRate(r.tea)}</td><td>${r.plazo||''}d</td></tr>`;
+        h+=`<tr style="background:${bg};"><td>${esc(r.detalle||'')}</td><td>${this.fmtRate(r.tna)}</td><td>${this.fmtRate(r.tea)}</td><td>${esc(r.plazo||'')}d</td></tr>`;
       });
       h+='</tbody></table></div>';
     });
@@ -1416,6 +1438,12 @@ const App = {
     });
 
     document.addEventListener('click', e => {
+      // Delegated handler for addManual (avoids inline onclick injection)
+      const manualEl = e.target.closest('[data-manual-aid]');
+      if (manualEl) { App.addManual(Number(manualEl.dataset.manualAid), manualEl.dataset.manualName); return; }
+      // Delegated handler for selectCliente (avoids inline onclick injection)
+      const clienteEl = e.target.closest('[data-cliente-name]');
+      if (clienteEl) { App.selectCliente(clienteEl.dataset.clienteName); return; }
       if (!e.target.closest('.row-new-search') && !e.target.closest('.app-dropdown')) App.hideDropdown();
       if (!e.target.closest('#cliente') && !e.target.closest('#cliente-dd')) App.hideClienteDD();
     });
@@ -1450,44 +1478,6 @@ const App = {
     });
   },
 
-  /* ── Ref panel toggle (mobile) ── */
-  toggleRef() {
-    const p = $('ref-panel');
-    const isOpen = p.classList.toggle('open');
-    $('ref-toggle').textContent = isOpen ? 'Ocultar tabla de referencia' : 'Ver tabla de precios de referencia';
-  },
-
-  /* ── Render tabla de referencia ── */
-  renderRef() {
-    const q = ($('ref-filter')?.value || '').toLowerCase().trim();
-    let html = '';
-
-    Object.entries(catalogo).forEach(([cat, prods]) => {
-      const filtered = prods.filter(p =>
-        !q ||
-        p.producto.toLowerCase().includes(q) ||
-        cat.toLowerCase().includes(q) ||
-        (p.formulacion && p.formulacion.toLowerCase().includes(q)) ||
-        (p.proveedor && p.proveedor.toLowerCase().includes(q))
-      );
-      if (!filtered.length) return;
-      html += `<tr class="cat-row"><td colspan="7">${cat}</td></tr>`;
-      filtered.forEach(p => {
-        const stockClass = p.stock > 0 ? 'color:var(--green)' : 'color:var(--text-mut)';
-        html += `<tr>
-          <td class="prod-name">${p.producto}</td>
-          <td class="droga">${p.formulacion || '—'}</td>
-          <td class="prov">${(p.proveedor || '').replace(/ S\.A\.?/g, '')}</td>
-          <td class="num precio-col">$${fmt(p.precio_usd)}</td>
-          <td class="num">${p.presentacion || '—'}</td>
-          <td class="num">${p.margen_pct || 0}%</td>
-          <td class="num" style="${stockClass}">${p.stock || 0}</td>
-        </tr>`;
-      });
-    });
-
-    $('ref-tbody').innerHTML = html;
-  },
 
   /* ── Plazo ── */
   setModo(el) {
@@ -1551,7 +1541,7 @@ const App = {
     const app = aplicaciones.find(a => a.id === aid);
     if (!app) return;
     if (field === 'hectareas') {
-      app.hectareas = parseFloat(val) || 0;
+      app.hectareas = Math.max(0, parseFloat(val) || 0);
       // Update row values inline without full re-render (keeps focus)
       const has = app.hectareas;
       const recargo = App.getRecargo();
@@ -1569,6 +1559,13 @@ const App = {
           if (vals[2]) vals[2].textContent = fmt(costoHa);
           if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
         });
+        // Update collapsed summary text
+        const summaryEl = appBlock.querySelector('.app-summary');
+        if (summaryEl) {
+          let netoHa = 0, ivaHa = 0;
+          app.rows.forEach(r => { const c = r.precio * (1 + recargo) * r.dosis; netoHa += c; ivaHa += c * (r.iva_pct / 100); });
+          summaryEl.textContent = `${app.rows.length} prod · USD ${fmt(netoHa)}/ha` + (has > 0 ? ` · USD ${fmt((netoHa + ivaHa) * has)} total` : '');
+        }
       }
       App.renderConsolidado();
     } else {
@@ -1631,7 +1628,7 @@ const App = {
     });
     const nombreManual = searchEl.value.trim();
     if (nombreManual) {
-      html += `<div class="dd-item dd-add" onclick="App.addManual(${aid},'${nombreManual.replace(/'/g, "\\'")}')">
+      html += `<div class="dd-item dd-add" data-manual-aid="${aid}" data-manual-name="${esc(nombreManual)}">
         <span style="color:var(--accent); font-weight:700;">+ Agregar "${esc(nombreManual)}" manualmente</span>
       </div>`;
     }
@@ -1736,8 +1733,8 @@ const App = {
         const monto = has > 0 ? costoHa * has : null;
         return `<div class="row-item" data-rowid="${r.id}" style="grid-template-columns:${gridCols}">
           <div class="row-prod">
-            <span class="row-prod-name">${r.producto}</span>
-            <span class="row-prod-meta">${r.formulacion || r.unidad || ''}</span>
+            <span class="row-prod-name">${esc(r.producto)}</span>
+            <span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span>
           </div>
           <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">$${fmt(r.costo_usd)}</span>
           <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">${r.margen_pct}%</span>
@@ -1970,7 +1967,7 @@ const App = {
     const allRows = aplicaciones.flatMap(a => a.rows);
     let totalHa = 0;
     const lineas = allRows.map(r => {
-      const precioP = r.precio * (1 + App.getRecargo() / 100);
+      const precioP = r.precio * (1 + App.getRecargo());
       const costoHa = precioP * r.dosis;
       const vol = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? precioP * r.dosis * has : null;
@@ -2180,8 +2177,10 @@ const App = {
           if (vol) retiroMap[key].totalVol += vol;
         });
 
-        grandTotalHa += appTotalHa * (has > 0 ? has : 1);
-        grandTotalIvaHa += appTotalIvaHa * (has > 0 ? has : 1);
+        if (has > 0) {
+          grandTotalHa += appTotalHa * has;
+          grandTotalIvaHa += appTotalIvaHa * has;
+        }
       }
 
       y += 2; // spacing between apps
@@ -2293,7 +2292,7 @@ const App = {
       : (showAll ? clientes.slice(0, 30) : []);
     if (!clienteMatches.length && !q) { dd.classList.remove('show'); return; }
     let html = clienteMatches.map((c, i) =>
-      `<div class="dd-item${i === clienteHighlight ? ' highlighted' : ''}" onclick="App.selectCliente('${c.nombre.replace(/'/g, "\\'")}')">
+      `<div class="dd-item${i === clienteHighlight ? ' highlighted' : ''}" data-cliente-name="${esc(c.nombre)}">
         <span>${esc(c.nombre)}</span>
         <span style="font-size:11px;color:var(--text-mut);">${esc(c.cuit || '')}</span>
       </div>`
@@ -2366,7 +2365,7 @@ const App = {
     const proveedores = Object.keys(porProveedor).sort();
     let html = '';
     proveedores.forEach(prov => {
-      html += `<div class="lista-cat">${prov}</div>`;
+      html += `<div class="lista-cat">${esc(prov)}</div>`;
       porProveedor[prov].forEach(p => {
         const precio = Calc.precioConRecargo(p.precio_usd, plazo);
         const mg = Number(p.margen_pct) || 0;
@@ -2374,8 +2373,8 @@ const App = {
         const pSug = Number(p.precio_usd) || 0;
         html += `<div class="lista-row" style="display:grid;grid-template-columns:1fr 62px 46px 72px;gap:8px;align-items:center;">
           <div style="min-width:0;">
-            <div class="lista-name">${p.producto}</div>
-            <div class="lista-unit">${p.categoria} · ${p.unidad}${p.formulacion ? ' · '+p.formulacion : ''}</div>
+            <div class="lista-name">${esc(p.producto)}</div>
+            <div class="lista-unit">${esc(p.categoria)} · ${esc(p.unidad)}${p.formulacion ? ' · '+esc(p.formulacion) : ''}</div>
           </div>
           <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(costo)}</span>
           <span style="text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#16a34a;">${mg}%</span>
@@ -2383,13 +2382,14 @@ const App = {
         </div>`;
       });
     });
-    if (!html && q) html = '<div style="padding:20px;text-align:center;color:var(--text-mut);font-size:.82rem;">Sin resultados para "' + q + '"</div>';
+    if (!html && q) html = '<div style="padding:20px;text-align:center;color:var(--text-mut);font-size:.82rem;">Sin resultados para "' + esc(q) + '"</div>';
     $('lista-body').innerHTML = html;
   }
 };
 App._debouncedFilterClientes = debounce(() => App.filterClientes(), 200);
 App._debouncedFilterDropdown = debounce((aid) => App.filterDropdown(aid), 200);
 App._debouncedUpdateField = debounce((aid, rid, field, val) => App.updateField(aid, rid, field, val), 150);
+App._debouncedRenderLista = debounce(() => App.renderLista(), 200);
 
 document.addEventListener('DOMContentLoaded', App.init);
 </script>

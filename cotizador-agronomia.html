@@ -1354,28 +1354,28 @@ const Historial = {
     let y = 0;
     const navy = [13, 45, 94], gris = [100, 116, 139], black = [0, 0, 0];
 
-    // Header (same style as active PDF)
+    // Header
     if (logoDataUrl) {
-      const logoW = 26, logoH = logoW / 2.51;
+      const logoW = 28, logoH = logoW / 2.51;
       try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 6, logoW, logoH); } catch(e) {}
     }
     doc.setTextColor(...navy);
-    doc.setFontSize(11);
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.text((h.cliente || '—') + '  ·  #' + (h.numero || ''), margin, 12);
-    doc.setFontSize(7.5);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...gris);
-    doc.text(h.fecha + '  ·  ' + (h.vendedor || '') + '  ·  ' + (h.plazo || 'Contado'), margin, 17);
+    doc.text(h.fecha + '  ·  ' + (h.vendedor || '') + '  ·  ' + (h.plazo || 'Contado'), margin, 18);
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
-    doc.line(margin, 20, W - margin, 20);
-    y = 23;
+    doc.line(margin, 21, W - margin, 21);
+    y = 24;
 
     // Establecimiento + Hectáreas
     if (h.establecimiento || h.hectareas) {
       doc.setTextColor(...navy);
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       let info = h.establecimiento || '';
       if (h.hectareas) info += (info ? ' · ' : '') + h.hectareas + ' has';
@@ -1383,59 +1383,55 @@ const Historial = {
       y += 7;
     }
 
-    // Tabla
-    const colC = [margin, margin + 60, margin + 85, margin + 110, margin + 135, margin + 158];
-    doc.setFillColor(60, 60, 60);
-    doc.rect(margin, y, contentW, 6, 'F');
+    // Tabla — same columns as active PDF
+    const colC = [margin, margin + 58, margin + 88, margin + 120, margin + 152];
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, 7, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(6.5);
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
-    doc.text('PRODUCTO', colC[0] + 2, y + 4);
-    doc.text('DOSIS/HA', colC[1] + 2, y + 4);
-    doc.text('VOLUMEN', colC[2] + 2, y + 4);
-    doc.text('PRECIO', colC[3] + 2, y + 4);
-    doc.text('$/HA', colC[4] + 2, y + 4);
-    doc.text('MONTO', colC[5] + 2, y + 4);
-    y += 6;
+    doc.text('PRODUCTO', colC[0] + 2, y + 5);
+    doc.text('DOSIS', colC[1] + 2, y + 5);
+    doc.text('PRECIO', colC[2] + 2, y + 5);
+    doc.text('$/HA', colC[3] + 2, y + 5);
+    doc.text('MONTO', colC[4] + 2, y + 5);
+    y += 7;
 
     (h.lineas || []).forEach((l, i) => {
       if (y > 272) { doc.addPage(); y = 12; }
-      if (i % 2 === 0) { doc.setFillColor(245, 245, 245); doc.rect(margin, y, contentW, 5.5, 'F'); }
+      if (i % 2 === 0) { doc.setFillColor(243, 244, 246); doc.rect(margin, y, contentW, 7, 'F'); }
       doc.setTextColor(...black);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
-      const nombre = (l.producto || '').length > 34 ? l.producto.substring(0, 32) + '...' : (l.producto || '');
-      doc.text(nombre, colC[0] + 2, y + 3.8);
-      doc.setFontSize(7);
-      doc.text(l.dosis + ' ' + (l.unidad || 'L') + '/ha', colC[1] + 2, y + 3.8);
-      doc.setTextColor(...gris);
-      doc.text(l.vol || '—', colC[2] + 2, y + 3.8);
-      doc.setTextColor(...black);
-      doc.text('U$S ' + l.precio, colC[3] + 2, y + 3.8);
-      doc.text('U$S ' + l.costoHa, colC[4] + 2, y + 3.8);
+      doc.setFontSize(8.5);
+      const nombre = (l.producto || '').length > 32 ? l.producto.substring(0, 30) + '...' : (l.producto || '');
+      doc.text(nombre, colC[0] + 2, y + 4.8);
+      doc.setFontSize(8);
+      doc.text(l.dosis + ' ' + (l.unidad || 'L'), colC[1] + 2, y + 4.8);
+      doc.text('$' + (l.precio || '—'), colC[2] + 2, y + 4.8);
+      doc.text('$' + (l.costoHa || '—'), colC[3] + 2, y + 4.8);
       doc.setFont('helvetica', 'bold');
-      doc.text(l.monto !== '—' ? 'U$S ' + l.monto : '—', colC[5] + 2, y + 3.8);
-      y += 5.5;
+      doc.text(l.monto !== '—' ? '$' + l.monto : '—', colC[4] + 2, y + 4.8);
+      y += 7;
     });
 
     // Totales
     y += 2;
-    doc.setFillColor(30, 41, 59);
-    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setFillColor(...navy);
+    doc.rect(margin, y, contentW, 9, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('TOTAL/HA', margin + 3, y + 5.5);
-    doc.text('USD ' + h.total, W - margin - 4, y + 5.5, { align: 'right' });
+    doc.text('TOTAL/HA', margin + 3, y + 6);
+    doc.text('USD ' + h.total, W - margin - 4, y + 6, { align: 'right' });
     if (h.hectareas && h.totalHas) {
-      y += 9;
-      doc.setFillColor(30, 41, 59);
-      doc.rect(margin, y, contentW, 8, 'F');
+      y += 10;
+      doc.setFillColor(...navy);
+      doc.rect(margin, y, contentW, 9, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.text('TOTAL ' + h.hectareas + ' HAS (c/IVA)', margin + 3, y + 5.5);
-      doc.text('USD ' + h.totalHas, W - margin - 4, y + 5.5, { align: 'right' });
+      doc.text('TOTAL ' + h.hectareas + ' HAS (c/IVA)', margin + 3, y + 6);
+      doc.text('USD ' + h.totalHas, W - margin - 4, y + 6, { align: 'right' });
     }
-    y += (h.hectareas ? 28 : 16);
+    y += 14;
 
     // Footer
     doc.setFontSize(7);
@@ -2180,9 +2176,8 @@ const App = {
   generarPDF(modo) {
     const esReceta = modo === 'receta';
     const { jsPDF } = window.jspdf;
-    // Mobile-friendly: narrower page, bigger fonts
-    const W = 148, margin = 10; // A5 width (148mm) for mobile readability
-    const doc = new jsPDF({ unit: 'mm', format: [W, 297] });
+    const W = 210, margin = 15;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const contentW = W - margin * 2;
     let y = 0;
 
@@ -2192,7 +2187,7 @@ const App = {
 
     // ── Header ──
     if (logoDataUrl) {
-      const logoW = 22, logoH = logoW / 2.51;
+      const logoW = 28, logoH = logoW / 2.51;
       try { doc.addImage(logoDataUrl, 'PNG', W - margin - logoW, 6, logoW, logoH); } catch(e) {}
     }
     const cliente = $('cliente').value || '';
@@ -2234,7 +2229,7 @@ const App = {
 
       if (esReceta) {
         // Receta: Producto | Dosis | Volumen | Formulación
-        const colR = [margin, margin + 52, margin + 76, margin + 98];
+        const colR = [margin, margin + 72, margin + 102, margin + 136];
         doc.setFillColor(...navy);
         doc.rect(margin, y, contentW, 7, 'F');
         doc.setTextColor(255, 255, 255);
@@ -2253,7 +2248,7 @@ const App = {
           doc.setTextColor(...black);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8.5);
-          const nombre = r.producto.length > 28 ? r.producto.substring(0, 26) + '...' : r.producto;
+          const nombre = r.producto.length > 38 ? r.producto.substring(0, 36) + '...' : r.producto;
           doc.text(nombre, colR[0] + 2, y + 4.8);
           doc.setFontSize(8);
           doc.text(r.dosis + ' ' + (r.unidad||'L') + '/ha', colR[1] + 2, y + 4.8);
@@ -2271,8 +2266,8 @@ const App = {
         // Cotización: Producto | Dosis | Precio | $/ha | Monto (+ Financ.)
         const pdfRecargo = App.getRecargo();
         const colC = pdfRecargo > 0
-          ? [margin, margin + 38, margin + 56, margin + 76, margin + 96, margin + 114]
-          : [margin, margin + 42, margin + 62, margin + 84, margin + 108];
+          ? [margin, margin + 52, margin + 76, margin + 100, margin + 126, margin + 154]
+          : [margin, margin + 58, margin + 88, margin + 120, margin + 152];
         doc.setFillColor(...navy);
         doc.rect(margin, y, contentW, 7, 'F');
         doc.setTextColor(255, 255, 255);
@@ -2311,7 +2306,7 @@ const App = {
           doc.setTextColor(...black);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8.5);
-          const maxLen = pdfRecargo > 0 ? 20 : 24;
+          const maxLen = pdfRecargo > 0 ? 28 : 32;
           const nombre = r.producto.length > maxLen ? r.producto.substring(0, maxLen - 2) + '...' : r.producto;
           doc.text(nombre, colC[0] + 2, y + 4.8);
           doc.setFontSize(8);

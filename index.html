@@ -230,8 +230,9 @@ body {
   const VENDOR_KEY = 'henderseeds_vendor';
   const sel = document.getElementById('vendorSelect');
 
-  // Always start empty — force vendor selection
-  sel.value = '';
+  // Restore last vendor from localStorage
+  const saved = localStorage.getItem(VENDOR_KEY);
+  if (saved) sel.value = saved;
 
   // Save vendor on change
   sel.addEventListener('change', function() {

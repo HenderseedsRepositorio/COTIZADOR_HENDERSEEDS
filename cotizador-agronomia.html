@@ -1545,9 +1545,10 @@ const App = {
           const volumen = has > 0 ? r.dosis * has : null;
           const monto = has > 0 ? costoHa * has : null;
           const vals = rowEl.querySelectorAll('.row-val');
-          if (vals[1]) vals[1].textContent = volumen ? fmt(volumen) : '—';
-          if (vals[2]) vals[2].textContent = fmt(costoHa);
-          if (vals[3]) vals[3].textContent = monto ? fmt(monto) : '—';
+          const base = recargo > 0 ? 4 : 3; // 3 mob-hide cols + optional precioFin
+          if (vals[base]) vals[base].textContent = volumen ? fmt(volumen) : '—';
+          if (vals[base + 1]) vals[base + 1].textContent = fmt(costoHa);
+          if (vals[base + 2]) vals[base + 2].textContent = monto ? fmt(monto) : '—';
         });
         // Update collapsed summary text
         const summaryEl = appBlock.querySelector('.app-summary');
@@ -1875,13 +1876,12 @@ const App = {
       const volumen = has > 0 ? r.dosis * has : null;
       const monto = has > 0 ? costoHa * has : null;
       const vals = rowEl.querySelectorAll('.row-val');
-      // With financiacion: [0]=sug, [1]=pfin, [2]=vol, [3]=costo, [4]=monto
-      // Without: [0]=sug, [1]=vol, [2]=costo, [3]=monto
-      const offset = recargo > 0 ? 1 : 0;
-      if (recargo > 0 && vals[1]) vals[1].textContent = '$' + fmt(precioF);
-      if (vals[1 + offset]) vals[1 + offset].textContent = volumen ? fmt(volumen) : '—';
-      if (vals[2 + offset]) vals[2 + offset].textContent = fmt(costoHa);
-      if (vals[3 + offset]) vals[3 + offset].textContent = monto ? fmt(monto) : '—';
+      // vals: [0]=costo_usd, [1]=margen, [2]=precio_margen, [3?]=precioFin, [N-3]=vol, [N-2]=costoHa, [N-1]=monto
+      const base = recargo > 0 ? 4 : 3; // 3 mob-hide cols + optional precioFin
+      if (recargo > 0 && vals[3]) vals[3].textContent = '$' + fmt(precioF);
+      if (vals[base]) vals[base].textContent = volumen ? fmt(volumen) : '—';
+      if (vals[base + 1]) vals[base + 1].textContent = fmt(costoHa);
+      if (vals[base + 2]) vals[base + 2].textContent = monto ? fmt(monto) : '—';
     }
 
     App.renderConsolidado();

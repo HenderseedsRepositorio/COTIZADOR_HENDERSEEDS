@@ -6,6 +6,7 @@
 <title>Cotizador Agroinsumos — Henderseeds v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -825,20 +826,28 @@ async function captureAndShare(el, filename, opts={}) {
 
 function debounce(fn, ms=150) { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
-/* ══════════════════════════════════════════
-   CATÁLOGO FALLBACK — copia de "Catalogo Agronomia" en Sheets
-   Columnas: producto, presentacion, formulacion, proveedor,
-   iva_pct, costo_usd, margen_pct, precio_usd, dosis_sug, stock
-   Cuando conecte a Sheets se sobreescribe con datos frescos.
-   ══════════════════════════════════════════ */
-/* Catálogo vacío — SIEMPRE se carga desde Sheets. Sin fallback de precios. */
-const CATALOGO_FALLBACK = {};
+/* ── Supabase Config ── */
+const CONFIG = {
+  SUPABASE_URL: 'https://xpzwopnsasvlppbvapdy.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwendvcG5zYXN2bHBwYnZhcGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTk0NTMsImV4cCI6MjA4OTk3NTQ1M30.5o3QBrVRSOIYA8ynFnn11aTzNyuMEh1HjGCkCSTZxXY'
+};
+const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
-const FINANCIACION_FALLBACK = [
-  { plazo: "contado", label: "Contado", recargo_pct: 0 },
-  { plazo: "mayo2026", label: "Mayo 2026", recargo_pct: 2 },
-  { plazo: "dic2026", label: "Dic 2026", recargo_pct: 6 }
-];
+const SUBTIPO_MAP = {
+  'HER': 'Herbicidas', 'INS': 'Insecticidas', 'FUN': 'Fungicidas',
+  'CUR': 'Curasemillas', 'COA': 'Coadyuvantes', 'PAS': 'Pasturas',
+  'SIL': 'Silo Bolsa', 'SEM': 'Semillas', 'FER': 'Fertilizantes'
+};
+
+function groupBySubtipo(rows) {
+  const result = {};
+  rows.forEach(r => {
+    const cat = SUBTIPO_MAP[r.subtipo] || r.subtipo || 'Otros';
+    if (!result[cat]) result[cat] = [];
+    result[cat].push(r);
+  });
+  return result;
+}
 
 /* ── Logo para PDF (se carga como base64 al inicio) ── */
 let logoDataUrl = null;
@@ -856,8 +865,8 @@ let logoDataUrl = null;
 })();
 
 /* ── Estado ── */
-let catalogo = JSON.parse(localStorage.getItem('hs_agro_catalogo_cache') || 'null') || CATALOGO_FALLBACK;
-let financiacion = JSON.parse(localStorage.getItem('hs_agro_financiacion_cache') || 'null') || FINANCIACION_FALLBACK;
+let catalogo = JSON.parse(localStorage.getItem('hs_agro_catalogo_cache') || 'null') || {};
+let financiacion = JSON.parse(localStorage.getItem('hs_agro_financiacion_cache') || 'null') || [];
 let aplicaciones = [];
 let appId = 0;
 let rowId = 0;
@@ -911,143 +920,106 @@ const LocalBackup = {
   }
 };
 
-/* ══════════════════════════════════════════
-   API_URL — Pegá acá la URL de tu Apps Script deploy
-   Dejala vacía para usar datos fallback locales
-   ══════════════════════════════════════════ */
-const API_URL = 'https://script.google.com/macros/s/AKfycbyoK9r8Scj6WBhl_XUUiAU_kcpTVtGKSlDH9WHmVlRGNo-jt-QbLqlg5BNY5RGAhHV8kw/exec';
-
-/* ── Market (conexión a Sheets) ── */
+/* ── Market (conexión a Supabase) ── */
 const Market = {
   online: false,
 
-  init() {
-    if (!API_URL) {
-      Market.setStatus(false, 'Offline — datos locales');
-      return;
-    }
-    // Show cached data immediately
+  async init() {
     const hasCachedCat = localStorage.getItem('hs_agro_catalogo_cache');
-    const totalCached = Object.values(catalogo).reduce((s,arr) => s + arr.length, 0);
+    const totalCached = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
     const cacheTs = parseInt(localStorage.getItem('hs_agro_catalogo_ts') || '0');
-    const cacheStale = cacheTs > 0 && (Date.now() - cacheTs) > 4 * 60 * 60 * 1000; // 4h TTL
+    const cacheStale = cacheTs > 0 && (Date.now() - cacheTs) > 4 * 60 * 60 * 1000;
     Market.setStatus(hasCachedCat ? true : null, hasCachedCat ? (cacheStale ? 'Cache viejo — ' : 'Cache — ') + totalCached + ' productos' : 'Conectando...');
 
-    // Background refresh all data
-    Promise.all([
-      Market.fetch('getCatalogoAgro'),
-      Market.fetch('getFinanciacionAgro'),
-      Market.fetch('getClientes')
-    ]).then(([catRes, finRes, cliRes]) => {
-      if (catRes.ok && catRes.catalogo) {
-        catalogo = catRes.catalogo;
+    try {
+      const [catRes, finRes, cliRes] = await Promise.all([
+        sb.from('catalogo_agro').select(),
+        sb.from('financiacion_agro').select(),
+        sb.from('clientes').select('nombre,cuit')
+      ]);
+
+      if (catRes.data && catRes.data.length) {
+        catalogo = groupBySubtipo(catRes.data);
         localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
         localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
-        var totalProds = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
-        Market.setStatus(true, 'Sheets — ' + totalProds + ' productos');
-      } else if (!hasCachedCat) {
-        Market.setStatus(false, 'Error catálogo — datos locales');
       }
-      if (finRes.ok && finRes.financiacion) {
-        financiacion = finRes.financiacion;
+      if (finRes.data && finRes.data.length) {
+        financiacion = finRes.data;
         localStorage.setItem('hs_agro_financiacion_cache', JSON.stringify(financiacion));
       }
-      if (cliRes.ok && cliRes.clientes) {
-        clientes = cliRes.clientes;
+      if (cliRes.data) {
+        clientes = cliRes.data;
         localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
       }
+
+      const totalProds = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
+      Market.setStatus(true, 'Conectado — ' + totalProds + ' productos');
       App.renderLista(plazoActual);
-      // Sync pending local quotes
+
+      // Sync pending local backups
       const pending = LocalBackup.getPending();
       if (pending.length) {
-        (async () => {
-          for (const cot of pending) {
-            try {
-              await Market.post({ action:'registrarAgro', vendedor:cot.vendedor, cliente:cot.cliente, items:cot.items });
-              LocalBackup.markSynced(cot.localId);
-            } catch(e) { break; }
-          }
-        })();
+        for (const cot of pending) {
+          try {
+            await sb.from('cotizaciones_agro').insert({
+              vendedor: cot.vendedor, cliente: cot.cliente, items: cot.items
+            });
+            LocalBackup.markSynced(cot.localId);
+          } catch(e) { break; }
+        }
       }
-    }).catch(err => {
+    } catch(err) {
       console.error('Market.init error:', err);
       Market.setStatus(hasCachedCat ? true : false, hasCachedCat ? 'Sin conexión — usando cache' : 'Error — datos locales');
-    });
-  },
-
-  async fetch(action) {
-    const res = await fetch(API_URL + '?action=' + action + '&_t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-  },
-
-  async post(data) {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-  },
-
-  async registrarCotizacion() {
-    if (!API_URL) return null;
-    try {
-      const fin = financiacion.find(f => f.plazo === plazoActual);
-      const firstApp = aplicaciones[0] || { hectareas: 0, establecimiento: '' };
-      const allRows = aplicaciones.flatMap(a => a.rows);
-      const data = {
-        action: 'registrarAgro',
-        vendedor: vendor,
-        cliente: $('cliente').value,
-        localidad: '',
-        hectareas: firstApp.hectareas,
-        establecimiento: firstApp.establecimiento,
-        plazo: fin ? fin.label : 'Contado',
-        recargo_pct: fin ? fin.recargo_pct : 0,
-        lineas: allRows.map(r => ({
-          categoria: r.cat,
-          producto: r.producto,
-          unidad: r.unidad,
-          precio: r.precio,
-          dosis: r.dosis,
-          iva_pct: r.iva_pct
-        })),
-        aplicaciones: aplicaciones.map(a => ({
-          establecimiento: a.establecimiento,
-          hectareas: a.hectareas,
-          lineas: a.rows.map(r => ({
-            categoria: r.cat,
-            producto: r.producto,
-            unidad: r.unidad,
-            precio: r.precio,
-            dosis: r.dosis,
-            iva_pct: r.iva_pct
-          }))
-        }))
-      };
-      return await Market.post(data);
-    } catch (err) {
-      console.error('Registrar error:', err);
-      return null;
     }
   },
 
   async refresh() {
     Market.setStatus(null, 'Actualizando...');
     try {
-      const [catRes, finRes, cliRes] = await Promise.all([Market.fetch('getCatalogoAgro'), Market.fetch('getFinanciacionAgro'), Market.fetch('getClientes')]);
-      if (catRes.ok && catRes.catalogo) {
-        catalogo = catRes.catalogo;
+      const [catRes, finRes, cliRes] = await Promise.all([
+        sb.from('catalogo_agro').select(),
+        sb.from('financiacion_agro').select(),
+        sb.from('clientes').select('nombre,cuit')
+      ]);
+      if (catRes.data && catRes.data.length) {
+        catalogo = groupBySubtipo(catRes.data);
         localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
         localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
       }
-      if (finRes.ok && finRes.financiacion) { financiacion = finRes.financiacion; localStorage.setItem('hs_agro_financiacion_cache', JSON.stringify(financiacion)); }
-      if (cliRes.ok && cliRes.clientes) { clientes = cliRes.clientes; localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes)); }
+      if (finRes.data && finRes.data.length) {
+        financiacion = finRes.data;
+        localStorage.setItem('hs_agro_financiacion_cache', JSON.stringify(financiacion));
+      }
+      if (cliRes.data) {
+        clientes = cliRes.data;
+        localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
+      }
       const total = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
       Market.setStatus(true, 'Actualizado — ' + total + ' productos');
       App.renderLista(plazoActual);
-    } catch(e) { Market.setStatus(false, 'Error al actualizar'); }
+    } catch(e) {
+      Market.setStatus(false, 'Error al actualizar');
+    }
+  },
+
+  async registrarCotizacion(payload) {
+    const { data, error } = await sb.from('cotizaciones_agro')
+      .insert({
+        vendedor: payload.vendedor,
+        cliente: payload.cliente,
+        establecimiento: payload.establecimiento,
+        hectareas: payload.hectareas,
+        plazo: payload.plazo,
+        recargo_pct: payload.recargo_pct,
+        tipo: payload.tipo,
+        aplicaciones: payload.aplicaciones,
+        items: payload.items
+      })
+      .select('numero')
+      .single();
+    if (error) throw error;
+    return data.numero;
   },
 
   setStatus(online, text) {
@@ -1079,14 +1051,35 @@ const Historial = {
     }
   },
   async cargar() {
-    // Show cached immediately, then refresh
     if (Historial.items.length) Historial.render();
-    if (!API_URL) { if (!Historial.items.length) Historial.render(); return; }
     try {
-      const res = await Market.fetch('getHistorialAgro');
-      if (res.ok && res.historial) {
-        Historial.items = res.historial;
-        localStorage.setItem('hs_agro_historial_cache', JSON.stringify(res.historial));
+      const { data, error } = await sb.from('cotizaciones_agro')
+        .select()
+        .order('numero', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      if (data) {
+        Historial.items = data.map(q => ({
+          numero: q.numero,
+          fecha: q.fecha ? new Date(q.fecha).toLocaleDateString('es-AR') : '—',
+          vendedor: q.vendedor,
+          cliente: q.cliente,
+          establecimiento: q.establecimiento,
+          hectareas: q.hectareas,
+          plazo: q.plazo,
+          tipo: q.tipo,
+          estado: q.estado || 'Pendiente',
+          lineas: q.items || [],
+          total: fmt((q.items || []).reduce((s, l) => s + (parseFloat(String(l.costoHa).replace(/\./g,'').replace(',','.')) || 0), 0)),
+          totalHas: q.hectareas > 0
+            ? fmt((q.items || []).reduce((s, l) => {
+                const m = l.monto && l.monto !== '—' ? parseFloat(String(l.monto).replace(/\./g,'').replace(',','.')) || 0 : 0;
+                return s + m;
+              }, 0))
+            : null,
+          aplicaciones: q.aplicaciones
+        }));
+        localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
       }
     } catch(e) { console.error('Error cargando historial:', e); }
     Historial.render();
@@ -1098,13 +1091,12 @@ const Historial = {
       bodyInline.innerHTML = `<div class="hist-empty"><p style="font-size:32px; margin-bottom:8px;">&#128203;</p><p>Sin cotizaciones</p></div>`;
       return;
     }
-    const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
     const estadoColors = {Pendiente:'#f59e0b', Enviada:'#3b82f6', 'Venta cargada':'#22c55e'};
     bodyInline.innerHTML = Historial.items.map((h, idx) => {
       const tipoTag = h.tipo === 'Receta'
         ? `<span style="font-size:10px; background:var(--bg); color:var(--text-sec); padding:1px 6px; border-radius:4px;">Receta</span>`
         : `<span style="font-size:10px; background:var(--accent-bg); color:var(--accent); padding:1px 6px; border-radius:4px;">Cotización</span>`;
-      const est = estados[h.numero] || 'Pendiente';
+      const est = h.estado || 'Pendiente';
       const thead = `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:4px 0; border-bottom:1px solid var(--border); font-size:9px; font-weight:700; color:var(--text-mut); text-transform:uppercase;">
         <span>Producto</span><span style="text-align:right">Dosis</span><span style="text-align:right">Vol.</span><span style="text-align:right">Precio</span><span style="text-align:right">$/ha</span><span style="text-align:right">Monto</span>
       </div>`;
@@ -1158,11 +1150,15 @@ const Historial = {
     }).join('');
     // bodyInline is the only target now (hist tab was replaced by condiciones)
   },
-  setEstado(numero, estado) {
-    const estados = JSON.parse(localStorage.getItem('hs_agro_quote_estados') || '{}');
-    estados[numero] = estado;
-    localStorage.setItem('hs_agro_quote_estados', JSON.stringify(estados));
+  async setEstado(numero, estado) {
+    // Optimistic update
+    const q = this.items.find(i => i.numero == numero);
+    if (q) q.estado = estado;
     this.render();
+    // Sync to Supabase
+    try {
+      await sb.from('cotizaciones_agro').update({ estado }).eq('numero', numero);
+    } catch(e) { console.warn('Error actualizando estado:', e); }
   },
   modificar(idx) {
     const h = Historial.items[idx];
@@ -1209,17 +1205,13 @@ const Historial = {
     if (!h) return;
     if (!confirm('¿Eliminar cotización #' + (h.numero || '') + '? Esta acción no se puede deshacer.')) return;
     try {
-      const r = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'deleteCotizacionAgro', numero: h.numero }) });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const text = await r.text();
-      let d; try { d = JSON.parse(text); } catch(e) { throw new Error('Respuesta no JSON'); }
-      if (d.ok) {
-        Historial.items.splice(idx, 1);
-        localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
-        Historial.render();
-        alert('Cotización eliminada.');
-      } else { alert('Error: ' + (d.error || 'No se pudo eliminar')); }
-    } catch(e) { alert('Error de conexión: ' + e.message); }
+      const { error } = await sb.from('cotizaciones_agro').delete().eq('numero', h.numero);
+      if (error) throw error;
+      Historial.items.splice(idx, 1);
+      localStorage.setItem('hs_agro_historial_cache', JSON.stringify(Historial.items));
+      Historial.render();
+      alert('Cotización eliminada.');
+    } catch(e) { alert('Error: ' + e.message); }
   },
   async recargar() {
     await Historial.cargar();
@@ -1362,14 +1354,12 @@ const Condiciones = {
     return n.toFixed(1) + '%';
   },
   async load() {
-    if (this.data) { this.renderTable(); }
-    if (!API_URL) return;
+    if (this.data) this.renderTable();
     try {
-      const r = await fetch(API_URL + '?action=getCondiciones&_t=' + Date.now(), { cache: 'no-store' });
-      const d = await r.json();
-      if (Array.isArray(d) && d.length) {
-        this.data = d;
-        localStorage.setItem('hs_condiciones_cache', JSON.stringify(d));
+      const { data, error } = await sb.from('condiciones').select();
+      if (data && data.length) {
+        this.data = data;
+        localStorage.setItem('hs_condiciones_cache', JSON.stringify(data));
         this.renderTable();
       } else if (!this.data) {
         $('condTable').innerHTML = '<p style="color:var(--text-mut);font-size:.75rem;">Sin condiciones disponibles</p>';
@@ -1962,38 +1952,48 @@ const App = {
   },
 
   async _registrarYGuardar(modo) {
-    const firstApp = aplicaciones[0] || { hectareas: 0, establecimiento: '', rows: [] };
-    const has = firstApp.hectareas;
-    const fin = financiacion.find(f => f.plazo === plazoActual);
-    const allRows = aplicaciones.flatMap(a => a.rows);
-    let totalHa = 0;
-    const lineas = allRows.map(r => {
-      const precioP = r.precio * (1 + App.getRecargo());
-      const costoHa = precioP * r.dosis;
-      const vol = has > 0 ? r.dosis * has : null;
-      const monto = has > 0 ? precioP * r.dosis * has : null;
-      totalHa += costoHa;
-      return { producto: r.producto, dosis: r.dosis, unidad: r.unidad, precio: fmt(precioP), costoHa: fmt(costoHa), vol: vol ? fmt(vol) : '—', monto: monto ? fmt(monto) : '—' };
+    const recargo = App.getRecargo();
+    const items = aplicaciones.flatMap(a => {
+      const has = a.hectareas || 0;
+      return a.rows.map(r => {
+        const precioP = r.precio * (1 + recargo);
+        const costoHa = precioP * r.dosis;
+        const vol = has > 0 ? r.dosis * has : null;
+        const monto = has > 0 ? costoHa * has : null;
+        return {
+          producto: r.producto, cat: r.cat, dosis: r.dosis, unidad: r.unidad,
+          precio: fmt(precioP), costoHa: fmt(costoHa),
+          vol: vol ? fmt(vol) : '—', monto: monto ? fmt(monto) : '—',
+          iva_pct: r.iva_pct, formulacion: r.formulacion || ''
+        };
+      });
     });
-    // Save local backup immediately (before network call)
-    const localId = 'agro_'+Date.now();
-    const backup = {
-      localId,
-      fecha: dateStr(),
-      vendedor: vendor,
-      cliente: $('cliente').value||'—',
-      items: lineas,
-      synced: false
-    };
-    LocalBackup.save(backup);
 
-    // Registrar en Sheets
-    let numero = '—';
+    const firstApp = aplicaciones[0] || { hectareas: 0, establecimiento: '' };
+
+    // LocalBackup (offline fallback)
+    const localId = 'agro_' + Date.now();
+    LocalBackup.save({ localId, fecha: dateStr(), vendedor: vendor, cliente: $('cliente').value || '—', items, synced: false });
+
+    // Supabase insert
     try {
-      const result = await Market.registrarCotizacion();
-      if (result && result.ok) { numero = result.numero; LocalBackup.markSynced(localId); }
-    } catch(e) { console.error(e); }
-    // Recargar historial desde Sheets
+      const numero = await Market.registrarCotizacion({
+        vendedor: vendor,
+        cliente: $('cliente').value || '—',
+        establecimiento: firstApp.establecimiento,
+        hectareas: firstApp.hectareas,
+        plazo: plazoActual === 'financiacion' ? ($('fin-info').textContent || 'Financiación') : 'Contado',
+        recargo_pct: Math.round(recargo * 10000) / 100,
+        tipo: modo,
+        aplicaciones: aplicaciones.map(a => ({
+          id: a.id, establecimiento: a.establecimiento, hectareas: a.hectareas,
+          rows: a.rows
+        })),
+        items
+      });
+      LocalBackup.markSynced(localId);
+    } catch(e) { console.error('Error registrando:', e); }
+
     Historial.recargar();
   },
 
@@ -2330,13 +2330,12 @@ const App = {
     const nombre = $('cliente').value.trim();
     if (!nombre) return;
     $('cliente-dd').classList.remove('show');
-    clientes.push({ nombre, localidad: '' });
-    if (API_URL) {
-      try {
-        await Market.post({ action: 'addCliente', nombre });
-        console.log('Cliente agregado a Sheets:', nombre);
-      } catch (err) { console.error('Error agregando cliente:', err); }
-    }
+    clientes.push({ nombre, cuit: '' });
+    localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
+    App.selectCliente(nombre);
+    try {
+      await sb.from('clientes').insert({ nombre });
+    } catch(e) { console.warn('Error agregando cliente:', e); }
   },
 
   /* ── Lista ── */

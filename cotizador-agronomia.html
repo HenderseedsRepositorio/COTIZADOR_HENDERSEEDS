@@ -882,6 +882,15 @@ let logoDataUrl = null;
 })();
 
 /* ── Estado ── */
+// One-time cache clear after Supabase migration (old Apps Script cache had different format)
+if (!localStorage.getItem('hs_agro_supabase_v1')) {
+  localStorage.removeItem('hs_agro_catalogo_cache');
+  localStorage.removeItem('hs_agro_catalogo_ts');
+  localStorage.removeItem('hs_agro_financiacion_cache');
+  localStorage.removeItem('hs_agro_historial_cache');
+  localStorage.removeItem('hs_agro_quote_estados');
+  localStorage.setItem('hs_agro_supabase_v1', '1');
+}
 let catalogo = JSON.parse(localStorage.getItem('hs_agro_catalogo_cache') || 'null') || {};
 let financiacion = JSON.parse(localStorage.getItem('hs_agro_financiacion_cache') || 'null') || [];
 let aplicaciones = [];

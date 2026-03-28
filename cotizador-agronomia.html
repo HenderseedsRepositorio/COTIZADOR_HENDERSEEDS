@@ -951,11 +951,8 @@ const Market = {
   online: false,
 
   async init() {
-    const hasCachedCat = localStorage.getItem('hs_agro_catalogo_cache');
-    const totalCached = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
-    const cacheTs = parseInt(localStorage.getItem('hs_agro_catalogo_ts') || '0');
-    const cacheStale = cacheTs > 0 && (Date.now() - cacheTs) > 4 * 60 * 60 * 1000;
-    Market.setStatus(hasCachedCat ? true : null, hasCachedCat ? (cacheStale ? 'Cache viejo — ' : 'Cache — ') + totalCached + ' productos' : 'Conectando...');
+    const hasCachedCat = Object.keys(catalogo).length > 0;
+    Market.setStatus(null, 'Conectando...');
 
     try {
       const [catRes, finRes, cliRes] = await Promise.all([
@@ -971,7 +968,6 @@ const Market = {
       if (catRes.data && catRes.data.length) {
         catalogo = groupBySubtipo(catRes.data);
         localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
-        localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
       }
       if (finRes.data && finRes.data.length) {
         financiacion = finRes.data;
@@ -983,24 +979,26 @@ const Market = {
       }
 
       const totalProds = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
-      Market.setStatus(true, 'Conectado — ' + totalProds + ' productos');
+      Market.setStatus(true, totalProds + ' productos');
       App.renderLista(plazoActual);
 
       // Sync pending local backups
       const pending = LocalBackup.getPending();
-      if (pending.length) {
-        for (const cot of pending) {
-          try {
-            await sb.from('cotizaciones_agro').insert({
-              vendedor: cot.vendedor, cliente: cot.cliente, items: cot.items
-            });
-            LocalBackup.markSynced(cot.localId);
-          } catch(e) { break; }
-        }
+      for (const cot of pending) {
+        try {
+          await sb.from('cotizaciones_agro').insert({ vendedor: cot.vendedor, cliente: cot.cliente, items: cot.items });
+          LocalBackup.markSynced(cot.localId);
+        } catch(e) { break; }
       }
     } catch(err) {
       console.error('Market.init error:', err);
-      Market.setStatus(hasCachedCat ? true : false, hasCachedCat ? 'Sin conexión — usando cache' : 'Error — datos locales');
+      if (hasCachedCat) {
+        const totalCached = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
+        Market.setStatus(false, 'Sin conexión — cache ' + totalCached + ' prod.');
+        App.renderLista(plazoActual);
+      } else {
+        Market.setStatus(false, 'Sin conexión — sin datos');
+      }
     }
   },
 
@@ -1012,10 +1010,10 @@ const Market = {
         sb.from('financiacion_agro').select(),
         sb.from('clientes').select('nombre,cuit')
       ]);
+      if (catRes.error) throw catRes.error;
       if (catRes.data && catRes.data.length) {
         catalogo = groupBySubtipo(catRes.data);
         localStorage.setItem('hs_agro_catalogo_cache', JSON.stringify(catalogo));
-        localStorage.setItem('hs_agro_catalogo_ts', Date.now().toString());
       }
       if (finRes.data && finRes.data.length) {
         financiacion = finRes.data;
@@ -1026,7 +1024,7 @@ const Market = {
         localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
       }
       const total = Object.values(catalogo).reduce((s, arr) => s + arr.length, 0);
-      Market.setStatus(true, 'Actualizado — ' + total + ' productos');
+      Market.setStatus(true, total + ' productos');
       App.renderLista(plazoActual);
     } catch(e) {
       Market.setStatus(false, 'Error al actualizar');

@@ -11,29 +11,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
+  /* ── Shared palette (same in both cotizadores) ── */
   --navy: #0d2d5e;
-  --navy-light: #1a4a8a;
+  --navy-mid: #1a4a8a;
   --navy-sky: #2d6fc4;
+  --green-ok: #16a34a;
+  --green-bg: #dcfce7;
+  --red: #ef4444;
+  --red-bg: #fee2e2;
+  --warn: #f59e0b;
+  --wa-green: #25d366;
+  --bg: #f0f4fb;
+  --bg-tint: #eef3fb;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #0d2033;
+  --text-sec: #64748b;
+  --text-mut: #94a3b8;
+  /* ── App-specific accent (blue for Agro) ── */
   --accent: #2d6fc4;
   --accent-dark: #1a4a8a;
   --accent-bg: #e8f0fe;
   --accent-light: #5b9af5;
-  --green: #16a34a;
-  --green-bg: #dcfce7;
-  --red: #ef4444;
-  --bg: #f0f4fb;
-  --card: #ffffff;
-  --border: #e2e8f0;
   --accent-border: #b8cfef;
-  --text: #0d2033;
-  --text-sec: #64748b;
-  --text-mut: #94a3b8;
+  /* ── Typography scale ── */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  /* ── Spacing scale (base-4) ── */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  /* ── Radii ── */
   --radius: 14px;
   --radius-sm: 9px;
   --shadow: 0 2px 14px rgba(13,45,94,.08), 0 1px 3px rgba(13,45,94,.04);
+  /* ── Fonts ── */
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --title: 'Archivo Black', sans-serif;
+  /* ── Touch ── */
+  --touch-min: 44px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -73,9 +91,10 @@ input, select, button { font-family: inherit; font-size: inherit; }
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-mut);
-  font-size: .76rem;
-  font-weight: 500;
-  padding: 10px 4px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 12px 4px;
+  min-height: var(--touch-min);
   cursor: pointer;
   transition: all .2s;
   font-family: var(--font);
@@ -145,8 +164,8 @@ input, select, button { font-family: inherit; font-size: inherit; }
 .card {
   background: var(--card);
   border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 10px;
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-2);
   box-shadow: var(--shadow);
 }
 .card-title {
@@ -322,12 +341,13 @@ input, select, button { font-family: inherit; font-size: inherit; }
   background: var(--bg);
 }
 .dd-item {
-  padding: 4px 12px;
+  padding: 10px 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--text-sm);
+  min-height: var(--touch-min);
   border-bottom: 1px solid var(--bg);
 }
 .dd-item:hover, .dd-item.highlighted { background: var(--accent-bg); }
@@ -339,7 +359,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 
 .cliente-dd { z-index: 500; max-height: 60vh; }
-.cliente-dd .dd-item { font-size: 13px; padding: 6px 12px; }
+.cliente-dd .dd-item { font-size: var(--text-base); padding: 10px 12px; min-height: var(--touch-min); display:flex; align-items:center; justify-content:space-between; }
 .cliente-dd .dd-add { color: var(--accent); font-weight: 700; font-size: 12px; }
 
 /* ── Plazo ── */
@@ -350,9 +370,10 @@ input, select, button { font-family: inherit; font-size: inherit; }
 }
 .plazo-chip {
   flex: 1;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border-radius: 10px;
-  font-size: .7rem;
+  font-size: var(--text-sm);
+  min-height: var(--touch-min);
   font-weight: 700;
   border: 1.5px solid var(--border);
   background: white;
@@ -643,6 +664,10 @@ input, select, button { font-family: inherit; font-size: inherit; }
   .card { padding: 10px; }
   .app-block { padding: 10px; }
 }
+/* ── Skeleton loading ── */
+.skeleton { background: linear-gradient(90deg, var(--bg) 25%, var(--border) 50%, var(--bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; height: 14px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
 /* ── Toast ── */
 .toast-container { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:6px; pointer-events:none; width:90%; max-width:380px; }
 .toast { pointer-events:auto; padding:10px 16px; border-radius:10px; font-family:var(--font); font-size:.82rem; font-weight:600; color:#fff; text-align:center; animation:toastIn .25s ease; box-shadow:0 4px 16px rgba(0,0,0,.18); }
@@ -735,8 +760,8 @@ input, select, button { font-family: inherit; font-size: inherit; }
         <button class="btn-add-app" onclick="App.addAplicacion()">+ Agregar Aplicación</button>
         <div id="resumen-consolidado" style="display:none;"></div>
 
-        <!-- ACCIONES (inline, debajo del resumen) -->
-        <div id="acciones-inline" style="display:none;margin-top:10px;">
+        <!-- ACCIONES (sticky bottom bar) -->
+        <div id="acciones-inline" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:936px;background:var(--card);border-top:1px solid var(--border);padding:10px 12px;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,.08);">
           <div style="display:flex;gap:8px;">
             <button class="btn btn-green" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('cotizacion')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Cotización</button>
             <button class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('receta')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Receta</button>
@@ -1166,7 +1191,7 @@ const Historial = {
         ? `<span style="font-size:10px; background:var(--bg); color:var(--text-sec); padding:1px 6px; border-radius:4px;">Receta</span>`
         : `<span style="font-size:10px; background:var(--accent-bg); color:var(--accent); padding:1px 6px; border-radius:4px;">Cotización</span>`;
       const est = h.estado || 'Pendiente';
-      const thead = `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:4px 0; border-bottom:1px solid var(--border); font-size:9px; font-weight:700; color:var(--text-mut); text-transform:uppercase;">
+      const thead = `<div style="display:grid; grid-template-columns:1fr 50px 55px 50px 50px 55px; gap:2px; padding:4px 0; border-bottom:1px solid var(--border); font-size:10px; font-weight:700; color:var(--text-mut); text-transform:uppercase;">
         <span>Producto</span><span style="text-align:right">Dosis</span><span style="text-align:right">Vol.</span><span style="text-align:right">Precio</span><span style="text-align:right">$/ha</span><span style="text-align:right">Monto</span>
       </div>`;
       const trows = (h.lineas || []).map(l =>
@@ -1735,7 +1760,8 @@ const App = {
         <span style="color:var(--accent); font-weight:700;">+ Agregar "${esc(nombreManual)}" manualmente</span>
       </div>`;
     }
-    if (!html) html = '<div style="padding:12px; color:var(--text-mut); font-size:13px;">Escribí para buscar o agregar</div>';
+    if (!html && !Object.keys(catalogo).length) html = '<div style="padding:12px;"><div class="skeleton" style="width:70%;margin-bottom:8px;"></div><div class="skeleton" style="width:50%;"></div></div>';
+    else if (!html) html = '<div style="padding:12px; color:var(--text-mut); font-size:13px;">Escribí para buscar o agregar</div>';
     ddEl.innerHTML = html;
     ddEl.classList.add('show');
     highlightIdx = -1;
@@ -1839,9 +1865,9 @@ const App = {
             <span class="row-prod-name">${esc(r.producto)}</span>
             <span class="row-prod-meta">${esc(r.formulacion || r.unidad || '')}</span>
           </div>
-          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">$${fmt(r.costo_usd)}</span>
-          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">${r.margen_pct}%</span>
-          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">$${fmt(r.precio_margen)}</span>
+          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:10px;">$${fmt(r.costo_usd)}</span>
+          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:10px;">${r.margen_pct}%</span>
+          <span class="row-val mob-hide" style="color:var(--text-mut);font-size:10px;">$${fmt(r.precio_margen)}</span>
           <input type="number" class="row-inp" inputmode="decimal" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App._debouncedUpdateField(${app.id},${r.id},'precio',this.value)">
@@ -1896,9 +1922,9 @@ const App = {
           <div class="rows-scroll">
             <div class="rows-header" style="grid-template-columns:${gridCols}">
               <span>Producto</span>
-              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:.58rem;">Costo</span>
-              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:.58rem;">%Mg</span>
-              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:.58rem;">P.Sug</span>
+              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:var(--text-xs);">Costo</span>
+              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:var(--text-xs);">%Mg</span>
+              <span class="mob-hide" style="text-align:right;color:var(--text-mut);font-size:var(--text-xs);">P.Sug</span>
               <span style="text-align:right">Contado</span>
               ${recargo > 0 ? '<span style="text-align:right;color:var(--accent);">Financ.</span>' : ''}
               <span style="text-align:right">Dosis</span>

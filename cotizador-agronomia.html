@@ -872,6 +872,7 @@ let appId = 0;
 let rowId = 0;
 let activeDropdownApp = null;
 let plazoActual = 'contado';
+let editandoNumero = null; // numero de cotización que se está editando (null = nueva)
 let prodSeleccionado = null;
 let highlightIdx = -1;
 let ddItems = [];
@@ -1001,6 +1002,24 @@ const Market = {
     } catch(e) {
       Market.setStatus(false, 'Error al actualizar');
     }
+  },
+
+  async actualizarCotizacion(numero, payload) {
+    const { error } = await sb.from('cotizaciones_agro')
+      .update({
+        vendedor: payload.vendedor,
+        cliente: payload.cliente,
+        establecimiento: payload.establecimiento,
+        hectareas: payload.hectareas,
+        plazo: payload.plazo,
+        recargo_pct: payload.recargo_pct,
+        tipo: payload.tipo,
+        aplicaciones: payload.aplicaciones,
+        items: payload.items
+      })
+      .eq('numero', numero);
+    if (error) throw error;
+    return numero;
   },
 
   async registrarCotizacion(payload) {
@@ -1163,6 +1182,8 @@ const Historial = {
   modificar(idx) {
     const h = Historial.items[idx];
     if (!h) return;
+    // Track editing state
+    editandoNumero = h.numero || null;
     // Set client
     $('cliente').value = h.cliente || '';
     // Clear existing aplicaciones and load from history
@@ -1971,22 +1992,28 @@ const App = {
     const localId = 'agro_' + Date.now();
     LocalBackup.save({ localId, fecha: dateStr(), vendedor: vendor, cliente: $('cliente').value || '—', items, synced: false });
 
-    // Supabase insert
+    // Supabase insert or update
+    const payload = {
+      vendedor: vendor,
+      cliente: $('cliente').value || '—',
+      establecimiento: firstApp.establecimiento,
+      hectareas: firstApp.hectareas,
+      plazo: plazoActual === 'financiacion' ? ($('fin-info').textContent || 'Financiación') : 'Contado',
+      recargo_pct: Math.round(recargo * 10000) / 100,
+      tipo: modo,
+      aplicaciones: aplicaciones.map(a => ({
+        id: a.id, establecimiento: a.establecimiento, hectareas: a.hectareas,
+        rows: a.rows
+      })),
+      items
+    };
     try {
-      const numero = await Market.registrarCotizacion({
-        vendedor: vendor,
-        cliente: $('cliente').value || '—',
-        establecimiento: firstApp.establecimiento,
-        hectareas: firstApp.hectareas,
-        plazo: plazoActual === 'financiacion' ? ($('fin-info').textContent || 'Financiación') : 'Contado',
-        recargo_pct: Math.round(recargo * 10000) / 100,
-        tipo: modo,
-        aplicaciones: aplicaciones.map(a => ({
-          id: a.id, establecimiento: a.establecimiento, hectareas: a.hectareas,
-          rows: a.rows
-        })),
-        items
-      });
+      if (editandoNumero) {
+        await Market.actualizarCotizacion(editandoNumero, payload);
+        editandoNumero = null;
+      } else {
+        await Market.registrarCotizacion(payload);
+      }
       LocalBackup.markSynced(localId);
     } catch(e) { console.error('Error registrando:', e); }
 

@@ -794,14 +794,17 @@ const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, m
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 function unidadFromNombre(nombre) {
-  const m = String(nombre).match(/x\s*[\d,\.]+\s*(lts?|l|kg|gr|uni|dosis|mt)/i);
+  const n = String(nombre);
+  // Silo bolsas siempre en unidades
+  if (/ipesa|silo.*\d|bolsa.*\d.*mt/i.test(n) && !/x\s*[\d,\.]+\s*lt/i.test(n)) return 'Un';
+  const m = n.match(/x\s*[\d,\.]+\s*(lts?|l|kg|gr|uni|dosis|mt)/i);
   if (!m) return 'L';
   const u = m[1].toUpperCase();
   if (u === 'LTS' || u === 'LT' || u === 'L') return 'L';
   if (u === 'KG') return 'Kg';
   if (u === 'GR') return 'g';
   if (u === 'UNI') return 'Un';
-  if (u === 'MT') return 'Mt';
+  if (u === 'MT') return 'Un';
   if (u === 'DOSIS') return 'Dosis';
   return 'L';
 }

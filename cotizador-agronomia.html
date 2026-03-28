@@ -793,6 +793,18 @@ const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function unidadFromNombre(nombre) {
+  const m = String(nombre).match(/x\s*[\d,\.]+\s*(lts?|l|kg|gr|uni|dosis|mt)/i);
+  if (!m) return 'L';
+  const u = m[1].toUpperCase();
+  if (u === 'LTS' || u === 'LT' || u === 'L') return 'L';
+  if (u === 'KG') return 'Kg';
+  if (u === 'GR') return 'g';
+  if (u === 'UNI') return 'Un';
+  if (u === 'MT') return 'Mt';
+  if (u === 'DOSIS') return 'Dosis';
+  return 'L';
+}
 
 async function captureAndShare(el, filename, opts={}) {
   const canvas = await html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:opts.width||400, width:opts.width||400, height:el.scrollHeight});
@@ -844,6 +856,7 @@ function groupBySubtipo(rows) {
   rows.forEach(r => {
     const cat = SUBTIPO_MAP[r.subtipo] || r.subtipo || 'Otros';
     if (!result[cat]) result[cat] = [];
+    r.unidad = r.unidad || unidadFromNombre(r.producto);
     result[cat].push(r);
   });
   return result;
@@ -1674,7 +1687,7 @@ const App = {
       producto: p.producto,
       cat: p.cat,
       precio: p.precio_usd,
-      unidad: p.unidad || 'L',
+      unidad: p.unidad || unidadFromNombre(p.producto),
       dosis: p.dosis_sug || 0,
       iva_pct: p.iva_pct,
       proveedor: p.proveedor || '',
@@ -1705,7 +1718,7 @@ const App = {
       producto: nombre,
       cat: 'Otros',
       precio: 0,
-      unidad: 'L',
+      unidad: unidadFromNombre(nombre),
       dosis: 1,
       iva_pct: 21,
       proveedor: '',

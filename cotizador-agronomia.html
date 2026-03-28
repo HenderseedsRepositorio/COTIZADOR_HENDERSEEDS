@@ -839,6 +839,8 @@ input, select, button { font-family: inherit; font-size: inherit; }
 
 <script>
 const $ = id => document.getElementById(id);
+// Parse number: handles raw JS numbers, plain strings, and Argentine locale ("3.002,50")
+const parseFmt = v => { if (typeof v === 'number') return v; const s = String(v || ''); if (s.includes(',')) return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0; return parseFloat(s) || 0; };
 const fmt = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const dateStr = (d = new Date()) => d.toLocaleDateString('es-AR');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -1164,11 +1166,10 @@ const Historial = {
           tipo: q.tipo,
           estado: q.estado || 'Pendiente',
           lineas: q.items || [],
-          total: fmt((q.items || []).reduce((s, l) => s + (parseFloat(String(l.costoHa).replace(/\./g,'').replace(',','.')) || 0), 0)),
+          total: fmt((q.items || []).reduce((s, l) => s + (l._costoHa != null ? l._costoHa : parseFmt(l.costoHa)), 0)),
           totalHas: q.hectareas > 0
             ? fmt((q.items || []).reduce((s, l) => {
-                const m = l.monto && l.monto !== '—' ? parseFloat(String(l.monto).replace(/\./g,'').replace(',','.')) || 0 : 0;
-                return s + m;
+                return s + (l._monto != null ? l._monto : (l.monto && l.monto !== '—' ? parseFmt(l.monto) : 0));
               }, 0))
             : null,
           aplicaciones: q.aplicaciones
@@ -1269,12 +1270,12 @@ const Historial = {
         rowId++;
         rows.push({
           id: rowId, producto: l.producto || '', cat: l.cat || l.categoria || '',
-          precio: parseFloat(String(l.precio).replace(/\./g,'').replace(',','.')) || 0,
+          precio: parseFmt(l.precio),
           unidad: l.unidad || unidadFromNombre(l.producto || ''),
-          dosis: parseFloat(String(l.dosis).replace(/\./g,'').replace(',','.')) || 0,
+          dosis: parseFmt(l.dosis),
           iva_pct: l.iva_pct || 21, proveedor: l.proveedor || '',
           costo_usd: l.costo_usd || 0, margen_pct: l.margen_pct || 0,
-          precio_margen: parseFloat(String(l.precio).replace(/\./g,'').replace(',','.')) || 0,
+          precio_margen: parseFmt(l.precio),
           formulacion: l.formulacion || '', presentacion: l.presentacion || 0
         });
       });
@@ -2096,7 +2097,11 @@ const App = {
           producto: r.producto, cat: r.cat, dosis: r.dosis, unidad: r.unidad,
           precio: fmt(precioP), costoHa: fmt(costoHa),
           vol: vol ? fmt(vol) : '—', monto: monto ? fmt(monto) : '—',
-          iva_pct: r.iva_pct, formulacion: r.formulacion || ''
+          iva_pct: r.iva_pct, formulacion: r.formulacion || '',
+          _precio: Math.round(precioP * 100) / 100,
+          _costoHa: Math.round(costoHa * 100) / 100,
+          _vol: vol ? Math.round(vol * 100) / 100 : 0,
+          _monto: monto ? Math.round(monto * 100) / 100 : 0
         };
       });
     });

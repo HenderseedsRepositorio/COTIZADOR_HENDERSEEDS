@@ -718,6 +718,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
             <button class="btn btn-green" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('cotizacion')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Cotización</button>
             <button class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="App.compartirPDF('receta')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Receta</button>
             <button id="btnSaveAgroInline" class="btn" style="flex:1;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;" onclick="App.guardarCotizacion()">💾 Guardar</button>
+            <button class="btn" style="background:#f0f4fb;color:var(--navy);border:1.5px solid var(--border);padding:8px;" onclick="App.nuevaCotizacion()" title="Nueva">✨</button>
           </div>
         </div>
 
@@ -749,7 +750,7 @@ input, select, button { font-family: inherit; font-size: inherit; }
     <input type="text" id="lista-search" class="inp inp-sm" placeholder="🔍 Buscar producto..." autocomplete="off"
       oninput="App._debouncedRenderLista()" style="margin-bottom:8px;">
     <div style="display:grid;grid-template-columns:1fr 62px 46px 72px;gap:8px;padding:6px 8px;font-size:.65rem;font-weight:700;color:var(--text-mut);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border);">
-      <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:center;">Margen</span><span style="text-align:right;">P.Contado</span>
+      <span>Producto</span><span style="text-align:right;">Costo</span><span style="text-align:center;">Margen</span><span style="text-align:right;">Precio</span>
     </div>
     <div id="lista-body"></div>
   </section>
@@ -889,7 +890,6 @@ let rowId = 0;
 let activeDropdownApp = null;
 let plazoActual = 'contado';
 let editandoNumero = null; // numero de cotización que se está editando (null = nueva)
-let prodSeleccionado = null;
 let highlightIdx = -1;
 let ddItems = [];
 let clientes = JSON.parse(localStorage.getItem('hs_agro_clientes_cache') || '[]');
@@ -954,6 +954,10 @@ const Market = {
         sb.from('financiacion_agro').select(),
         sb.from('clientes').select('nombre,cuit')
       ]);
+
+      if (catRes.error) throw catRes.error;
+      if (finRes.error) throw finRes.error;
+      if (cliRes.error) console.warn('Error clientes:', cliRes.error);
 
       if (catRes.data && catRes.data.length) {
         catalogo = groupBySubtipo(catRes.data);
@@ -1173,9 +1177,9 @@ const Historial = {
             <span style="font-family:var(--mono); font-size:11px; font-weight:700;">USD ${h.totalHas || '—'}</span>
           </div>` : ''}
           <div style="display:flex; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid var(--border);">
-            <button style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:5px;" onclick="Historial.modificar(${idx})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modificar</button>
-            <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;" onclick="Historial.compartir(${idx})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-            <button onclick="Historial.eliminar(${idx})" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;" ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+            <button style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:5px;" onclick="Historial.modificar(${h.numero})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modificar</button>
+            <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;" onclick="Historial.compartir(${h.numero})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+            <button onclick="Historial.eliminar(${h.numero})" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;" ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:70px;">
@@ -1195,8 +1199,8 @@ const Historial = {
       await sb.from('cotizaciones_agro').update({ estado }).eq('numero', numero);
     } catch(e) { console.warn('Error actualizando estado:', e); }
   },
-  modificar(idx) {
-    const h = Historial.items[idx];
+  modificar(numero) {
+    const h = Historial.items.find(i => i.numero == numero);
     if (!h) return;
     // Track editing state
     editandoNumero = h.numero || null;
@@ -1204,27 +1208,55 @@ const Historial = {
     $('cliente').value = h.cliente || '';
     // Clear existing aplicaciones and load from history
     aplicaciones.length = 0;
-    appId++;
-    const app = { id: appId, establecimiento: h.establecimiento || '', hectareas: h.hectareas || 0, rows: [] };
-    (h.lineas || []).forEach(l => {
-      rowId++;
-      app.rows.push({
-        id: rowId,
-        producto: l.producto || '',
-        cat: l.categoria || '',
-        precio: parseFloat(l.precio) || 0,
-        unidad: l.unidad || 'L',
-        dosis: parseFloat(l.dosis) || 0,
-        iva_pct: l.iva_pct || 21,
-        proveedor: '',
-        costo_usd: 0,
-        margen_pct: 0,
-        precio_margen: parseFloat(l.precio) || 0,
-        formulacion: l.formulacion || '',
-        presentacion: 0
+    const buildRows = (lineas) => {
+      const rows = [];
+      (lineas || []).forEach(l => {
+        rowId++;
+        rows.push({
+          id: rowId, producto: l.producto || '', cat: l.cat || l.categoria || '',
+          precio: parseFloat(String(l.precio).replace(/\./g,'').replace(',','.')) || 0,
+          unidad: l.unidad || unidadFromNombre(l.producto || ''),
+          dosis: parseFloat(String(l.dosis).replace(/\./g,'').replace(',','.')) || 0,
+          iva_pct: l.iva_pct || 21, proveedor: l.proveedor || '',
+          costo_usd: l.costo_usd || 0, margen_pct: l.margen_pct || 0,
+          precio_margen: parseFloat(String(l.precio).replace(/\./g,'').replace(',','.')) || 0,
+          formulacion: l.formulacion || '', presentacion: l.presentacion || 0
+        });
       });
-    });
-    aplicaciones.push(app);
+      return rows;
+    };
+    // Prefer full aplicaciones structure, fallback to flat lineas
+    if (h.aplicaciones && h.aplicaciones.length) {
+      h.aplicaciones.forEach(a => {
+        appId++;
+        aplicaciones.push({
+          id: appId, establecimiento: a.establecimiento || '', hectareas: a.hectareas || 0,
+          rows: buildRows(a.rows || a.lineas), collapsed: false
+        });
+      });
+    } else {
+      appId++;
+      aplicaciones.push({
+        id: appId, establecimiento: h.establecimiento || '', hectareas: h.hectareas || 0,
+        rows: buildRows(h.lineas), collapsed: false
+      });
+    }
+    // Restore plazo
+    if (h.plazo && h.plazo !== 'Contado') {
+      plazoActual = 'financiacion';
+      document.querySelectorAll('#tab-cotizar .plazo-chip').forEach(c => c.classList.remove('active'));
+      const finChip = document.querySelector('#tab-cotizar .plazo-chip[data-modo="financiacion"]');
+      if (finChip) finChip.classList.add('active');
+      const finConfig = $('fin-config');
+      if (finConfig) finConfig.style.display = 'flex';
+    } else {
+      plazoActual = 'contado';
+      document.querySelectorAll('#tab-cotizar .plazo-chip').forEach(c => c.classList.remove('active'));
+      const contChip = document.querySelector('#tab-cotizar .plazo-chip[data-modo="contado"]');
+      if (contChip) contChip.classList.add('active');
+      const finConfig = $('fin-config');
+      if (finConfig) finConfig.style.display = 'none';
+    }
     App.renderAplicaciones();
     // Switch to cotizar tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1234,11 +1266,13 @@ const Historial = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     alert('Cotización #' + (h.numero || '') + ' cargada. Editá y compartí.');
   },
-  async compartir(idx) {
-    await Historial.exportar(idx);
+  async compartir(numero) {
+    const idx = Historial.items.findIndex(i => i.numero == numero);
+    if (idx >= 0) await Historial.exportar(idx);
   },
-  async eliminar(idx) {
-    const h = Historial.items[idx];
+  async eliminar(numero) {
+    const idx = Historial.items.findIndex(i => i.numero == numero);
+    const h = idx >= 0 ? Historial.items[idx] : null;
     if (!h) return;
     if (!confirm('¿Eliminar cotización #' + (h.numero || '') + '? Esta acción no se puede deshacer.')) return;
     try {
@@ -1500,7 +1534,7 @@ const App = {
         const active = f.plazo === plazoActual ? ' active' : '';
         const small = f.recargo_pct > 0 ? `<small>+${f.recargo_pct}%</small>` : '<small>0%</small>';
         const handler = bar.closest('#tab-cotizar') ? `App.setPlazo(this)` : `App.setListaPlazo(this)`;
-        return `<button class="plazo-chip${active}" data-plazo="${f.plazo}" onclick="${handler}">${f.label} ${small}</button>`;
+        return `<button class="plazo-chip${active}" data-plazo="${esc(f.plazo)}" onclick="${handler}">${esc(f.label)} ${small}</button>`;
       }).join('');
     });
   },
@@ -1767,11 +1801,11 @@ const App = {
           <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">$${fmt(r.costo_usd)}</span>
           <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">${r.margen_pct}%</span>
           <span class="row-val mob-hide" style="color:var(--text-mut);font-size:9px;">$${fmt(r.precio_margen)}</span>
-          <input type="number" class="row-inp" value="${r.precio}" step="0.01" min="0"
+          <input type="number" class="row-inp" inputmode="decimal" value="${r.precio}" step="0.01" min="0"
             onchange="App.updateField(${app.id},${r.id},'precio',this.value)"
             oninput="App._debouncedUpdateField(${app.id},${r.id},'precio',this.value)">
           ${recargo > 0 ? `<span class="row-val" style="color:var(--accent);font-weight:600;">$${fmt(precioFinal)}</span>` : ''}
-          <input type="number" class="row-inp" value="${r.dosis}" step="0.1" min="0"
+          <input type="number" class="row-inp" inputmode="decimal" value="${r.dosis}" step="0.1" min="0"
             onchange="App.updateField(${app.id},${r.id},'dosis',this.value)"
             oninput="App._debouncedUpdateField(${app.id},${r.id},'dosis',this.value)">
           <span class="row-val mob-hide">${volumen ? fmt(volumen) : '—'}</span>
@@ -1789,8 +1823,6 @@ const App = {
       const deleteBtn = aplicaciones.length > 1
         ? `<button class="app-delete" onclick="App.removeAplicacion(${app.id})" title="Eliminar">&times;</button>`
         : '';
-
-      const totalesHtml = '';
 
       const appLabel = app.establecimiento || ('Aplicación ' + (appIdx + 1));
 
@@ -1814,7 +1846,7 @@ const App = {
             </div>
             <div>
               <label class="form-lbl">Hectáreas</label>
-              <input type="number" class="inp inp-sm" placeholder="Has" min="0" value="${app.hectareas || ''}"
+              <input type="number" class="inp inp-sm" inputmode="decimal" placeholder="Has" min="0" value="${app.hectareas || ''}"
                 oninput="App.updateAppField(${app.id},'hectareas',this.value)"
                 onchange="if(this.value<0)this.value=0;App.updateAppField(${app.id},'hectareas',this.value)">
             </div>
@@ -1856,7 +1888,6 @@ const App = {
             <span></span>
           </div>
 
-          ${totalesHtml}
         </div>
       </div>`;
     }).join('');
@@ -1946,8 +1977,9 @@ const App = {
       const has = app.hectareas || 0;
       app.rows.forEach(r => {
         const precioF = r.precio * (1 + recargo);
+        const costoHa = precioF * r.dosis;
         const vol = has > 0 ? r.dosis * has : 0;
-        const monto = precioF * vol;
+        const monto = has > 0 ? costoHa * has : costoHa;
         grandNeto += monto;
         grandIva += monto * (r.iva_pct / 100);
         const key = r.producto;
@@ -2036,6 +2068,21 @@ const App = {
     Historial.recargar();
   },
 
+  nuevaCotizacion() {
+    if (aplicaciones.some(a => a.rows.length) && !confirm('¿Limpiar cotización actual y empezar una nueva?')) return;
+    $('cliente').value = '';
+    editandoNumero = null;
+    aplicaciones.length = 0;
+    plazoActual = 'contado';
+    document.querySelectorAll('#tab-cotizar .plazo-chip').forEach(c => c.classList.remove('active'));
+    const contChip = document.querySelector('#tab-cotizar .plazo-chip[data-modo="contado"]');
+    if (contChip) contChip.classList.add('active');
+    const finConfig = $('fin-config');
+    if (finConfig) finConfig.style.display = 'none';
+    App.addAplicacion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
   async guardarCotizacion() {
     const allRows = aplicaciones.flatMap(a => a.rows);
     if (!allRows.length) { alert('Sin productos cargados'); return; }
@@ -2045,7 +2092,7 @@ const App = {
     btn.disabled = true; btn.innerHTML = '⏳ Guardando...';
     try {
       await App._registrarYGuardar('cotizacion');
-      alert('Cotización guardada en Sheets');
+      alert('Cotización guardada correctamente');
     } catch(e) {
       alert('Error: ' + e.message);
     } finally {
@@ -2081,7 +2128,8 @@ const App = {
     doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...gris);
-    doc.text(dateStr(), margin, 17);
+    const plazoLabel = plazoActual === 'financiacion' ? ($('fin-info').textContent || 'Financiación') : 'Contado';
+    doc.text(dateStr() + '  ·  ' + vendor + '  ·  ' + plazoLabel, margin, 17);
     // Línea separadora
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -2255,7 +2303,7 @@ const App = {
     }
 
     // ── Grand total (if 2+ apps, cotizacion mode) ──
-    if (!esReceta && aplicaciones.filter(a => a.rows.length > 0).length >= 2) {
+    if (!esReceta && aplicaciones.some(a => a.rows.length > 0)) {
       if (y > 265) { doc.addPage(); y = 12; }
       doc.setFillColor(30, 41, 59);
       doc.rect(margin, y, contentW, 8, 'F');
@@ -2369,11 +2417,16 @@ const App = {
     const nombre = $('cliente').value.trim();
     if (!nombre) return;
     $('cliente-dd').classList.remove('show');
+    // Deduplicate
+    if (clientes.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) {
+      App.selectCliente(nombre);
+      return;
+    }
     clientes.push({ nombre, cuit: '' });
     localStorage.setItem('hs_agro_clientes_cache', JSON.stringify(clientes));
     App.selectCliente(nombre);
     try {
-      await sb.from('clientes').insert({ nombre });
+      await sb.from('clientes').upsert({ nombre }, { onConflict: 'nombre', ignoreDuplicates: true });
     } catch(e) { console.warn('Error agregando cliente:', e); }
   },
 
@@ -2417,7 +2470,7 @@ const App = {
           </div>
           <span style="text-align:right;font-family:var(--mono);font-size:12px;color:#475569;">$${fmt(costo)}</span>
           <span style="text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#16a34a;">${mg}%</span>
-          <span class="lista-price" style="text-align:right;font-size:13px;">$${fmt(pSug)}</span>
+          <span class="lista-price" style="text-align:right;font-size:13px;">$${fmt(precio)}</span>
         </div>`;
       });
     });

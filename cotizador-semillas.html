@@ -299,6 +299,15 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .toast-action:hover{opacity:.8}
 .toast-close{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:1rem;padding:0 0 0 4px;line-height:1}
 @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+/* Confirm modal */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+.confirm-box{background:#fff;border-radius:14px;padding:24px 20px 16px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.confirm-box p{font-family:var(--font);font-size:.88rem;color:var(--c-dark);margin-bottom:16px;line-height:1.4}
+.confirm-box .confirm-btns{display:flex;gap:8px}
+.confirm-box .confirm-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer}
+.confirm-box .cbtn-cancel{background:var(--c-bg);color:var(--c-gray)}
+.confirm-box .cbtn-ok{background:#dc2626;color:#fff}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 /* Connection indicator */
 .conn-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .conn-dot.online{background:#22c55e}
@@ -684,7 +693,16 @@ const Toast = {
   },
   ok(title,body,opts){this.show('ok',title,body,opts)},
   err(title,body,opts){this.show('err',title,body,opts)},
-  warn(title,body,opts){this.show('warn',title,body,opts)}
+  warn(title,body,opts){this.show('warn',title,body,opts)},
+  confirm(msg, onOk) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `<div class="confirm-box"><p>${esc(msg)}</p><div class="confirm-btns"><button class="cbtn-cancel">Cancelar</button><button class="cbtn-ok">Confirmar</button></div></div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('.cbtn-cancel').onclick = () => overlay.remove();
+    overlay.querySelector('.cbtn-ok').onclick = () => { overlay.remove(); onOk(); };
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  }
 };
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1408,7 +1426,7 @@ const Quote = {
       btn.style.background='#22c55e';
       setTimeout(()=>{ if(this._pendingShare) { this._pendingShare=null; btn.innerHTML=this._origShareHTML; btn.style.background=''; } },30000);
     } catch(e) {
-      alert('Error al generar el PDF. Intentá de nuevo.');
+      Toast.err('Error','No se pudo generar el PDF. Intentá de nuevo.');
       btn.innerHTML=this._origShareHTML; btn.disabled=false;
     }
     finally { const ov=$('quote-overlay'); const qc=$('quote-content'); qc.style.width=''; ov.style.cssText=''; ov.classList.remove('visible'); document.body.style.overflow=''; }
@@ -1461,8 +1479,8 @@ const Quote = {
     } catch(e) {
       if(e.name!=='AbortError') {
         // Fallback: download
-        try { await captureAndShare($('quote-content'),filename,{width:440}); alert('Se descargó la imagen — compartila desde tu galería.'); }
-        catch(e2) { alert('Error al generar la imagen.'); }
+        try { await captureAndShare($('quote-content'),filename,{width:440}); Toast.ok('Descargada','Imagen guardada — compartila desde tu galería.'); }
+        catch(e2) { Toast.err('Error','No se pudo generar la imagen.'); }
       }
     }
     finally { btn.innerHTML=orig; btn.disabled=false; }
@@ -1470,7 +1488,7 @@ const Quote = {
   async downloadPNG() {
     if(!lastLC.length) return;
     try { await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.png`, {width:440}); }
-    catch(e) { alert('Error al generar imagen'); }
+    catch(e) { Toast.err('Error','No se pudo generar la imagen.'); }
   },
   async downloadPDF() {
     if(!lastLC.length) return;
@@ -1478,7 +1496,7 @@ const Quote = {
     btn.innerHTML='⏳ Generando...'; btn.disabled=true;
     try {
       await captureAndShare($('quote-content'), `Cotizacion_${$('cliente').value||'Cliente'}.pdf`, {pdf:true, width:440});
-    } catch(e) { alert('Error al generar PDF'); }
+    } catch(e) { Toast.err('Error','No se pudo generar el PDF.'); }
     finally { btn.innerHTML=orig; btn.disabled=false; }
   }
 };
@@ -1682,7 +1700,7 @@ const Conditions = {
     card.style.position='fixed'; card.style.left='0'; card.style.top='0'; card.style.zIndex='9999';
     try {
       await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.png', {share:shareMode, title:'Condiciones Comerciales — Henderseeds'});
-    } catch(e) { if(e.name!=='AbortError') alert('Error al generar imagen'); }
+    } catch(e) { if(e.name!=='AbortError') Toast.err('Error','No se pudo generar la imagen.'); }
     finally { card.style.position='absolute'; card.style.left='-9999px'; card.style.zIndex=''; }
   },
   async sharePDF() {
@@ -1693,7 +1711,7 @@ const Conditions = {
     card.style.position='fixed'; card.style.left='0'; card.style.top='0'; card.style.zIndex='9999';
     try {
       await captureAndShare($('cond-share-content'), 'Condiciones_Henderseeds.pdf', {share:true, pdf:true, title:'Condiciones Comerciales — Henderseeds'});
-    } catch(e) { if(e.name!=='AbortError') alert('Error al generar PDF'); }
+    } catch(e) { if(e.name!=='AbortError') Toast.err('Error','No se pudo generar el PDF.'); }
     finally { card.style.position='absolute'; card.style.left='-9999px'; card.style.zIndex=''; }
   }
 };
@@ -1845,14 +1863,15 @@ const Historial = {
     Historial.cargar(numero);
     Quote.shareDirect();
   },
-  async eliminar(numero) {
-    if(!confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'? Esta acción no se puede deshacer.')) return;
-    try {
-      const {error}=await sb.from('cotizaciones').delete().eq('numero',numero);
-      if(error) throw new Error(error.message);
-      Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.');
-      this.load(true);
-    } catch(e){ Toast.warn('Error',e.message); }
+  eliminar(numero) {
+    Toast.confirm('¿Eliminar cotización #'+String(numero).padStart(4,'0')+'?', async () => {
+      try {
+        const {error}=await sb.from('cotizaciones').delete().eq('numero',numero);
+        if(error) throw new Error(error.message);
+        Toast.ok('Eliminada','Cotización #'+String(numero).padStart(4,'0')+' eliminada.');
+        Historial.load(true);
+      } catch(e){ Toast.warn('Error',e.message); }
+    });
   }
 };
 

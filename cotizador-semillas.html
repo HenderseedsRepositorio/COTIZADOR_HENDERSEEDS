@@ -72,13 +72,14 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 /* ══════ INLINE ROWS (hybrid selection) ══════ */
 .rows-header{display:grid;grid-template-columns:1fr 52px 52px 48px 48px 72px 24px;gap:4px;padding:6px 10px;font-size:.7rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
 .row-item{display:grid;grid-template-columns:1fr 52px 52px 48px 48px 72px 24px;gap:4px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
-.row-dto{display:flex;align-items:center;background:var(--c-bg);border:1px solid var(--c-border);border-radius:5px;overflow:hidden;height:28px}
-.row-dto button{width:16px;height:28px;border:none;background:none;color:var(--c-gray);font-size:11px;cursor:pointer;padding:0;line-height:1;font-family:var(--font)}
+.row-dto{display:flex;align-items:center;background:var(--c-bg);border:1px solid transparent;border-radius:5px;overflow:hidden;height:28px;opacity:.4;transition:opacity .15s,border-color .15s}
+.row-dto button{width:16px;height:28px;border:none;background:none;color:var(--c-light);font-size:11px;cursor:pointer;padding:0;line-height:1;font-family:var(--font)}
 .row-dto button:active{background:var(--c-border)}
-.row-dto input{width:22px;text-align:center;border:none;background:none;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--c-navy);padding:0;-moz-appearance:textfield}
+.row-dto input{width:22px;text-align:center;border:none;background:none;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--c-light);padding:0;-moz-appearance:textfield}
 .row-dto input::-webkit-inner-spin-button,.row-dto input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.row-dto.custom{border-color:var(--c-orange)}
-.row-dto.custom input{color:var(--c-orange)}
+.row-dto.custom{opacity:1;border-color:var(--c-orange);background:#fffbf0}
+.row-dto.custom button{color:var(--c-gray)}
+.row-dto.custom input{color:var(--c-orange);font-weight:700}
 @keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .row-prod{display:flex;flex-direction:column;min-width:0}
 .row-prod-name{font-size:.76rem;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -410,12 +411,12 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
         <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
-          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="6" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="5" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
           <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valZG',-0.5)">−</button><input type="number" id="valZG" value="5" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZG',0.5)">+</button></div></div>
         </div>
         <div class="dto-group"><p class="dto-title">Dto. Henderseeds</p>
           <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valPM',-0.5)">−</button><input type="number" id="valPM" value="6" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPM',0.5)">+</button></div></div>
-          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valPG',-0.5)">−</button><input type="number" id="valPG" value="5" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPG',0.5)">+</button></div></div>
+          <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valPG',-0.5)">−</button><input type="number" id="valPG" value="6" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPG',0.5)">+</button></div></div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">

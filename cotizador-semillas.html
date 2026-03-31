@@ -70,8 +70,15 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .htable tbody tr:hover td{background:#f8faff}
 
 /* ══════ INLINE ROWS (hybrid selection) ══════ */
-.rows-header{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;padding:6px 10px;font-size:.7rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
-.row-item{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
+.rows-header{display:grid;grid-template-columns:1fr 52px 52px 48px 48px 72px 24px;gap:4px;padding:6px 10px;font-size:.7rem;font-weight:700;color:var(--c-blue);text-transform:uppercase;letter-spacing:.07em}
+.row-item{display:grid;grid-template-columns:1fr 52px 52px 48px 48px 72px 24px;gap:4px;align-items:center;background:var(--c-card);border-radius:10px;padding:8px 10px;margin-bottom:5px;box-shadow:0 2px 10px rgba(13,45,94,.06),0 1px 2px rgba(13,45,94,.03);animation:rowIn .2s ease both}
+.row-dto{display:flex;align-items:center;background:var(--c-bg);border:1px solid var(--c-border);border-radius:5px;overflow:hidden;height:28px}
+.row-dto button{width:16px;height:28px;border:none;background:none;color:var(--c-gray);font-size:11px;cursor:pointer;padding:0;line-height:1;font-family:var(--font)}
+.row-dto button:active{background:var(--c-border)}
+.row-dto input{width:22px;text-align:center;border:none;background:none;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--c-navy);padding:0;-moz-appearance:textfield}
+.row-dto input::-webkit-inner-spin-button,.row-dto input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.row-dto.custom{border-color:var(--c-orange)}
+.row-dto.custom input{color:var(--c-orange)}
 @keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .row-prod{display:flex;flex-direction:column;min-width:0}
 .row-prod-name{font-size:.76rem;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -85,7 +92,7 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .row-rm:hover{background:#fef2f2;color:#ef4444}
 
 /* Row new (search) */
-.row-new{display:grid;grid-template-columns:1fr 48px 48px 72px 24px;gap:6px;align-items:center;background:var(--c-bg);border:1.5px dashed var(--c-border);border-radius:10px;padding:8px 10px;margin-top:2px;position:relative}
+.row-new{display:grid;grid-template-columns:1fr 52px 52px 48px 48px 72px 24px;gap:4px;align-items:center;background:var(--c-bg);border:1.5px dashed var(--c-border);border-radius:10px;padding:8px 10px;margin-top:2px;position:relative}
 .row-new-search{position:static}
 .row-new-search input{width:100%;padding:6px 9px;border:1.5px solid var(--c-border);border-radius:8px;font-size:.76rem;font-family:var(--font);outline:none;background:#fff;color:var(--c-dark);transition:border-color .15s,box-shadow .15s}
 .row-new-search input:focus{border-color:var(--c-sky);box-shadow:0 0 0 3px rgba(45,111,196,.12)}
@@ -373,6 +380,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
       <p class="slabel" style="margin:0 0 8px;">Híbridos seleccionados</p>
       <div class="rows-header no-print">
         <span>Híbrido</span>
+        <span style="text-align:center">%Z</span>
+        <span style="text-align:center">%H</span>
         <span style="text-align:center">Banda</span>
         <span style="text-align:right">Cant.</span>
         <span style="text-align:right">P. Neto</span>
@@ -386,6 +395,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
             onfocus="Calc.showDropdown()" oninput="Calc._debouncedFilterDropdown()">
           <div class="h-dropdown" id="hybridDD"></div>
         </div>
+        <span style="font-size:.7rem;color:var(--c-light);text-align:center;">—</span>
+        <span style="font-size:.7rem;color:var(--c-light);text-align:center;">—</span>
         <span style="font-size:.7rem;color:var(--c-light);text-align:center;">—</span>
         <span style="font-size:.7rem;color:var(--c-light);text-align:right;">—</span>
         <span style="font-size:.7rem;color:var(--c-light);text-align:right;">—</span>
@@ -928,7 +939,10 @@ const Calc = {
     const h = findHybrid(name);
     if(!h) return;
     const defBanda = h.b1_disp > 0 ? 1 : h.b2_disp > 0 ? 2 : h.b3_disp > 0 ? 3 : 1;
-    lineas.push({tipo:hybridType(name),hibrido:name,banda:defBanda,cant:0,lista:h['b'+defBanda]||h.b1});
+    const esM = hybridType(name)==='maiz';
+    lineas.push({tipo:hybridType(name),hibrido:name,banda:defBanda,cant:0,lista:h['b'+defBanda]||h.b1,
+      dtoZ:+(esM?$('valZM').value:$('valZG').value), dtoH:+(esM?$('valPM').value:$('valPG').value),
+      dtoZCustom:false, dtoHCustom:false});
     this.renderLines();
   },
   removeLine(i) { lineas.splice(i,1); this.renderLines(); },
@@ -991,6 +1005,17 @@ const Calc = {
     if(v>parseFloat(el.max))v=parseFloat(el.max);
     el.value=v; this.run();
   },
+  stepDto(i, field, delta) {
+    const l=lineas[i];
+    l[field]=Math.max(0,Math.min(20,+(l[field]+delta).toFixed(1)));
+    l[field+'Custom']=true;
+    this.renderLines();
+  },
+  updateDto(i, field, val) {
+    lineas[i][field]=Math.max(0,Math.min(20,+val));
+    lineas[i][field+'Custom']=true;
+    this.run();
+  },
   toggleVolManual() {
     $('valVolManual').style.display = $('selVol').value==='manual' ? 'inline-block' : 'none';
     this.run();
@@ -1005,6 +1030,18 @@ const Calc = {
         <div class="row-prod">
           <span class="row-prod-name">${emoji(l.tipo)} ${l.hibrido}</span>
           <span class="row-prod-meta">${l.tipo==='maiz'?'Maíz':'Girasol'} · B${l.banda}: $${fmt(hy?hy['b'+l.banda]||hy.b1:0)} · Disp: ${hy?hy['b'+l.banda+'_disp']||0:0}%</span>
+        </div>
+        <div class="row-dto${l.dtoZCustom?' custom':''}">
+          <button type="button" onclick="Calc.stepDto(${i},'dtoZ',-0.5)">−</button>
+          <input type="number" value="${l.dtoZ}" step="0.5" min="0" max="20"
+            onchange="Calc.updateDto(${i},'dtoZ',this.value)">
+          <button type="button" onclick="Calc.stepDto(${i},'dtoZ',0.5)">+</button>
+        </div>
+        <div class="row-dto${l.dtoHCustom?' custom':''}">
+          <button type="button" onclick="Calc.stepDto(${i},'dtoH',-0.5)">−</button>
+          <input type="number" value="${l.dtoH}" step="0.5" min="0" max="20"
+            onchange="Calc.updateDto(${i},'dtoH',this.value)">
+          <button type="button" onclick="Calc.stepDto(${i},'dtoH',0.5)">+</button>
         </div>
         <select class="row-inp" onchange="Calc.updateLine(${i},'banda',this.value)">
           ${hy && hy.b1_disp > 0?`<option value="1" ${l.banda===1?'selected':''}>B1 (${hy.b1_disp}%)</option>`:''}
@@ -1051,7 +1088,10 @@ const Calc = {
       const fPre=chkPre?(esM?.90:.93):1;
       const pPre=chkPre?(esM?10:7):0;
       const fCre=(chkCre&&esM)?.975:1;
-      const valZ=esM?valZM:valZG, valP=esM?valPM:valPG;
+      // Sync non-custom lines with global values
+      if(!l.dtoZCustom) l.dtoZ=esM?valZM:valZG;
+      if(!l.dtoHCustom) l.dtoH=esM?valPM:valPG;
+      const valZ=l.dtoZ, valP=l.dtoH;
       const fZP=(1-valZ/100)*(1-valP/100);
       const fVol=fVAct!==null?fVAct:this.getVolFactor(l.tipo,esM?bM:bG);
       const pVol=Math.round((1-fVol)*1000)/10;
@@ -1847,7 +1887,11 @@ const Historial = {
     items.forEach(it=>{
       const h=findHybrid(it.hibrido);
       const b=parseInt(it.banda)||1;
-      lineas.push({tipo:hybridType(it.hibrido),hibrido:it.hibrido,banda:b,cant:+it.cant||0,lista:h?h['b'+b]||h.b1:0});
+      const esM=hybridType(it.hibrido)==='maiz';
+      const dZ=pn(it.valZ), dH=pn(it.valP);
+      lineas.push({tipo:hybridType(it.hibrido),hibrido:it.hibrido,banda:b,cant:+it.cant||0,lista:h?h['b'+b]||h.b1:0,
+        dtoZ:dZ||+(esM?$('valZM').value:$('valZG').value), dtoH:dH||+(esM?$('valPM').value:$('valPG').value),
+        dtoZCustom:false, dtoHCustom:false});
     });
     Calc.renderLines();
     Calc.run();

@@ -1231,6 +1231,7 @@ const Sheets = {
           LocalBackup.markSynced(localId);
           Toast.ok('Cotización registrada',`#${String(numero).padStart(4,'0')} guardada.`);
           Historial._cacheTime=0; // invalidate historial cache
+          if($('hist-card-nidera').style.display!=='none') Historial.load(true);
           return numero;
         } catch(e) {
           console.error(`Sheets.register intento ${attempt}:`, e);
@@ -1260,6 +1261,7 @@ const Sheets = {
       LocalBackup.markSynced(localId);
       Toast.ok('Sincronizado','Cotización #'+String(numero).padStart(4,'0')+' guardada.');
       Historial._cacheTime=0;
+      if($('hist-card-nidera').style.display!=='none') Historial.load(true);
     } catch(e) {
       console.error('Retry sync failed:', e);
       Toast.err('Sigue sin conexión','Intentá de nuevo más tarde.',{
@@ -1296,6 +1298,7 @@ const Sheets = {
         Toast.ok('Sincronizado','#'+String(numero).padStart(4,'0')+' registrada.');
       }
       Historial._cacheTime=0;
+      if($('hist-card-nidera').style.display!=='none') Historial.load(true);
     } catch(e) {
       Toast.warn('Sin conexión','Cotización guardada local. Se sincronizará después.');
     }

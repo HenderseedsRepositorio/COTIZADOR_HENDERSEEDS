@@ -127,10 +127,12 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .tech-table td:first-child{text-align:left;padding-left:0;font-weight:600}
 
 .rdesc-table{width:100%;border-collapse:collapse}
-.rdesc-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding-bottom:6px;border-bottom:2px solid var(--c-accent);text-align:right;padding-left:5px;white-space:nowrap}
-.rdesc-table th:first-child{text-align:left;padding-left:0}
-.rdesc-table td{padding:5px 5px 5px 0;border-bottom:1px solid var(--c-row);text-align:right;padding-left:5px;font-size:.7rem}
-.rdesc-table td:first-child{text-align:left;padding-left:0;font-weight:600;font-size:.71rem}
+.rdesc-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-blue);padding:3px 5px 6px;border-bottom:2px solid var(--c-accent);text-align:right;white-space:nowrap}
+.rdesc-table th:first-child{text-align:left}
+.rdesc-table th.mob-hide{text-align:center;font-size:.65rem;padding:3px 4px 6px}
+.rdesc-table td{padding:4px 5px;border-bottom:1px solid var(--c-row);text-align:right;font-size:.7rem}
+.rdesc-table td:first-child{text-align:left;font-weight:600;font-size:.71rem}
+.rdesc-table td.mob-hide{text-align:center;padding:4px 4px;font-size:.65rem}
 .rdesc-table tfoot td{border-top:2px solid var(--c-accent);font-weight:700;padding-top:7px}
 
 /* ══════ DISCOUNT GROUPS ══════ */
@@ -316,6 +318,35 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 .confirm-box .cbtn-cancel{background:var(--c-bg);color:var(--c-gray)}
 .confirm-box .cbtn-ok{background:#dc2626;color:#fff}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* Volume table modal */
+.vol-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+.vol-box{background:#fff;border-radius:14px;padding:20px 16px 16px;max-width:420px;width:94%;box-shadow:0 8px 32px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.vol-box h3{font-family:var(--head);font-size:.95rem;color:var(--c-navy);margin:0 0 12px;text-align:center}
+.vol-tbl{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:14px}
+.vol-tbl caption{font-family:var(--head);font-size:.82rem;color:var(--c-navy);padding:6px 0;text-align:left}
+.vol-tbl th{background:var(--c-navy);color:#fff;padding:5px 8px;text-align:center;font-weight:600}
+.vol-tbl td{padding:4px 8px;text-align:center;border-bottom:1px solid var(--c-border)}
+.vol-tbl tr:nth-child(even) td{background:var(--c-bg)}
+.vol-close{display:block;margin:0 auto;padding:8px 28px;border-radius:99px;border:none;background:var(--c-navy);color:#fff;font-family:var(--font);font-size:.8rem;font-weight:700;cursor:pointer}
+.vol-btn{background:none;border:1px solid var(--c-border);border-radius:8px;padding:5px 10px;font-size:.7rem;font-family:var(--font);color:var(--c-navy);cursor:pointer;font-weight:600;white-space:nowrap}
+.vol-btn:hover{background:var(--c-bg)}
+/* Pre-campaign badge & modal */
+.precamp-badge{display:inline-flex;align-items:center;gap:4px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;padding:4px 10px;font-size:.65rem;font-family:var(--font);font-weight:600;color:var(--c-gray);cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.precamp-badge:hover{border-color:var(--c-blue)}
+.precamp-badge svg{opacity:.5}
+.precamp-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+.precamp-box{background:#fff;border-radius:14px;padding:22px 20px 18px;max-width:340px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.precamp-box h3{font-family:var(--head);font-size:.9rem;color:var(--c-navy);margin:0 0 4px;text-align:center}
+.precamp-box .precamp-sub{font-size:.68rem;color:var(--c-gray);text-align:center;margin:0 0 16px;line-height:1.3}
+.precamp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.precamp-row .dto-emoji{font-size:1.1rem}
+.precamp-row label{font-size:.75rem;font-weight:600;color:var(--c-dark);flex:1}
+.precamp-row input{width:60px;text-align:center;padding:7px 4px;border:1.5px solid var(--c-border);border-radius:8px;font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--c-navy)}
+.precamp-row input:focus{border-color:var(--c-blue);outline:none}
+.precamp-btns{display:flex;gap:8px;margin-top:16px}
+.precamp-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-family:var(--font);font-size:.8rem;font-weight:700;cursor:pointer}
+.precamp-cancel{background:var(--c-bg);color:var(--c-gray)}
+.precamp-save{background:var(--c-navy);color:#fff}
 /* Connection indicator */
 .conn-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .conn-dot.online{background:#22c55e}
@@ -325,6 +356,53 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 </head>
 <body>
 <div id="toastContainer" class="toast-container"></div>
+
+<!-- Pre-campaign config modal -->
+<div id="preCampModal" class="precamp-modal" style="display:none" onclick="if(event.target===this)PreCamp.close()">
+  <div class="precamp-box">
+    <h3>Configurar Pre-Campaña</h3>
+    <p class="precamp-sub">Estos valores se aplican a todas las cotizaciones nuevas.<br>Se guardan en este dispositivo.</p>
+    <div class="precamp-row">
+      <span class="dto-emoji">🌽</span><label>Maíz</label>
+      <input type="number" id="preCfgM" min="0" max="30" step="1" value="10"><span style="font-size:.8rem;font-weight:600;color:var(--c-gray);">%</span>
+    </div>
+    <div class="precamp-row">
+      <span class="dto-emoji">🌻</span><label>Girasol</label>
+      <input type="number" id="preCfgG" min="0" max="30" step="1" value="4"><span style="font-size:.8rem;font-weight:600;color:var(--c-gray);">%</span>
+    </div>
+    <div class="precamp-btns">
+      <button class="precamp-cancel" onclick="PreCamp.close()">Cancelar</button>
+      <button class="precamp-save" onclick="PreCamp.save()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Volume discount table modal -->
+<div id="volModal" class="vol-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="vol-box">
+    <h3>Tablas de descuento por volumen</h3>
+    <table class="vol-tbl">
+      <caption>🌽 Maíz</caption>
+      <tr><th>Bolsas</th><th>Descuento</th></tr>
+      <tr><td>30 – 99</td><td>3%</td></tr>
+      <tr><td>100 – 199</td><td>6%</td></tr>
+      <tr><td>200 – 349</td><td>8%</td></tr>
+      <tr><td>350 – 549</td><td>9%</td></tr>
+      <tr><td>550 – 999</td><td>10%</td></tr>
+      <tr><td>1000+</td><td>11%</td></tr>
+    </table>
+    <table class="vol-tbl">
+      <caption>🌻 Girasol</caption>
+      <tr><th>Bolsas</th><th>Descuento</th></tr>
+      <tr><td>31 – 60</td><td>1%</td></tr>
+      <tr><td>61 – 120</td><td>2%</td></tr>
+      <tr><td>121 – 180</td><td>3%</td></tr>
+      <tr><td>181 – 330</td><td>4%</td></tr>
+      <tr><td>331+</td><td>5%</td></tr>
+    </table>
+    <button class="vol-close" onclick="$('volModal').style.display='none'">Cerrar</button>
+  </div>
+</div>
 
 <!-- ══════════ VENDOR SELECTOR ══════════ -->
 <div id="vendor-overlay">
@@ -407,8 +485,16 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
 
     <!-- DESCUENTOS -->
     <div class="hcard no-print fu fu2" style="padding:12px 15px;margin-bottom:8px;">
-      <p class="slabel">Descuentos y bonificaciones</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <p class="slabel" style="margin:0;">Descuentos y bonificaciones</p>
+        <button type="button" class="precamp-badge" onclick="PreCamp.open()">
+          Pre-Campaña: 🌽 <span id="preTagM">10</span>% · 🌻 <span id="preTagG">4</span>%
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        </button>
+      </div>
+      <input type="hidden" id="valPreM" value="10">
+      <input type="hidden" id="valPreG" value="4">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;" id="toggleGrid"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
         <div class="dto-group"><p class="dto-title">Dto. Zonal</p>
           <div class="dto-row"><span class="dto-emoji">🌽</span><div class="stepper"><button type="button" onclick="Calc.step('valZM',-0.5)">−</button><input type="number" id="valZM" value="5" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valZM',0.5)">+</button></div></div>
@@ -419,10 +505,8 @@ select.row-inp{padding-right:18px;background-image:url("data:image/svg+xml,%3Csv
           <div class="dto-row"><span class="dto-emoji">🌻</span><div class="stepper"><button type="button" onclick="Calc.step('valPG',-0.5)">−</button><input type="number" id="valPG" value="6" min="0" max="15" step="0.5" class="stepper-val" onchange="Calc.run()"><button type="button" onclick="Calc.step('valPG',0.5)">+</button></div></div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <label style="font-size:.7rem;font-weight:600;color:var(--c-gray);white-space:nowrap;">Volumen:</label>
-        <select id="selVol" onchange="Calc.toggleVolManual()" class="inp" style="flex:1;min-width:130px;padding:6px 22px 6px 8px;font-size:.76rem;"><option value="auto">Auto (tabla Nidera)</option><option value="manual">Manual %</option></select>
-        <input type="number" id="valVolManual" style="display:none;width:70px;padding:6px 8px;font-size:.76rem;" value="0" onblur="Calc.run()" placeholder="%" class="inp">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button type="button" class="vol-btn" onclick="showVolTable()">📊 Tabla de volumen</button>
       </div>
     </div>
 
@@ -673,6 +757,39 @@ const dateStr = () => new Date().toLocaleDateString('es-AR',{weekday:'long',year
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 function debounce(fn, ms=150) { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+function showVolTable() { $('volModal').style.display='flex'; }
+
+/* Pre-campaign config — persisted in localStorage */
+const PreCamp = {
+  _key: 'hs_precampana',
+  _defaults: { maiz: 10, girasol: 4 },
+  load() {
+    const raw = localStorage.getItem(this._key);
+    const vals = raw ? JSON.parse(raw) : this._defaults;
+    $('valPreM').value = vals.maiz;
+    $('valPreG').value = vals.girasol;
+    $('preTagM').textContent = vals.maiz;
+    $('preTagG').textContent = vals.girasol;
+  },
+  open() {
+    $('preCfgM').value = $('valPreM').value;
+    $('preCfgG').value = $('valPreG').value;
+    $('preCampModal').style.display = 'flex';
+  },
+  close() { $('preCampModal').style.display = 'none'; },
+  save() {
+    const m = Math.max(0, Math.min(30, +$('preCfgM').value || 0));
+    const g = Math.max(0, Math.min(30, +$('preCfgG').value || 0));
+    localStorage.setItem(this._key, JSON.stringify({ maiz: m, girasol: g }));
+    $('valPreM').value = m;
+    $('valPreG').value = g;
+    $('preTagM').textContent = m;
+    $('preTagG').textContent = g;
+    this.close();
+    Calc.run();
+    Toast.ok('Pre-Campaña actualizada', `Maíz ${m}% · Girasol ${g}%`);
+  }
+};
 
 function findHybrid(name) {
   return CATALOGO.maiz.find(h=>h.id===name) || CATALOGO.girasol.find(h=>h.id===name);
@@ -851,7 +968,6 @@ const App = {
     document.querySelectorAll('#headerLogoNidera,#quoteLogoNidera').forEach(img => img.src=nideraB64);
     // Build toggle grids
     $('toggleGrid').innerHTML = [
-      makeToggle('chkPre','Pre-Camp','M:10%/G:7%','Calc.run()',true),
       makeToggle('chkContado','Contado','8%','Calc.run()'),
       makeToggle('chkCrecer','Plan Crecer','2.5% solo maíz','Calc.run()'),
       makeToggle('chkCross','Cross','5%','Calc.run()')
@@ -868,6 +984,7 @@ const App = {
   init() {
     const saved = localStorage.getItem('henderseeds_vendor') || localStorage.getItem('hs_vendor');
     if(saved) this.selectVendor(saved);
+    PreCamp.load();
     this.initUI();
     $('displayDate').innerText = dateStr();
     $('displayDateVisible').innerText = dateStr();
@@ -1017,10 +1134,7 @@ const Calc = {
     lineas[i][field+'Custom']=true;
     this.run();
   },
-  toggleVolManual() {
-    $('valVolManual').style.display = $('selVol').value==='manual' ? 'inline-block' : 'none';
-    this.run();
-  },
+  toggleVolManual() { this.run(); },
   renderLines() {
     const emoji = t => t==='maiz' ? '🌽' : '🌻';
     const h = name => findHybrid(name);
@@ -1075,19 +1189,19 @@ const Calc = {
     let netTotal=0, bM=0, bG=0;
     lineas.forEach(l => { l.tipo==='maiz' ? bM+=Number(l.cant) : bG+=Number(l.cant); });
 
-    const chkPre=$('chkPre').checked, chkCont=$('chkContado').checked;
+    const chkCont=$('chkContado').checked;
     const chkCre=$('chkCrecer').checked, chkCro=$('chkCross').checked;
+    const valPreM=+$('valPreM').value, valPreG=+$('valPreG').value;
     const valZM=+$('valZM').value, valZG=+$('valZG').value;
     const valPM=+$('valPM').value, valPG=+$('valPG').value;
     const fC=chkCont?.92:1, fCro=chkCro?.95:1;
-    const isMan=$('selVol').value==='manual';
-    const fVAct=isMan ? (1-+$('valVolManual').value/100) : null;
+    const fVAct=null; // always auto
 
     let lc=[];
     lineas.forEach((l,i) => {
       const esM=l.tipo==='maiz';
-      const fPre=chkPre?(esM?.90:.93):1;
-      const pPre=chkPre?(esM?10:7):0;
+      const pPre=esM?valPreM:valPreG;
+      const fPre=pPre>0?(1-pPre/100):1;
       const fCre=(chkCre&&esM)?.975:1;
       // Sync non-custom lines with global values
       if(!l.dtoZCustom) l.dtoZ=esM?valZM:valZG;
@@ -1138,7 +1252,7 @@ const Market = {
     el.value=v; this.render();
   },
   render() {
-    const fPreM=$('mktPre').checked?.90:1, fPreG=$('mktPre').checked?.93:1;
+    const fPreM=$('mktPre').checked?(1-+$('valPreM').value/100):1, fPreG=$('mktPre').checked?(1-+$('valPreG').value/100):1;
     const fCont=$('mktContado').checked?.92:1;
     const chkCre=$('mktCrecer').checked;
     const fCro=$('mktCross').checked?.95:1;
@@ -1838,11 +1952,10 @@ const Historial = {
       h+=`<p class="hist-client">${q.cliente}</p>`;
       const hpct=v=>{let s=String(v||'');const n=parseFloat(s);if(!n||n===0)return`<span style="color:var(--c-border);font-size:var(--text-xs);">—</span>`;if(s.includes('%'))return`<span style="color:#15803d;font-weight:700;font-size:var(--text-xs);">${s}</span>`;return`<span style="color:#15803d;font-weight:700;font-size:var(--text-xs);">${n<1?Math.round(n*100):Math.round(n)}%</span>`;};
       const totalCiva=q.items.reduce((s,i)=>s+(+i.siva||0)*(1+0.21),0);
-      const ds='font-size:var(--text-xs);padding:1px 2px;';
-      h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B.</th><th class="mob-hide" style="${ds}">Pre</th><th class="mob-hide" style="${ds}">Cdo</th><th class="mob-hide" style="${ds}">Cre</th><th class="mob-hide" style="${ds}">Cro</th><th class="mob-hide" style="${ds}">Vol</th><th class="mob-hide" style="${ds}">Zon</th><th class="mob-hide" style="${ds}">Hend</th><th>P.Neto</th><th>Cnt</th><th>s/IVA</th><th>c/IVA</th></tr></thead><tbody>`;
+      h+=`<div style="overflow-x:auto;"><table class="rdesc-table"><thead><tr><th style="text-align:left;">Híbrido</th><th>B.</th><th class="mob-hide">PRE</th><th class="mob-hide">CDO</th><th class="mob-hide">CRE</th><th class="mob-hide">CRO</th><th class="mob-hide">VOL</th><th class="mob-hide">ZON</th><th class="mob-hide">HEND</th><th>P.Neto</th><th>Cnt</th><th>s/IVA</th><th>c/IVA</th></tr></thead><tbody>`;
       q.items.forEach(i=>{
         const civa=(+i.siva||0)*(1+0.21);
-        h+=`<tr><td style="font-size:.7rem;">${i.hibrido}</td><td style="font-family:var(--mono);">${i.banda}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.pre)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cont)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cre)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.cro)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.vol)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.zonal)}</td><td class="mob-hide" style="padding:1px 2px;">${hpct(i.hend)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(+i.precio)}</td><td style="font-family:var(--mono);">${+i.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(+i.siva)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(civa)}</td></tr>`;
+        h+=`<tr><td>${i.hibrido}</td><td style="font-family:var(--mono);">${i.banda}</td><td class="mob-hide">${hpct(i.pre)}</td><td class="mob-hide">${hpct(i.cont)}</td><td class="mob-hide">${hpct(i.cre)}</td><td class="mob-hide">${hpct(i.cro)}</td><td class="mob-hide">${hpct(i.vol)}</td><td class="mob-hide">${hpct(i.zonal)}</td><td class="mob-hide">${hpct(i.hend)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-navy);">\$${fmt(+i.precio)}</td><td style="font-family:var(--mono);">${+i.cant}</td><td style="font-family:var(--mono);color:#475569;">\$${fmt(+i.siva)}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-blue);">\$${fmt(civa)}</td></tr>`;
       });
       h+=`</tbody><tfoot><tr><td colspan="12" style="text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--c-blue);">Total c/IVA</td><td style="font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--c-navy);">USD ${fmt(totalCiva)}</td></tr></tfoot></table></div>`;
       h+=`<div style="display:flex;gap:8px;margin-top:8px;"><button onclick="Historial.cargar(${q.numero})" style="flex:1;background:var(--c-blue);color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modificar</button><button onclick="Historial.compartir(${q.numero})" style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button><button onclick="Historial.eliminar(${q.numero})" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div>`;
@@ -1877,11 +1990,10 @@ const Historial = {
     const items=q.items||[];
     const first=items[0]||{};
     const pn=v=>{const n=parseFloat(String(v||'0'));return isNaN(n)?0:n>0&&n<1?Math.round(n*1000)/10:Math.round(n*10)/10;};
-    $('chkPre').checked=pn(first.pPre)>0;
     $('chkContado').checked=pn(first.pCont)>0;
     $('chkCrecer').checked=pn(first.pCre)>0;
     $('chkCross').checked=pn(first.pCro)>0;
-    // Restore Dto. Zonal and Dto. Henderseeds per type (maíz/girasol)
+    // Restore Dto. Zonal, Henderseeds and Pre-Campaña per type (maíz/girasol)
     const itemM=items.find(i=>hybridType(i.hibrido)==='maiz');
     const itemG=items.find(i=>hybridType(i.hibrido)==='girasol');
     if(itemM){ $('valZM').value=pn(itemM.valZ); $('valPM').value=pn(itemM.valP); }
